@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">WikiDiary</string>
+    <string name="tab_text_1">Add</string>
+    <string name="tab_text_2">Preparing Note</string>
+    <string name="tab_text_3">List</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="action_todo">ToDo</string>
+    <string name="action_add_todo">Nowe zadanie</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+
+
+    <string name="nav_label_main">Main</string>
+    <string name="nav_label_code_generation">Note Generation</string>
+    <string name="nav_label_settings">Settings</string>
+
+    <string name="ok">Ok</string>
+    <string name="cancel">Anuluj</string>
+
+    <string name="pref_header_email">Email</string>
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name">John Smith</string>
+    <string name="pref_title_send_options">Sending an e-mail</string>
+
+    <string name="email_failure">Set up an account in Settings</string>
+    <string name="email_successfully"> Email was sent successfully.</string>
+    <string name="turn_on_mail">Turn on an email in settings</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>
