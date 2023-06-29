@@ -1,45 +1,43 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/padding_default">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:hint="@string/tag_hint"
+        android:inputType="text"
+        app:flow_horizontalBias="0.8"
+        app:layout_constraintEnd_toStartOf="@id/numberOfDay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/editText"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_weight=".9"
-            android:text="input"/>
+    <TextView
+        android:id="@+id/numberOfDay"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:background="@drawable/tag_button_bg"
+        android:gravity="center"
+        app:layout_constraintWidth_percent="0.1"
+        android:text="@string/numberOfDay"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/editText"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:id="@+id/changeDateNote"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/tag_button_bg"
-            android:layout_weight=".1">
-
-            <TextView
-                android:id="@+id/numberOfDayTv"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:text="1"/>
-
-
-        </LinearLayout>
-
-
-    </LinearLayout>
 
     <pl.maniak.wikidiary.utils.views.FlowLayout
         android:id="@+id/containerTags"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/padding_default"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editText" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -27,7 +27,8 @@
     <string name="email_failure">Set up an account in Settings</string>
     <string name="email_successfully"> Email was sent successfully.</string>
     <string name="turn_on_mail">Turn on an email in settings</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="tag_hint">tag</string>
+    <string name="numberOfDay">1</string>
 
 </resources>
