@@ -1,6 +1,7 @@
 package pl.maniak.wikidiary.ui.main
 
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +13,9 @@ import androidx.fragment.app.Fragment
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.databinding.FragmentMainBinding
+import pl.maniak.wikidiary.utils.helpers.DateHelper
 import pl.maniak.wikidiary.utils.views.FlowLayout.LayoutParams
+import java.util.*
 
 
 class MainFragment : Fragment() {
@@ -26,7 +29,24 @@ class MainFragment : Fragment() {
     }
 
     private fun setUpView() {
+        with(binding) {
+            numberOfDay.text = DateHelper.getOnlyDayFromDate(Date())
+            numberOfDay.setOnClickListener { showDatePicker() }
+        }
         initTagContainer()
+    }
+
+    private fun showDatePicker() {
+        val cal = Calendar.getInstance()
+
+        val listener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+            cal.set(Calendar.YEAR, year)
+            cal.set(Calendar.MONTH, month)
+            cal.set(Calendar.HOUR_OF_DAY, dayOfMonth)
+            binding.numberOfDay.text = DateHelper.getOnlyDayFromDate(year, month, dayOfMonth)
+        }
+
+        DatePickerDialog(requireContext(), listener, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
     }
 
     private fun initTagContainer() {
