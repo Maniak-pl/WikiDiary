@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.Tag
@@ -61,17 +62,34 @@ class MainFragment : Fragment() {
             val params = LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
             params.setMargins(10, 10, 10, 10)
             tv.layoutParams = params
-            tv.setOnClickListener { addWikiNote(tv.text.toString())}
+            tv.setOnClickListener { addWikiNote(tv.text.toString()) }
             binding.containerTags.addView(tv)
         }
+        initFunctionTag()
         binding.containerTags.invalidate()
     }
 
     private fun addWikiNote(tag: String) {
-        if(tag.isNotEmpty()) {
-            repository.saveNote(WikiNote(1, tag, binding.editText.text.toString(),Date(), false))
+        if (tag.isNotEmpty()) {
+            repository.saveNote(WikiNote(1, tag, binding.editText.text.toString(), Date(), false))
             binding.editText.text.clear()
         }
+    }
+
+    private fun initFunctionTag() {
+        binding.containerTags.addView(getFunctionView("Commands") {
+            Toast.makeText(context, "startQuickCommands", Toast.LENGTH_SHORT).show()
+        })
+    }
+
+    private fun getFunctionView(title: String, listener: View.OnClickListener): View {
+        val tv = requireActivity().layoutInflater.inflate(R.layout.function_tag_item, null) as TextView
+        tv.text = title
+        val params = LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+        params.setMargins(10, 10, 10, 10)
+        tv.layoutParams = params
+        tv.setOnClickListener(listener)
+        return tv
     }
 
     companion object {
