@@ -1,5 +1,16 @@
 package pl.maniak.wikidiary.data
 
+import pl.maniak.wikidiary.utils.helpers.formatDateString
 import java.util.Date
 
-data class WikiNote(val id:Long, val tag:String, val description:String,val date:Date, val isSend:Boolean)
+data class WikiNote(
+    val id: Long,
+    val tag: String,
+    val content: String,
+    val date: Date,
+    val isSend: Boolean
+) {
+    fun formatDateString(): String {
+        return formatDateString(date)
+    }
+}

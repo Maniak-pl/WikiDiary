@@ -21,3 +21,8 @@ object DateHelper {
         return SimpleDateFormat(dayFormat, Locale.getDefault()).format(cal.time)
     }
 }
+
+fun formatDateString(date: Date): String {
+    val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+    return sdf.format(date)
+}
