@@ -8,7 +8,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import pl.maniak.wikidiary.data.WikiNote
-import pl.maniak.wikidiary.ui.screens.ListNotesScreen
+import pl.maniak.wikidiary.ui.screens.PreparingNoteScreen
 import java.util.Date
 
 class MainActivity : ComponentActivity() {
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    ListNotesScreen(list)
+                    PreparingNoteScreen(list)
                 }
             }
         }
