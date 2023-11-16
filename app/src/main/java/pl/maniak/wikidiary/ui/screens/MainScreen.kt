@@ -25,15 +25,12 @@ import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.WikiNote
 import pl.maniak.wikidiary.ui.theme.WikiTheme
-import java.util.Date
 
 @Composable
 fun MainScreen() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Add) }
-    val list = listOf(
-        WikiNote(1, "ToDo", "Taking out the trash on Saturday", Date(), false),
-        WikiNote(2, "Today", "I got up at 5:00", Date(), false)
-    )
+    val tags = mutableListOf("Today", "ToDo", "Work", "Home", "Books")
+    val list = mutableListOf<WikiNote>()
 
     Scaffold(
         topBar = {
@@ -68,7 +65,9 @@ fun MainScreen() {
         ) {
             when (currentScreen) {
                 is Screen.Add -> {
-                    AddScreen()
+                    AddScreen(
+                        tags = tags,
+                        onAddWikiNote = { list.add(it) })
                 }
 
                 is Screen.PrepareNote -> {
