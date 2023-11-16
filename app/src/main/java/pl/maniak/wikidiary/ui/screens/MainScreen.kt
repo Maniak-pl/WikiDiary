@@ -27,10 +27,9 @@ import pl.maniak.wikidiary.data.WikiNote
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 
 @Composable
-fun MainScreen() {
+fun MainScreen(list: MutableList<WikiNote> = mutableListOf(), onAddWikiNote: (WikiNote) -> Unit = {}) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Add) }
     val tags = mutableListOf("Today", "ToDo", "Work", "Home", "Books")
-    val list = mutableListOf<WikiNote>()
 
     Scaffold(
         topBar = {
@@ -67,7 +66,8 @@ fun MainScreen() {
                 is Screen.Add -> {
                     AddScreen(
                         tags = tags,
-                        onAddWikiNote = { list.add(it) })
+                        onAddWikiNote = { onAddWikiNote(it) }
+                    )
                 }
 
                 is Screen.PrepareNote -> {

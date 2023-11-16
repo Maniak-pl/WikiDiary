@@ -6,13 +6,13 @@ class WikiNoteRepositoryImpl : WikiNoteRepository {
 
     private var list = mutableListOf<WikiNote>()
 
-    override fun getNotes(): List<WikiNote> {
+    override fun getNotes(): MutableList<WikiNote> {
 
         return list
     }
 
-    override fun getWikiNotesWithTag(tag: String): List<WikiNote> {
-        return list.filter { it.tag == tag }
+    override fun getWikiNotesWithTag(tag: String): MutableList<WikiNote> {
+        return list.filter { it.tag == tag }.toMutableList()
     }
 
     override fun saveNote(note: WikiNote) {
