@@ -16,7 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import pl.maniak.wikidiary.data.WikiNote
+import pl.maniak.wikidiary.domain.model.WikiNote
+import java.util.Date
 
 @Composable
 fun ListNotesScreen(
@@ -74,8 +75,8 @@ fun WikiNoteItem(
 fun ListNotesScreenPreview() {
     ListNotesScreen(
         listOf(
-            WikiNote(1, "ToDo", "Taking out the trash on Saturday", java.util.Date(), false),
-            WikiNote(2, "Today", "I got up at 5:00", java.util.Date(), false)
+            WikiNote(1, "ToDo", "Taking out the trash on Saturday", Date(), false),
+            WikiNote(2, "Today", "I got up at 5:00", Date(), false)
         )
     )
 }

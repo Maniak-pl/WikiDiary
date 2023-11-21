@@ -1,4 +1,4 @@
-package pl.maniak.wikidiary.data
+package pl.maniak.wikidiary.domain.model
 
 import pl.maniak.wikidiary.utils.helpers.formatDateString
 import java.util.Date

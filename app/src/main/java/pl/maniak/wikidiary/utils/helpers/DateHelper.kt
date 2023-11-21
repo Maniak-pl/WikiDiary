@@ -12,7 +12,7 @@ object DateHelper {
     private const val dayFormat = "dd"
 
     fun parseDateToStringWithDayName(date: Date): String {
-        return SimpleDateFormat(dayNameFormat, Locale.getDefault()).format(date)
+        return SimpleDateFormat(dayNameFormat, Locale.US).format(date)
     }
     fun getOnlyDayFromDate(date: Date): String {
         return SimpleDateFormat(dayFormat, Locale.getDefault()).format(date)

@@ -31,7 +31,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
-import pl.maniak.wikidiary.data.WikiNote
+import pl.maniak.wikidiary.domain.model.WikiNote
 import java.util.Date
 
 

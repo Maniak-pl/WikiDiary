@@ -12,8 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import pl.maniak.wikidiary.data.WikiNote
+import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.utils.helpers.WikiHelper
+import java.util.Date
 
 @Composable
 fun PreparingNoteScreen(
@@ -36,8 +37,8 @@ fun PreparingNoteScreen(
 fun PreparingNoteScreenPreview() {
     PreparingNoteScreen(
         notesList = listOf(
-            WikiNote(1, "ToDo", "Taking out the trash on Saturday", java.util.Date(), false),
-            WikiNote(2, "Today", "I got up at 5:00", java.util.Date(), false)
+            WikiNote(1, "ToDo", "Taking out the trash on Saturday", Date(), false),
+            WikiNote(2, "Today", "I got up at 5:00", Date(), false)
         )
     )
 }

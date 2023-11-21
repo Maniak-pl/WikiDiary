@@ -23,11 +23,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
-import pl.maniak.wikidiary.data.WikiNote
+import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 
 @Composable
-fun MainScreen(list: MutableList<WikiNote> = mutableListOf(), onAddWikiNote: (WikiNote) -> Unit = {}) {
+fun MainScreen(list: List<WikiNote> = mutableListOf(), onAddWikiNote: (WikiNote) -> Unit = {}) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Add) }
     val tags = mutableListOf("Today", "ToDo", "Work", "Home", "Books")
 

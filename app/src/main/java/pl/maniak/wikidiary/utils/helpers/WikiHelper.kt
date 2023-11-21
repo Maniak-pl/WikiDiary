@@ -1,6 +1,6 @@
 package pl.maniak.wikidiary.utils.helpers
 
-import pl.maniak.wikidiary.data.WikiNote
+import pl.maniak.wikidiary.domain.model.WikiNote
 
 object WikiHelper {
     private var dateMap: MutableMap<String, MutableMap<String, MutableList<String>>> = HashMap()
