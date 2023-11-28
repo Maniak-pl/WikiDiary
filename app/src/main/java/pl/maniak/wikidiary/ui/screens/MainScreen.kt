@@ -1,5 +1,8 @@
 package pl.maniak.wikidiary.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +34,8 @@ import pl.maniak.wikidiary.ui.theme.WikiTheme
 fun MainScreen(list: List<WikiNote> = mutableListOf(), onAddWikiNote: (WikiNote) -> Unit = {}) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Add) }
     val tags = mutableListOf("Today", "ToDo", "Work", "Home", "Books")
+    val clipboardManager =
+        LocalContext.current.getSystemService(ComponentActivity.CLIPBOARD_SERVICE) as ClipboardManager
 
     Scaffold(
         topBar = {
@@ -71,7 +77,12 @@ fun MainScreen(list: List<WikiNote> = mutableListOf(), onAddWikiNote: (WikiNote)
                 }
 
                 is Screen.PrepareNote -> {
-                    PreparingNoteScreen(notesList = list)
+                    PreparingNoteScreen(
+                        notesList = list,
+                        onCopyClick = {
+                            clipboardManager.setPrimaryClip(ClipData.newPlainText("WikiNote", it))
+                        }
+                    )
                 }
 
                 is Screen.ListNotes -> {
