@@ -29,14 +29,14 @@ import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
+import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 
 @Composable
 fun MainScreen(
     list: List<WikiNote> = mutableListOf(),
     tagList: List<Tag> = mutableListOf(),
-    onAddWikiNote: (WikiNote) -> Unit = {},
-    onAddTagClick: (Tag) -> Unit = {}
+    onClick: (ActionClick) -> Unit = {},
 ) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Add) }
     val clipboardManager =
@@ -77,8 +77,7 @@ fun MainScreen(
                 is Screen.Add -> {
                     AddScreen(
                         tags = tagList,
-                        onAddWikiNote = { onAddWikiNote(it) },
-                        onAddTagClick = { onAddTagClick(it) }
+                        onClick = onClick,
                     )
                 }
 
@@ -92,7 +91,7 @@ fun MainScreen(
                 }
 
                 is Screen.ListNotes -> {
-                    ListNotesScreen(notesList = list)
+                    ListNotesScreen(notesList = list, onClick = onClick)
                 }
             }
         }

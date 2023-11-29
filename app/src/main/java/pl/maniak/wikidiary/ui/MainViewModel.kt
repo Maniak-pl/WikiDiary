@@ -9,6 +9,11 @@ import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.domain.repository.TagRepository
 import pl.maniak.wikidiary.domain.repository.WikiNoteRepository
+import pl.maniak.wikidiary.ui.model.ActionClick
+import pl.maniak.wikidiary.ui.model.ActionClick.AddNote
+import pl.maniak.wikidiary.ui.model.ActionClick.AddTag
+import pl.maniak.wikidiary.ui.model.ActionClick.DeleteNote
+import pl.maniak.wikidiary.ui.model.ActionClick.DeleteTag
 
 class MainViewModel(
     private val noteRepository: WikiNoteRepository,
@@ -38,16 +43,39 @@ class MainViewModel(
         }
     }
 
-    fun saveWikiNote(note: WikiNote) {
+    fun onActionClick(action: ActionClick) {
+        when (action) {
+            is AddNote -> saveWikiNote(note = action.note)
+            is AddTag -> saveTag(tag = action.tag)
+            is DeleteNote -> deleteNote(note = action.note)
+            is DeleteTag -> deleteTag(tag = action.tag)
+        }
+    }
+
+    private fun saveWikiNote(note: WikiNote) {
         viewModelScope.launch {
             noteRepository.saveNote(note)
             loadNotes()
         }
     }
 
-    fun saveTag(tag: Tag) {
+    private fun saveTag(tag: Tag) {
         viewModelScope.launch {
             tagRepository.saveTag(tag)
+            loadTags()
+        }
+    }
+
+    private fun deleteNote(note: WikiNote) {
+        viewModelScope.launch {
+            noteRepository.deleteNoteById(note.id)
+            loadNotes()
+        }
+    }
+
+    private fun deleteTag(tag: Tag) {
+        viewModelScope.launch {
+            tagRepository.deleteTag(tag.id)
             loadTags()
         }
     }

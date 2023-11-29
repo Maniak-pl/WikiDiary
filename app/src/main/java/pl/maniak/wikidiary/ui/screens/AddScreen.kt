@@ -33,14 +33,14 @@ import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
+import pl.maniak.wikidiary.ui.model.ActionClick
 import java.util.Date
 
 
 @Composable
 fun AddScreen(
     tags: List<Tag> = emptyList(),
-    onAddWikiNote: (WikiNote) -> Unit,
-    onAddTagClick: (Tag) -> Unit = {}
+    onClick: (ActionClick) -> Unit,
 ) {
     var text by remember { mutableStateOf("") }
 
@@ -65,13 +65,13 @@ fun AddScreen(
                         date = Date(),
                         isSend = false
                     )
-                    onAddWikiNote.invoke(wikiNote)
+                    onClick.invoke(ActionClick.AddNote(wikiNote))
                     text = ""
                 }
             },
             onAddTagClick = {
                 if (text.isNotBlank()) {
-                    onAddTagClick.invoke(Tag(id = 0, tag = text))
+                    onClick.invoke(ActionClick.AddTag(Tag(id = 0, tag = text)))
                     text = ""
                 }
             })
@@ -104,7 +104,6 @@ private fun TagsLayout(
                         backgroundColor = Color.Black,
                         contentColor = Color.White
                     ),
-
                     border = BorderStroke(1.dp, Color.Black)
                 ) {
                     Text(text = tag.tag)
@@ -133,6 +132,6 @@ private fun TagsLayout(
 fun AddScreenPreview() {
     AddScreen(
         tags = listOf(Tag(1, "ToDo"), Tag(2, "Today")),
-        onAddWikiNote = {}
+        onClick = {}
     )
 }

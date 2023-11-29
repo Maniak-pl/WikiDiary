@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,26 +19,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.domain.model.WikiNote
+import pl.maniak.wikidiary.ui.model.ActionClick
 import java.util.Date
 
 @Composable
 fun ListNotesScreen(
-    notesList: List<WikiNote> = emptyList()
+    notesList: List<WikiNote> = emptyList(),
+    onClick: (ActionClick) -> Unit = {},
 ) {
     LazyColumn {
         items(items = notesList) { note ->
-            WikiNoteItem(note = note)
+            WikiNoteItem(note = note, onClick = onClick)
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WikiNoteItem(
-    note: WikiNote
+    note: WikiNote,
+    onClick: (ActionClick) -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 5.dp),
+            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .combinedClickable(
+                onLongClick = {
+                    onClick(ActionClick.DeleteNote(note))
+                },
+                onClick = { }
+            ),
         elevation = 5.dp
     ) {
         Column(
