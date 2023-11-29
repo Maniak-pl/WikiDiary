@@ -26,11 +26,21 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    MainScreen(viewModel.notes.value, onAddWikiNote = { note ->
-                        lifecycleScope.launch {
-                            viewModel.saveWikiNote(note)
+                    MainScreen(
+                        viewModel.notes.value,
+                        viewModel.tags.value,
+                        onAddWikiNote = { note ->
+                            lifecycleScope.launch {
+                                viewModel.saveWikiNote(note)
+                            }
+                        },
+                        onAddTagClick = { tag ->
+                            lifecycleScope.launch {
+                                viewModel.saveTag(tag)
+                            }
                         }
-                    })
+                    )
+
                 }
             }
         }

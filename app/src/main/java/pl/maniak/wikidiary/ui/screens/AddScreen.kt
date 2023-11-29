@@ -31,14 +31,16 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
+import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
 import java.util.Date
 
 
 @Composable
 fun AddScreen(
-    tags: List<String> = emptyList(),
-    onAddWikiNote: (WikiNote) -> Unit
+    tags: List<Tag> = emptyList(),
+    onAddWikiNote: (WikiNote) -> Unit,
+    onAddTagClick: (Tag) -> Unit = {}
 ) {
     var text by remember { mutableStateOf("") }
 
@@ -58,12 +60,18 @@ fun AddScreen(
                 if (text.isNotBlank()) {
                     val wikiNote = WikiNote(
                         id = 0,
-                        tag = tag,
+                        tag = tag.tag,
                         content = text,
                         date = Date(),
                         isSend = false
                     )
                     onAddWikiNote.invoke(wikiNote)
+                    text = ""
+                }
+            },
+            onAddTagClick = {
+                if (text.isNotBlank()) {
+                    onAddTagClick.invoke(Tag(id = 0, tag = text))
                     text = ""
                 }
             })
@@ -73,7 +81,11 @@ fun AddScreen(
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
 @Composable
-private fun TagsLayout(tags: List<String> = emptyList(), onTagClick: (String) -> Unit) {
+private fun TagsLayout(
+    tags: List<Tag> = emptyList(),
+    onTagClick: (Tag) -> Unit,
+    onAddTagClick: () -> Unit = {}
+) {
     val vertScrollState = rememberScrollState()
     Box(
         modifier = Modifier
@@ -95,12 +107,12 @@ private fun TagsLayout(tags: List<String> = emptyList(), onTagClick: (String) ->
 
                     border = BorderStroke(1.dp, Color.Black)
                 ) {
-                    Text(text = tag)
+                    Text(text = tag.tag)
                 }
             }
             Chip(
                 modifier = Modifier.wrapContentSize().padding(2.dp),
-                onClick = {},
+                onClick = { onAddTagClick() },
                 border = BorderStroke(2.dp, Color.Black),
                 colors = ChipDefaults.chipColors(
                     backgroundColor = Color.Green,
@@ -120,7 +132,7 @@ private fun TagsLayout(tags: List<String> = emptyList(), onTagClick: (String) ->
 @Composable
 fun AddScreenPreview() {
     AddScreen(
-        tags = listOf("ToDo", "Today", "Work", "Home"),
+        tags = listOf(Tag(1, "ToDo"), Tag(2, "Today")),
         onAddWikiNote = {}
     )
 }

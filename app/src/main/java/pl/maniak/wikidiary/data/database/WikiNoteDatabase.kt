@@ -5,10 +5,11 @@ import androidx.room.Database
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 
-@Database(entities = [WikiNoteEntity::class], version = 1, exportSchema = false)
+@Database(entities = [WikiNoteEntity::class, TagEntity::class], version = 1, exportSchema = false)
 abstract class WikiNoteDatabase : RoomDatabase() {
 
     abstract fun wikiNoteDao(): WikiNoteDao
+    abstract fun tagDao(): TagDao
 
     companion object {
         private var INSTANCE: WikiNoteDatabase? = null
@@ -18,7 +19,7 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                 val instance = databaseBuilder(
                     context.applicationContext,
                     WikiNoteDatabase::class.java,
-                    "wiki_note_database"
+                    "wiki_database"
                 ).build()
                 INSTANCE = instance
                 instance

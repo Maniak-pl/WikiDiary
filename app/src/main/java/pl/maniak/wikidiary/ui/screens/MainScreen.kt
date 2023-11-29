@@ -27,13 +27,18 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
+import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 
 @Composable
-fun MainScreen(list: List<WikiNote> = mutableListOf(), onAddWikiNote: (WikiNote) -> Unit = {}) {
+fun MainScreen(
+    list: List<WikiNote> = mutableListOf(),
+    tagList: List<Tag> = mutableListOf(),
+    onAddWikiNote: (WikiNote) -> Unit = {},
+    onAddTagClick: (Tag) -> Unit = {}
+) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Add) }
-    val tags = mutableListOf("Today", "ToDo", "Work", "Home", "Books")
     val clipboardManager =
         LocalContext.current.getSystemService(ComponentActivity.CLIPBOARD_SERVICE) as ClipboardManager
 
@@ -71,8 +76,9 @@ fun MainScreen(list: List<WikiNote> = mutableListOf(), onAddWikiNote: (WikiNote)
             when (currentScreen) {
                 is Screen.Add -> {
                     AddScreen(
-                        tags = tags,
-                        onAddWikiNote = { onAddWikiNote(it) }
+                        tags = tagList,
+                        onAddWikiNote = { onAddWikiNote(it) },
+                        onAddTagClick = { onAddTagClick(it) }
                     )
                 }
 
