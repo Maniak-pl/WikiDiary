@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Chip
 import androidx.compose.material.ChipDefaults
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -44,37 +45,41 @@ fun AddScreen(
 ) {
     var text by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        Row {
-            TextField(
-                modifier = Modifier.fillMaxWidth().weight(1f).height(50.dp),
-                value = text,
-                onValueChange = { text = it.capitalize() },
-                label = { Text(text = "Enter your text") }
-            )
+    Column(modifier = Modifier.fillMaxSize()) {
+
+        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+            TagsLayout(
+                tags = tags,
+                onTagClick = { tag ->
+                    if (text.isNotBlank()) {
+                        val wikiNote = WikiNote(
+                            id = 0,
+                            tag = tag.tag,
+                            content = text,
+                            date = Date(),
+                            isSend = false
+                        )
+                        onClick.invoke(ActionClick.AddNote(wikiNote))
+                        text = ""
+                    }
+                },
+                onAddTagClick = {
+                    if (text.isNotBlank()) {
+                        onClick.invoke(ActionClick.AddTag(Tag(id = 0, tag = text)))
+                        text = ""
+                    }
+                })
         }
 
-        TagsLayout(
-            tags = tags,
-            onTagClick = { tag ->
-                if (text.isNotBlank()) {
-                    val wikiNote = WikiNote(
-                        id = 0,
-                        tag = tag.tag,
-                        content = text,
-                        date = Date(),
-                        isSend = false
-                    )
-                    onClick.invoke(ActionClick.AddNote(wikiNote))
-                    text = ""
-                }
-            },
-            onAddTagClick = {
-                if (text.isNotBlank()) {
-                    onClick.invoke(ActionClick.AddTag(Tag(id = 0, tag = text)))
-                    text = ""
-                }
-            })
+        Divider(thickness = 2.dp, color = Color.Black)
+
+        TextField(
+            modifier = Modifier.fillMaxWidth().height(55.dp),
+            value = text,
+            onValueChange = { text = it.capitalize() },
+            label = { Text(text = "Enter your note") },
+        )
+
     }
 }
 
@@ -94,6 +99,7 @@ private fun TagsLayout(
     ) {
         FlowRow(
             modifier = Modifier.padding(4.dp)
+                .align(alignment = BottomStart)
                 .verticalScroll(vertScrollState),
         ) {
             tags.forEach { tag ->
