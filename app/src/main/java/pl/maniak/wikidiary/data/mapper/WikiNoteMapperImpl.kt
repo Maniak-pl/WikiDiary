@@ -10,6 +10,7 @@ class WikiNoteMapperImpl : WikiNoteMapper {
             id = entity.id,
             tag = entity.tag,
             content = entity.content,
+            folder = entity.folder,
             date = Date(entity.date),
             isSend = entity.isSend
         )
@@ -20,6 +21,7 @@ class WikiNoteMapperImpl : WikiNoteMapper {
             id = domain.id,
             tag = domain.tag,
             content = domain.content,
+            folder = domain.folder,
             date = domain.date.time,
             isSend = domain.isSend
         )

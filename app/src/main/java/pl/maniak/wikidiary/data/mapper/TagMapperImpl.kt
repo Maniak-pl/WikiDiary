@@ -5,10 +5,10 @@ import pl.maniak.wikidiary.data.database.TagEntity
 
 class TagMapperImpl: TagMapper {
     override fun mapToDomain(entity: TagEntity): Tag {
-        return Tag(entity.id, entity.tag)
+        return Tag(entity.id, entity.tag, entity.folder)
     }
 
     override fun mapToEntity(domain: Tag): TagEntity {
-        return TagEntity(domain.id, domain.tag)
+        return TagEntity(domain.id, domain.tag, domain.folder)
     }
 }

@@ -7,6 +7,7 @@ data class WikiNote(
     val id: Long,
     val tag: String,
     val content: String,
+    val folder: String? = null,
     val date: Date,
     val isSend: Boolean
 ) {

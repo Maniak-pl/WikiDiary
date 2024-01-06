@@ -9,6 +9,7 @@ data class WikiNoteEntity(
     val id: Long = 0,
     val tag: String,
     val content: String,
+    val folder: String? = null,
     val date: Long,
     val isSend: Boolean
 )

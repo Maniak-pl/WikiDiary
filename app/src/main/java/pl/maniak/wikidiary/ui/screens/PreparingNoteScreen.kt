@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.FloatingActionButtonDefaults
 import androidx.compose.material.FloatingActionButtonDefaults.elevation
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -50,7 +49,8 @@ fun PreparingNoteScreen(
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier
+                .padding(paddingValues)
                 .fillMaxSize()
                 .padding(8.dp)
                 .verticalScroll(state)
@@ -65,8 +65,8 @@ fun PreparingNoteScreen(
 fun PreparingNoteScreenPreview() {
     PreparingNoteScreen(
         notesList = listOf(
-            WikiNote(1, "ToDo", "Taking out the trash on Saturday", Date(), false),
-            WikiNote(2, "Today", "I got up at 5:00", Date(), false)
+            WikiNote(1, "ToDo", "Taking out the trash on Saturday", null, Date(), false),
+            WikiNote(2, "Today", "I got up at 5:00", "Work", Date(), false)
         )
     )
 }

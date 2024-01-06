@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class TagEntity(
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0,
-    var tag: String
+    var tag: String,
+    var folder: String? = null
 )

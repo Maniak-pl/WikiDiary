@@ -87,8 +87,8 @@ fun WikiNoteItem(
 fun ListNotesScreenPreview() {
     ListNotesScreen(
         listOf(
-            WikiNote(1, "ToDo", "Taking out the trash on Saturday", Date(), false),
-            WikiNote(2, "Today", "I got up at 5:00", Date(), false)
+            WikiNote(1, "ToDo", "Taking out the trash on Saturday", "", Date(), false),
+            WikiNote(2, "Today", "I got up at 5:00", "", Date(), false)
         )
     )
 }

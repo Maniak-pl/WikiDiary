@@ -57,6 +57,7 @@ fun AddScreen(
                         id = 0,
                         tag = tag.tag,
                         content = text,
+                        folder = tag.folder,
                         date = Date(),
                         isSend = false
                     )
@@ -118,6 +119,7 @@ private fun TagsLayout(
                         backgroundColor = Color.Black,
                         contentColor = Color.White
                     ),
+                    folderName = tag.folder
                 ) {
                     Text(text = tag.tag)
                 }

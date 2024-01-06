@@ -33,4 +33,8 @@ object WikiParser {
         str.append(note)
         return str.toString()
     }
+
+    fun addPage(folderName: String): String {
+        return "[[:$folderName]]"
+    }
 }

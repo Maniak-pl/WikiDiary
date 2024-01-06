@@ -2,6 +2,8 @@ package pl.maniak.wikidiary.ui.screens.tag
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -29,6 +32,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -41,6 +45,7 @@ fun Tag(
     shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
     border: BorderStroke? = BorderStroke(2.dp, Color.Black),
     colors: TagColors = TagDefaults.tagColors(),
+    folderName: String? = null,
     content: @Composable () -> Unit,
 ) {
     val contentColor by colors.contentColor(enabled)
@@ -63,16 +68,48 @@ fun Tag(
         border = border,
     ) {
         Box(
-            modifier = Modifier
-                .defaultMinSize(
-                    minHeight = TagDefaults.MinHeight
-                )
-                .wrapContentSize()
-                .padding(vertical = 4.dp, horizontal = 12.dp),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.wrapContentSize(),
         ) {
-            content()
+            Box(
+                modifier = Modifier
+                    .defaultMinSize(
+                        minHeight = TagDefaults.MinHeight
+                    )
+                    .wrapContentSize()
+                    .padding(vertical = 4.dp, horizontal = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                content()
+            }
         }
+    }
+    folderName?.let {
+        TagFolder(folderName = it)
+    }
+}
+
+@Composable
+fun TagFolder(folderName: String) {
+    Box(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(4.dp)
+            .background(
+                color = Color.Black,
+                shape = RoundedCornerShape(20)
+            )
+            .border(
+                width = 1.dp,
+                color = Color.Black,
+                shape = RoundedCornerShape(20)
+            )
+    ) {
+        Text(
+            text = folderName,
+            modifier = Modifier.padding(2.dp),
+            color = Color.White,
+            fontSize = 6.sp,
+        )
     }
 }
 
