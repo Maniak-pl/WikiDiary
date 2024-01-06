@@ -1,6 +1,5 @@
 package pl.maniak.wikidiary.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -9,11 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Chip
-import androidx.compose.material.ChipDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -35,7 +31,10 @@ import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.ui.model.ActionClick
+import pl.maniak.wikidiary.ui.screens.tag.Tag
+import pl.maniak.wikidiary.ui.screens.tag.TagDefaults
 import java.util.Date
+import java.util.Locale
 
 
 @Composable
@@ -47,39 +46,45 @@ fun AddScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
-            TagsLayout(
-                tags = tags,
-                onTagClick = { tag ->
-                    if (text.isNotBlank()) {
-                        val wikiNote = WikiNote(
-                            id = 0,
-                            tag = tag.tag,
-                            content = text,
-                            date = Date(),
-                            isSend = false
-                        )
-                        onClick.invoke(ActionClick.AddNote(wikiNote))
-                        text = ""
-                    }
-                },
-                onAddTagClick = {
-                    if (text.isNotBlank()) {
-                        onClick.invoke(ActionClick.AddTag(Tag(id = 0, tag = text)))
-                        text = ""
-                    }
-                })
-        }
+        TagsLayout(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxSize(),
+            tags = tags,
+            onTagClick = { tag ->
+                if (text.isNotBlank()) {
+                    val wikiNote = WikiNote(
+                        id = 0,
+                        tag = tag.tag,
+                        content = text,
+                        date = Date(),
+                        isSend = false
+                    )
+                    onClick.invoke(ActionClick.AddNote(wikiNote))
+                    text = ""
+                }
+            },
+            onAddTagClick = {
+                if (text.isNotBlank()) {
+                    onClick.invoke(ActionClick.AddTag(Tag(id = 0, tag = text)))
+                    text = ""
+                }
+            },
+            onRemoveTagClick = { tag ->
+                onClick.invoke(ActionClick.DeleteTag(tag))
+            }
+        )
 
         Divider(thickness = 2.dp, color = Color.Black)
 
         TextField(
-            modifier = Modifier.fillMaxWidth().height(55.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp),
             value = text,
-            onValueChange = { text = it.capitalize() },
+            onValueChange = { text = it.replaceFirstChar { char -> char.uppercase(Locale.getDefault()) } },
             label = { Text(text = "Enter your note") },
         )
-
     }
 }
 
@@ -87,47 +92,44 @@ fun AddScreen(
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
 @Composable
 private fun TagsLayout(
+    modifier: Modifier = Modifier,
     tags: List<Tag> = emptyList(),
     onTagClick: (Tag) -> Unit,
-    onAddTagClick: () -> Unit = {}
+    onAddTagClick: () -> Unit = {},
+    onRemoveTagClick: (Tag) -> Unit = {}
 ) {
     val vertScrollState = rememberScrollState()
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
         FlowRow(
-            modifier = Modifier.padding(4.dp)
+            modifier = Modifier
+                .padding(4.dp)
                 .align(alignment = BottomStart)
                 .verticalScroll(vertScrollState),
         ) {
             tags.forEach { tag ->
-                Chip(
-                    modifier = Modifier.wrapContentSize().padding(2.dp),
+                Tag(
                     onClick = { onTagClick(tag) },
-                    colors = ChipDefaults.chipColors(
+                    onLongClick = { onRemoveTagClick(tag) },
+                    colors = TagDefaults.tagColors(
                         backgroundColor = Color.Black,
                         contentColor = Color.White
                     ),
-                    border = BorderStroke(1.dp, Color.Black)
                 ) {
                     Text(text = tag.tag)
                 }
             }
-            Chip(
-                modifier = Modifier.wrapContentSize().padding(2.dp),
+            Tag(
                 onClick = { onAddTagClick() },
-                border = BorderStroke(2.dp, Color.Black),
-                colors = ChipDefaults.chipColors(
+                colors = TagDefaults.tagColors(
                     backgroundColor = Color.Green,
                     contentColor = Color.Black
                 ),
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_add),
-                    contentDescription = null
-                )
+                Icon(imageVector = ImageVector.vectorResource(R.drawable.ic_add), contentDescription = null)
             }
         }
     }
