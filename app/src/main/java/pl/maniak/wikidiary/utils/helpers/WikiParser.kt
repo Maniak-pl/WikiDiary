@@ -34,7 +34,7 @@ object WikiParser {
         return str.toString()
     }
 
-    fun addPage(folderName: String): String {
-        return "[[:$folderName]]"
+    fun addProject(tag: String, folder: String): String {
+        return "[[:$folder]] - [[:$folder:Projekt - $tag]]"
     }
 }

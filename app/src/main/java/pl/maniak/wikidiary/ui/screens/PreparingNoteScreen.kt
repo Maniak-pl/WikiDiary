@@ -66,7 +66,8 @@ fun PreparingNoteScreenPreview() {
     PreparingNoteScreen(
         notesList = listOf(
             WikiNote(1, "ToDo", "Taking out the trash on Saturday", null, Date(), false),
-            WikiNote(2, "Today", "I got up at 5:00", "Work", Date(), false)
+            WikiNote(2, "Today", "I got up at 5:00", "Work", Date(), false),
+            WikiNote(3, "Regeneration", "I went to the gym", "Health:Fitness", Date(), false),
         )
     )
 }

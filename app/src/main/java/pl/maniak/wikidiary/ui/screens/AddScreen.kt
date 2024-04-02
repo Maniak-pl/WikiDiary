@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -24,6 +26,7 @@ import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,6 +74,9 @@ fun AddScreen(
                     text = ""
                 }
             },
+            onProjectClick = { name, category ->
+                onClick.invoke(ActionClick.AddTag(Tag(id = 0, tag = name, folder = category)))
+            },
             onRemoveTagClick = { tag ->
                 onClick.invoke(ActionClick.DeleteTag(tag))
             }
@@ -97,6 +103,7 @@ private fun TagsLayout(
     tags: List<Tag> = emptyList(),
     onTagClick: (Tag) -> Unit,
     onAddTagClick: () -> Unit = {},
+    onProjectClick: (name: String, category: String) -> Unit = { _, _ -> },
     onRemoveTagClick: (Tag) -> Unit = {}
 ) {
     val vertScrollState = rememberScrollState()
@@ -116,7 +123,7 @@ private fun TagsLayout(
                     onClick = { onTagClick(tag) },
                     onLongClick = { onRemoveTagClick(tag) },
                     colors = TagDefaults.tagColors(
-                        backgroundColor = Color.Black,
+                        backgroundColor = if (tag.folder == null) Color.Black else Color.Red,
                         contentColor = Color.White
                     ),
                     folderName = tag.folder
@@ -133,7 +140,67 @@ private fun TagsLayout(
             ) {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.ic_add), contentDescription = null)
             }
+            CreateProjectDialog(onProjectClick = onProjectClick)
         }
+    }
+}
+
+@Composable
+fun CreateProjectDialog(
+    onProjectClick: (name: String, category: String) -> Unit = { _, _ -> }
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
+
+    Tag(
+        onClick = { showDialog = true },
+        colors = TagDefaults.tagColors(
+            backgroundColor = Color.Red,
+            contentColor = Color.Black
+        ),
+    ) {
+        Icon(imageVector = ImageVector.vectorResource(R.drawable.ic_project), contentDescription = null)
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(stringResource(id = R.string.action_add_project)) },
+            text = {
+                Column {
+                    TextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text(stringResource(id = R.string.label_name)) }
+                    )
+                    TextField(
+                        value = category,
+                        onValueChange = { category = it },
+                        label = { Text(stringResource(id = R.string.label_category)) }
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (name.isNotBlank() && category.isNotBlank()) {
+                            onProjectClick(name, category)
+                            name = ""
+                            category = ""
+                            showDialog = false
+                        }
+                    }
+                ) {
+                    Text(stringResource(id = R.string.ok))
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text(stringResource(id = R.string.cancel))
+                }
+            }
+        )
     }
 }
 
@@ -141,7 +208,7 @@ private fun TagsLayout(
 @Composable
 fun AddScreenPreview() {
     AddScreen(
-        tags = listOf(Tag(1, "ToDo"), Tag(2, "Today")),
+        tags = listOf(Tag(1, "ToDo"), Tag(2, "Today"), Tag(3, "Gym with Szymon 2024", "Health:Physical")),
         onClick = {}
     )
 }
