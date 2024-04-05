@@ -4,6 +4,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
@@ -14,6 +17,7 @@ import pl.maniak.wikidiary.ui.model.ActionClick.AddNote
 import pl.maniak.wikidiary.ui.model.ActionClick.AddTag
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteNote
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteTag
+import pl.maniak.wikidiary.ui.model.BottomSheetUiState
 
 class MainViewModel(
     private val noteRepository: WikiNoteRepository,
@@ -25,6 +29,12 @@ class MainViewModel(
 
     private val _tags = mutableStateOf<List<Tag>>(emptyList())
     val tags: State<List<Tag>> = _tags
+
+    private val _bottomSheetExpanded = MutableStateFlow(false)
+    val bottomSheetExpanded: StateFlow<Boolean> = _bottomSheetExpanded.asStateFlow()
+
+    private val _bottomSheetUiState = MutableStateFlow<BottomSheetUiState>(BottomSheetUiState.None)
+    val bottomSheetUiState: StateFlow<BottomSheetUiState> = _bottomSheetUiState.asStateFlow()
 
     init {
         loadNotes()
@@ -49,6 +59,8 @@ class MainViewModel(
             is AddTag -> saveTag(tag = action.tag)
             is DeleteNote -> deleteNote(note = action.note)
             is DeleteTag -> deleteTag(tag = action.tag)
+            // is CreateProject -> showBottomSheet(BottomSheetUiState.CreateProject)
+            // is CreateCategory -> showBottomSheet(BottomSheetUiState.CreateCategory)
         }
     }
 
@@ -78,5 +90,14 @@ class MainViewModel(
             tagRepository.deleteTag(tag.id)
             loadTags()
         }
+    }
+
+    fun showBottomSheet(uiState: BottomSheetUiState) {
+        _bottomSheetUiState.value = uiState
+        _bottomSheetExpanded.value = true
+    }
+
+    fun setBottomSheetExpanded(isExpanded: Boolean) {
+        _bottomSheetExpanded.value = isExpanded
     }
 }
