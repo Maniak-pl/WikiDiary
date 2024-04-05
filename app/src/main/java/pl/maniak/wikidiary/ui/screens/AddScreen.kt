@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
@@ -71,12 +69,10 @@ fun AddScreen(
                     text = ""
                 }
             },
-            onProjectClick = { name, category ->
-                onClick.invoke(ActionClick.AddTag(Tag(id = 0, tag = name, folder = category)))
-            },
             onRemoveTagClick = { tag ->
                 onClick.invoke(ActionClick.DeleteTag(tag))
-            }
+            },
+            onClick = onClick
         )
 
         Divider(thickness = 2.dp, color = Color.Black)
@@ -100,8 +96,8 @@ private fun TagsLayout(
     tags: List<Tag> = emptyList(),
     onTagClick: (Tag) -> Unit,
     onAddTagClick: () -> Unit = {},
-    onProjectClick: (name: String, category: String) -> Unit = { _, _ -> },
-    onRemoveTagClick: (Tag) -> Unit = {}
+    onRemoveTagClick: (Tag) -> Unit = {},
+    onClick: (ActionClick) -> Unit
 ) {
     val vertScrollState = rememberScrollState()
     Box(
@@ -132,62 +128,11 @@ private fun TagsLayout(
                 onClick = { onAddTagClick() },
             )
 
-            CreateProjectDialog(onProjectClick = onProjectClick)
+            Tag(
+                text = stringResource(id = R.string.label_project),
+                onClick = { onClick.invoke(ActionClick.TagCreateProject) },
+            )
         }
-    }
-}
-
-@Composable
-fun CreateProjectDialog(
-    onProjectClick: (name: String, category: String) -> Unit = { _, _ -> }
-) {
-    var showDialog by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
-
-    Tag(
-        text = stringResource(id = R.string.label_project),
-        onClick = { showDialog = true },
-    )
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(stringResource(id = R.string.action_add_project)) },
-            text = {
-                Column {
-                    TextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text(stringResource(id = R.string.label_name)) }
-                    )
-                    TextField(
-                        value = category,
-                        onValueChange = { category = it },
-                        label = { Text(stringResource(id = R.string.label_category)) }
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (name.isNotBlank() && category.isNotBlank()) {
-                            onProjectClick(name, category)
-                            name = ""
-                            category = ""
-                            showDialog = false
-                        }
-                    }
-                ) {
-                    Text(stringResource(id = R.string.ok))
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showDialog = false }) {
-                    Text(stringResource(id = R.string.cancel))
-                }
-            }
-        )
     }
 }
 

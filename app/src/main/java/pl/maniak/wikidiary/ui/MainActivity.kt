@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -17,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.koin.android.ext.android.inject
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState
+import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateProject
 import pl.maniak.wikidiary.ui.screens.MainScreen
+import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateProjectScreen
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 
 class MainActivity : ComponentActivity() {
@@ -44,33 +47,31 @@ class MainActivity : ComponentActivity() {
                 }
 
                 LaunchedEffect(bottomSheetExpanded) {
-                    if (bottomSheetExpanded) {
-                        scaffoldState.bottomSheetState.expand()
-                    } else {
-                        scaffoldState.bottomSheetState.collapse()
+                    with(scaffoldState.bottomSheetState) {
+                        if (bottomSheetExpanded) expand() else collapse()
                     }
                 }
 
                 BottomSheetScaffold(
                     sheetContent = {
+
                         when (bottomSheetUiState) {
-                            BottomSheetUiState.CreateProject -> {}
+                            is CreateProject -> CreateProjectScreen(onClick = viewModel::onActionClick)
                             BottomSheetUiState.None -> {}
                         }
                     },
                     scaffoldState = scaffoldState,
-                    sheetPeekHeight = 0.dp
+                    sheetPeekHeight = 0.dp,
+                    sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colors.background
                     ) {
                         MainScreen(
-                            viewModel.notes.value,
-                            viewModel.tags.value,
-                            onClick = { action ->
-                                viewModel.onActionClick(action)
-                            }
+                            list = viewModel.notes.value,
+                            tagList = viewModel.tags.value,
+                            onClick = viewModel::onActionClick
                         )
                     }
                 }

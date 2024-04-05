@@ -15,8 +15,10 @@ import pl.maniak.wikidiary.domain.repository.WikiNoteRepository
 import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.model.ActionClick.AddNote
 import pl.maniak.wikidiary.ui.model.ActionClick.AddTag
+import pl.maniak.wikidiary.ui.model.ActionClick.ConfirmCreateProject
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteNote
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteTag
+import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateProject
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState
 
 class MainViewModel(
@@ -59,7 +61,11 @@ class MainViewModel(
             is AddTag -> saveTag(tag = action.tag)
             is DeleteNote -> deleteNote(note = action.note)
             is DeleteTag -> deleteTag(tag = action.tag)
-            // is CreateProject -> showBottomSheet(BottomSheetUiState.CreateProject)
+            is TagCreateProject -> showBottomSheet(BottomSheetUiState.CreateProject)
+            is ConfirmCreateProject -> {
+                saveTag(Tag(id = 0, tag = action.name, folder = action.category))
+                hideBottomSheet()
+            }
             // is CreateCategory -> showBottomSheet(BottomSheetUiState.CreateCategory)
         }
     }
@@ -92,9 +98,14 @@ class MainViewModel(
         }
     }
 
-    fun showBottomSheet(uiState: BottomSheetUiState) {
+    private fun showBottomSheet(uiState: BottomSheetUiState) {
         _bottomSheetUiState.value = uiState
         _bottomSheetExpanded.value = true
+    }
+
+    private fun hideBottomSheet() {
+        _bottomSheetExpanded.value = false
+        _bottomSheetUiState.value = BottomSheetUiState.None
     }
 
     fun setBottomSheetExpanded(isExpanded: Boolean) {

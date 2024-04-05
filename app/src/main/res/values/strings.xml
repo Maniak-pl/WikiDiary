@@ -10,7 +10,7 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-    <string name="action_add_project">Add a project</string>
+    <string name="label_create_project">🎯 Create project</string>
     <string name="label_name">Name</string>
     <string name="label_category">Category</string>
 
