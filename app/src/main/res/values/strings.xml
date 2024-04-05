@@ -34,4 +34,7 @@
     <string name="tag_hint">tag</string>
     <string name="numberOfDay">1</string>
 
+    <string name="label_tag">🏷</string>
+    <string name="label_project">🎯</string>
+
 </resources>

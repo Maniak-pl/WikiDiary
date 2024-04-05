@@ -27,29 +27,36 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Tag(
     modifier: Modifier = Modifier,
+    text: String = "Tag",
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
     enabled: Boolean = true,
     shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
     border: BorderStroke? = BorderStroke(2.dp, Color.Black),
     colors: TagColors = TagDefaults.tagColors(),
-    folderName: String? = null,
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit = {
+        Text(
+            text = text,
+            style = TextStyle(fontSize = 12.sp)
+        )
+    },
 ) {
     val contentColor by colors.contentColor(enabled)
     Surface(
         modifier = modifier
             .wrapContentSize()
             .semantics { role = Role.Button }
-            .padding(vertical = 6.dp, horizontal = 4.dp)
+            .padding(vertical = 4.dp, horizontal = 2.dp)
             .combinedClickable(
                 interactionSource = remember {
                     MutableInteractionSource()

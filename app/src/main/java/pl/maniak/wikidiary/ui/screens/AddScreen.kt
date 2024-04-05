@@ -14,7 +14,6 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
@@ -25,9 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
@@ -120,26 +117,21 @@ private fun TagsLayout(
         ) {
             tags.forEach { tag ->
                 Tag(
+                    text = tag.tag,
                     onClick = { onTagClick(tag) },
                     onLongClick = { onRemoveTagClick(tag) },
                     colors = TagDefaults.tagColors(
                         backgroundColor = if (tag.folder == null) Color.Black else Color.Red,
                         contentColor = Color.White
                     ),
-                    folderName = tag.folder
-                ) {
-                    Text(text = tag.tag)
-                }
+                )
             }
+
             Tag(
+                text = stringResource(R.string.label_tag),
                 onClick = { onAddTagClick() },
-                colors = TagDefaults.tagColors(
-                    backgroundColor = Color.Green,
-                    contentColor = Color.Black
-                ),
-            ) {
-                Icon(imageVector = ImageVector.vectorResource(R.drawable.ic_add), contentDescription = null)
-            }
+            )
+
             CreateProjectDialog(onProjectClick = onProjectClick)
         }
     }
@@ -154,14 +146,9 @@ fun CreateProjectDialog(
     var category by remember { mutableStateOf("") }
 
     Tag(
+        text = stringResource(id = R.string.label_project),
         onClick = { showDialog = true },
-        colors = TagDefaults.tagColors(
-            backgroundColor = Color.Red,
-            contentColor = Color.Black
-        ),
-    ) {
-        Icon(imageVector = ImageVector.vectorResource(R.drawable.ic_project), contentDescription = null)
-    }
+    )
 
     if (showDialog) {
         AlertDialog(
