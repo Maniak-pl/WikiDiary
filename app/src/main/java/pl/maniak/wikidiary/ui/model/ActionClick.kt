@@ -18,4 +18,12 @@ sealed class ActionClick {
         val name: String,
         val category: String
     ) : ActionClick()
+
+    data object TagCreateCategory : ActionClick()
+
+    data class AddCategory(val name: String) : ActionClick()
+
+    data class DeleteCategory(val id: Long) : ActionClick()
+
+    data class UpdateCategory(val id: Long, val name: String) : ActionClick()
 }

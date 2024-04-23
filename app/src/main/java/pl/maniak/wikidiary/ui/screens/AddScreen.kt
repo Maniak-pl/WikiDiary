@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
@@ -29,8 +28,8 @@ import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.ui.model.ActionClick
-import pl.maniak.wikidiary.ui.screens.tag.Tag
-import pl.maniak.wikidiary.ui.screens.tag.TagDefaults
+import pl.maniak.wikidiary.ui.screens.view.Tag
+import pl.maniak.wikidiary.ui.screens.view.TagDefaults
 import java.util.Date
 import java.util.Locale
 
@@ -89,7 +88,7 @@ fun AddScreen(
 }
 
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TagsLayout(
     modifier: Modifier = Modifier,
@@ -131,6 +130,11 @@ private fun TagsLayout(
             Tag(
                 text = stringResource(id = R.string.label_project),
                 onClick = { onClick.invoke(ActionClick.TagCreateProject) },
+            )
+
+            Tag(
+                text = "\uD83D\uDCC2",
+                onClick = { onClick.invoke(ActionClick.TagCreateCategory) },
             )
         }
     }

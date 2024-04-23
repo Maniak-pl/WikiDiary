@@ -1,4 +1,4 @@
-package pl.maniak.wikidiary.ui.screens.tag
+package pl.maniak.wikidiary.ui.screens.view
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi

@@ -18,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.koin.android.ext.android.inject
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState
+import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateCategory
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateProject
 import pl.maniak.wikidiary.ui.screens.MainScreen
+import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateCategoryScreen
 import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateProjectScreen
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 
@@ -56,7 +58,13 @@ class MainActivity : ComponentActivity() {
                     sheetContent = {
 
                         when (bottomSheetUiState) {
-                            is CreateProject -> CreateProjectScreen(onClick = viewModel::onActionClick)
+                            is CreateProject -> CreateProjectScreen(
+                                categories = viewModel.categories.value,
+                                onClick = viewModel::onActionClick)
+                            is CreateCategory -> CreateCategoryScreen(
+                                categories = viewModel.categories.value,
+                                onClick = viewModel::onActionClick
+                            )
                             BottomSheetUiState.None -> {}
                         }
                     },

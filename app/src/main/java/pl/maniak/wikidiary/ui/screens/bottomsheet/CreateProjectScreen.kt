@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,21 +24,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.R
+import pl.maniak.wikidiary.data.Category
 import pl.maniak.wikidiary.ui.model.ActionClick
-import pl.maniak.wikidiary.ui.screens.bottomsheet.ScreenValues.CornerShape
 import pl.maniak.wikidiary.ui.screens.bottomsheet.ScreenValues.SpacerHeight
+import pl.maniak.wikidiary.ui.screens.view.DropdownMenuCategoriesView
 
 private object ScreenValues {
     val SpacerHeight = 16.dp
-    val CornerShape = 8.dp
 }
 
 @Composable
 fun CreateProjectScreen(
+    categories: List<Category>,
     onClick: (ActionClick) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<Category?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -60,25 +63,19 @@ fun CreateProjectScreen(
 
         Spacer(modifier = Modifier.height(SpacerHeight))
 
-        TextField(
+        OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(CornerShape),
             label = { Text(text = stringResource(id = R.string.label_name)) },
-            placeholder = { Text(text = stringResource(id = R.string.label_name)) }
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(modifier = Modifier.height(SpacerHeight))
 
-        TextField(
-            value = category,
-            onValueChange = { category = it },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(CornerShape),
-            label = { Text(text = stringResource(id = R.string.label_category)) },
-            placeholder = { Text(text = stringResource(id = R.string.label_category)) }
-        )
+        DropdownMenuCategoriesView(categories = categories, selectedCategory = selectedCategory, onCategorySelected = {
+            selectedCategory = it
+            category = it?.name ?: ""
+        })
 
         Spacer(modifier = Modifier.height(SpacerHeight))
 

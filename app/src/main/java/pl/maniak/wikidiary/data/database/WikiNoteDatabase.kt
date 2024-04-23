@@ -5,11 +5,12 @@ import androidx.room.Database
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 
-@Database(entities = [WikiNoteEntity::class, TagEntity::class], version = 1, exportSchema = false)
+@Database(entities = [WikiNoteEntity::class, TagEntity::class, CategoryEntity::class], version = 1, exportSchema = false)
 abstract class WikiNoteDatabase : RoomDatabase() {
 
     abstract fun wikiNoteDao(): WikiNoteDao
     abstract fun tagDao(): TagDao
+    abstract fun categoryDao(): CategoryDao
 
     companion object {
         private var INSTANCE: WikiNoteDatabase? = null
