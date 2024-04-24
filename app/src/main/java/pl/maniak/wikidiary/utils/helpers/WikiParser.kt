@@ -34,7 +34,29 @@ object WikiParser {
         return str.toString()
     }
 
-    fun addProject(tag: String, folder: String): String {
-        return "[[:$folder]] - [[:$folder:Projekt - $tag]]"
+    fun addProject(tag: String, folder: String, year: String): String {
+        return "${addIconCategory(folder)}[[:$folder]] - [[:Projects|\uD83D\uDEE0\uFE0F]] [[:$folder:Projekt - $tag ${year}]] "
+    }
+
+    private fun addIconCategory(category: String): String {
+        val icons = mapOf(
+            "Books" to "\uD83D\uDCDA ",
+            "Hobby" to "\uD83D\uDD79\uFE0F ",
+            "Work" to "\uD83D\uDCBC ",
+            "Health" to "❤\uFE0F ",
+            "Finances" to "\uD83D\uDCB0 ",
+            "People" to "\uD83D\uDC6B\uD83C\uDFFC ",
+            "WikiDiary" to "\uD83D\uDCD3 ",
+            "Education" to "\uD83C\uDF93 ",
+            "RealEstate" to "\uD83C\uDFD8\uFE0F ",
+            "Travels" to "\uD83D\uDDFA\uFE0F ",
+            "Transport" to "\uD83D\uDE97 "
+        )
+        for ((key, icon) in icons) {
+            if (category.contains(key, ignoreCase = true)) {
+                return icon
+            }
+        }
+        return ""
     }
 }

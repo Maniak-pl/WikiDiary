@@ -1,6 +1,9 @@
 package pl.maniak.wikidiary.utils.helpers
 
 import pl.maniak.wikidiary.domain.model.WikiNote
+import pl.maniak.wikidiary.utils.helpers.DateHelper.toFormattedStringWithDayName
+import pl.maniak.wikidiary.utils.helpers.DateHelper.toYearString
+
 
 object WikiHelper {
     private var dateMap: MutableMap<String, MutableMap<String, MutableList<String>>> = HashMap()
@@ -35,7 +38,7 @@ object WikiHelper {
     }
 
     private fun addTitleWiki(wikiNote: WikiNote) {
-        val data = DateHelper.parseDateToStringWithDayName(wikiNote.date)
+        val data = wikiNote.date.toFormattedStringWithDayName()
         if (!dateMap.containsKey(data)) {
             dateMap[data] = HashMap()
         }
@@ -45,7 +48,14 @@ object WikiHelper {
     private fun addCategory(date: String, wikiNote: WikiNote) {
         val category = dateMap[date]
         category?.let {
-            val tag = if (wikiNote.folder.isNullOrBlank()) wikiNote.tag else WikiParser.addProject(wikiNote.tag, wikiNote.folder)
+            val tag = if (wikiNote.folder.isNullOrBlank())
+                wikiNote.tag
+            else
+                WikiParser.addProject(
+                    wikiNote.tag,
+                    wikiNote.folder,
+                    wikiNote.date.toYearString()
+                )
             if (!category.containsKey(tag)) {
                 category[tag] = ArrayList()
             }

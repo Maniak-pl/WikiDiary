@@ -10,12 +10,17 @@ object DateHelper {
 
     private const val dayNameFormat = "dd.MM.yyyy, EEEE"
     private const val dayFormat = "dd"
+    private const val yearFormat = "yyyy"
 
-    fun parseDateToStringWithDayName(date: Date): String {
-        return SimpleDateFormat(dayNameFormat, Locale.US).format(date)
+    fun Date.toFormattedStringWithDayName(): String {
+        return SimpleDateFormat(dayNameFormat, Locale.US).format(this)
     }
-    fun getOnlyDayFromDate(date: Date): String {
-        return SimpleDateFormat(dayFormat, Locale.getDefault()).format(date)
+    fun Date.toDayString(): String {
+        return SimpleDateFormat(dayFormat, Locale.getDefault()).format(this)
+    }
+
+    fun Date.toYearString(): String {
+        return SimpleDateFormat(yearFormat, Locale.getDefault()).format(this)
     }
 
     fun getOnlyDayFromDate(year: Int, month: Int, day: Int): String {
