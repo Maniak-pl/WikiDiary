@@ -34,8 +34,8 @@ object WikiParser {
         return str.toString()
     }
 
-    fun addProject(tag: String, folder: String, year: String): String {
-        return "${addIconCategory(folder)}[[:$folder]] - [[:Projects|\uD83D\uDEE0\uFE0F]] [[:$folder:Projekt - $tag ${year}]] "
+    fun addProject(tag: String, folder: String, year: String, date: String): String {
+        return "${addIconCategory(folder)}[[:$folder]] - [[:$folder:Projekt - $tag ${year}]] FIXME $date"
     }
 
     private fun addIconCategory(category: String): String {

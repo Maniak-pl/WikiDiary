@@ -54,7 +54,8 @@ object WikiHelper {
                 WikiParser.addProject(
                     wikiNote.tag,
                     wikiNote.folder,
-                    wikiNote.date.toYearString()
+                    wikiNote.date.toYearString(),
+                    date
                 )
             if (!category.containsKey(tag)) {
                 category[tag] = ArrayList()
