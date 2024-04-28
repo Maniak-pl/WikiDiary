@@ -48,12 +48,12 @@ object WikiHelper {
     private fun addCategory(date: String, wikiNote: WikiNote) {
         val category = dateMap[date]
         category?.let {
-            val tag = if (wikiNote.folder.isNullOrBlank())
+            val tag = if (wikiNote.category.isNullOrBlank())
                 wikiNote.tag
             else
                 WikiParser.addProject(
                     wikiNote.tag,
-                    wikiNote.folder,
+                    wikiNote.category,
                     wikiNote.date.toYearString(),
                     date
                 )

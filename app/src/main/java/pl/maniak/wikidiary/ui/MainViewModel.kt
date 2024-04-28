@@ -2,6 +2,7 @@ package pl.maniak.wikidiary.ui
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,7 @@ import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateProject
 import pl.maniak.wikidiary.ui.model.ActionClick.UpdateCategory
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState
+import java.util.Date
 
 class MainViewModel(
     private val noteRepository: WikiNoteRepository,
@@ -74,13 +76,13 @@ class MainViewModel(
 
     fun onActionClick(action: ActionClick) {
         when (action) {
-            is AddNote -> saveWikiNote(note = action.note)
-            is AddTag -> saveTag(tag = action.tag)
+            is AddNote -> saveNoteAndUpdateTag(action.tag, action.content)
+            is AddTag -> saveTag(Tag(id = 0, name = action.tag))
             is DeleteNote -> deleteNote(note = action.note)
             is DeleteTag -> deleteTag(tag = action.tag)
             is TagCreateProject -> showBottomSheet(BottomSheetUiState.CreateProject)
             is ConfirmCreateProject -> {
-                saveTag(Tag(id = 0, tag = action.name, folder = action.category))
+                saveTag(Tag(id = 0, name = action.name, category = action.category, color = Color.Red, date = Date()))
                 hideBottomSheet()
             }
             is TagCreateCategory -> showBottomSheet(BottomSheetUiState.CreateCategory)
@@ -88,6 +90,19 @@ class MainViewModel(
             is DeleteCategory -> deleteCategory(action.id)
             is UpdateCategory -> saveCategory(Category(id = action.id, name = action.name))
         }
+    }
+
+    private fun saveNoteAndUpdateTag(tag: Tag, content: String) {
+        val wikiNote = WikiNote(
+            id = 0,
+            tag = tag.name,
+            content = content,
+            category = tag.category,
+            date = Date(),
+            isSend = false
+        )
+        saveWikiNote(note = wikiNote)
+        saveTag(tag.copy(date = Date()))
     }
 
     private fun saveWikiNote(note: WikiNote) {

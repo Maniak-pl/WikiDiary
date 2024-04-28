@@ -4,9 +4,9 @@ import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
 
 sealed class ActionClick {
-    data class AddNote(val note: WikiNote) : ActionClick()
+    data class AddNote(val tag: Tag, val content: String) : ActionClick()
 
-    data class AddTag(val tag: Tag) : ActionClick()
+    data class AddTag(val tag: String) : ActionClick()
 
     data class DeleteNote(val note: WikiNote) : ActionClick()
 
