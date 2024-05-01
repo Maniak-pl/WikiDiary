@@ -45,7 +45,7 @@ object WikiParser {
             "Work" to "\uD83D\uDCBC ",
             "Health" to "❤\uFE0F ",
             "Finances" to "\uD83D\uDCB0 ",
-            "People" to "\uD83D\uDC6B\uD83C\uDFFC ",
+            "Community" to "\uD83D\uDC6B\uD83C\uDFFC ",
             "WikiDiary" to "\uD83D\uDCD3 ",
             "Education" to "\uD83C\uDF93 ",
             "RealEstate" to "\uD83C\uDFD8\uFE0F ",

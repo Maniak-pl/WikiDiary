@@ -2,6 +2,7 @@ package pl.maniak.wikidiary.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,13 +55,22 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                BackHandler(onBack = {
+                    if (scaffoldState.bottomSheetState.isExpanded) {
+                        viewModel.setBottomSheetExpanded(false)
+                    } else {
+                        finish()
+                    }
+                })
+
                 BottomSheetScaffold(
                     sheetContent = {
 
                         when (bottomSheetUiState) {
                             is CreateProject -> CreateProjectScreen(
                                 categories = viewModel.categories.value,
-                                onClick = viewModel::onActionClick)
+                                onClick = viewModel::onActionClick
+                            )
                             is CreateCategory -> CreateCategoryScreen(
                                 categories = viewModel.categories.value,
                                 onClick = viewModel::onActionClick

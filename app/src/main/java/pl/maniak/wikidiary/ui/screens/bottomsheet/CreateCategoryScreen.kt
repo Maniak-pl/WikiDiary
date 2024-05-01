@@ -67,7 +67,6 @@ fun CreateCategoryScreen(
             value = categoryName,
             onValueChange = {
                 categoryName = it
-                selectedCategory = null
             },
             label = { Text("Category Name") },
             modifier = Modifier.fillMaxWidth(),
