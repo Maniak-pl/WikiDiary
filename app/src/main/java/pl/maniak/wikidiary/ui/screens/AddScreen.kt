@@ -65,8 +65,8 @@ fun AddScreen(
                     text = ""
                 }
             },
-            onRemoveTagClick = { tag ->
-                onClick.invoke(ActionClick.DeleteTag(tag))
+            onEditTagClick = { tag ->
+                onClick.invoke(ActionClick.EditTag(tag))
             },
             onClick = onClick
         )
@@ -93,7 +93,7 @@ private fun TagsLayout(
     scrollState: ScrollState,
     onTagClick: (Tag) -> Unit,
     onAddTagClick: () -> Unit = {},
-    onRemoveTagClick: (Tag) -> Unit = {},
+    onEditTagClick: (Tag) -> Unit = {},
     onClick: (ActionClick) -> Unit
 ) {
     FlowRow(
@@ -107,7 +107,7 @@ private fun TagsLayout(
             Tag(
                 text = tag.name,
                 onClick = { onTagClick(tag) },
-                onLongClick = { onRemoveTagClick(tag) },
+                onLongClick = { onEditTagClick(tag) },
                 colors = TagDefaults.tagColors(
                     backgroundColor = tag.color, contentColor = Color.White
                 ),

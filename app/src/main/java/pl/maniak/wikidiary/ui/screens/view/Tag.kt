@@ -79,7 +79,7 @@ fun Tag(
                         minHeight = TagDefaults.MinHeight
                     )
                     .wrapContentSize()
-                    .padding(vertical = 4.dp, horizontal = 12.dp),
+                    .padding(vertical = 6.dp, horizontal = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
                 content()

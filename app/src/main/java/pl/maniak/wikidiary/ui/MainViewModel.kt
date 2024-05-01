@@ -2,7 +2,6 @@ package pl.maniak.wikidiary.ui
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,14 +18,16 @@ import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.model.ActionClick.AddCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.AddNote
 import pl.maniak.wikidiary.ui.model.ActionClick.AddTag
-import pl.maniak.wikidiary.ui.model.ActionClick.ConfirmCreateProject
+import pl.maniak.wikidiary.ui.model.ActionClick.ConfirmProject
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteNote
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteTag
+import pl.maniak.wikidiary.ui.model.ActionClick.EditTag
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateProject
 import pl.maniak.wikidiary.ui.model.ActionClick.UpdateCategory
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState
+import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateProject
 import java.util.Date
 
 class MainViewModel(
@@ -79,10 +80,14 @@ class MainViewModel(
             is AddNote -> saveNoteAndUpdateTag(action.tag, action.content)
             is AddTag -> saveTag(Tag(id = 0, name = action.tag))
             is DeleteNote -> deleteNote(note = action.note)
-            is DeleteTag -> deleteTag(tag = action.tag)
-            is TagCreateProject -> showBottomSheet(BottomSheetUiState.CreateProject)
-            is ConfirmCreateProject -> {
-                saveTag(Tag(id = 0, name = action.name, category = action.category, color = Color.Red, date = Date()))
+            is DeleteTag -> {
+                deleteTag(id = action.id)
+                hideBottomSheet()
+            }
+            is EditTag -> showBottomSheet(CreateProject(action.tag))
+            is TagCreateProject -> showBottomSheet(CreateProject(null))
+            is ConfirmProject -> {
+                saveTag(Tag(id = action.id, name = action.name, category = action.category, color = action.color, date = Date()))
                 hideBottomSheet()
             }
             is TagCreateCategory -> showBottomSheet(BottomSheetUiState.CreateCategory)
@@ -126,9 +131,9 @@ class MainViewModel(
         }
     }
 
-    private fun deleteTag(tag: Tag) {
+    private fun deleteTag(id: Long) {
         viewModelScope.launch {
-            tagRepository.deleteTag(tag.id)
+            tagRepository.deleteTag(id)
             loadTags()
         }
     }

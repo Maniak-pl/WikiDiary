@@ -65,12 +65,13 @@ class MainActivity : ComponentActivity() {
 
                 BottomSheetScaffold(
                     sheetContent = {
-
-                        when (bottomSheetUiState) {
-                            is CreateProject -> CreateProjectScreen(
-                                categories = viewModel.categories.value,
-                                onClick = viewModel::onActionClick
-                            )
+                        when (val state = bottomSheetUiState) {
+                            is CreateProject ->
+                                CreateProjectScreen(
+                                    tag = state.tag,
+                                    categories = viewModel.categories.value,
+                                    onClick = viewModel::onActionClick
+                                )
                             is CreateCategory -> CreateCategoryScreen(
                                 categories = viewModel.categories.value,
                                 onClick = viewModel::onActionClick
