@@ -90,6 +90,7 @@ class MainActivity : ComponentActivity() {
                         MainScreen(
                             list = viewModel.notes.value,
                             tagList = viewModel.tags.value,
+                            routines = viewModel.routines.value,
                             onClick = viewModel::onActionClick
                         )
                     }

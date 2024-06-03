@@ -35,7 +35,7 @@ object WikiParser {
     }
 
     fun addProject(tag: String, folder: String, year: String, date: String): String {
-        return "${addIconCategory(folder)}[[:$folder]] - [[:$folder:Projekt - $tag ${year}]] FIXME $date"
+        return "${addIconCategory(folder)}[[:$folder]] - [[:$folder:Projekt - $tag ${year}]]"
     }
 
     private fun addIconCategory(category: String): String {

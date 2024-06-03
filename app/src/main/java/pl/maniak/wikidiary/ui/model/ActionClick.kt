@@ -1,6 +1,7 @@
 package pl.maniak.wikidiary.ui.model
 
 import androidx.compose.ui.graphics.Color
+import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
 
@@ -31,4 +32,10 @@ sealed class ActionClick {
     data class UpdateCategory(val id: Long, val name: String) : ActionClick()
 
     data class EditTag(val tag: Tag) : ActionClick()
+
+    data class AddRoutine(val name: String) : ActionClick()
+
+    data class DeleteRoutine(val id: Long) : ActionClick()
+
+    data class UpdateRoutine(val routine: Routine) : ActionClick()
 }

@@ -6,13 +6,18 @@ import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [WikiNoteEntity::class, TagEntity::class, CategoryEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [WikiNoteEntity::class, TagEntity::class, CategoryEntity::class, RoutineEntity::class],
+    version = 1,
+    exportSchema = false
+)
 @TypeConverters(Converters::class)
 abstract class WikiNoteDatabase : RoomDatabase() {
 
     abstract fun wikiNoteDao(): WikiNoteDao
     abstract fun tagDao(): TagDao
     abstract fun categoryDao(): CategoryDao
+    abstract fun routineDao(): RoutineDao
 
     companion object {
         private var INSTANCE: WikiNoteDatabase? = null

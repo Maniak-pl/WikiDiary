@@ -9,9 +9,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pl.maniak.wikidiary.data.Category
+import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.domain.repository.CategoryRepository
+import pl.maniak.wikidiary.domain.repository.Config
+import pl.maniak.wikidiary.domain.repository.RoutineRepository
 import pl.maniak.wikidiary.domain.repository.TagRepository
 import pl.maniak.wikidiary.domain.repository.WikiNoteRepository
 import pl.maniak.wikidiary.ui.model.ActionClick
@@ -33,7 +36,9 @@ import java.util.Date
 class MainViewModel(
     private val noteRepository: WikiNoteRepository,
     private val tagRepository: TagRepository,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val routineRepository: RoutineRepository,
+    private val config: Config,
 ) : ViewModel() {
 
     private val _notes = mutableStateOf<List<WikiNote>>(emptyList())
@@ -45,6 +50,9 @@ class MainViewModel(
     private val _categories = mutableStateOf<List<Category>>(emptyList())
     val categories: State<List<Category>> = _categories
 
+    private val _routines = mutableStateOf<List<Routine>>(emptyList())
+    val routines: State<List<Routine>> = _routines
+
     private val _bottomSheetExpanded = MutableStateFlow(false)
     val bottomSheetExpanded: StateFlow<Boolean> = _bottomSheetExpanded.asStateFlow()
 
@@ -55,6 +63,7 @@ class MainViewModel(
         loadNotes()
         loadTags()
         loadCategories()
+        loadRoutines()
     }
 
     private fun loadNotes() {
@@ -75,6 +84,21 @@ class MainViewModel(
         }
     }
 
+    private fun loadRoutines() {
+        if (config.isFirstLaunchToday()) {
+            viewModelScope.launch {
+                val allRoutines = routineRepository.getRoutines()
+                val updatedRoutines = allRoutines.map { it.copy(isCompleted = false) }
+                routineRepository.updateAll(updatedRoutines)
+                _routines.value = updatedRoutines
+            }
+        } else {
+            viewModelScope.launch {
+                _routines.value = routineRepository.getRoutines()
+            }
+        }
+    }
+
     fun onActionClick(action: ActionClick) {
         when (action) {
             is AddNote -> saveNoteAndUpdateTag(action.tag, action.content)
@@ -87,32 +111,44 @@ class MainViewModel(
             is EditTag -> showBottomSheet(CreateProject(action.tag))
             is TagCreateProject -> showBottomSheet(CreateProject(null))
             is ConfirmProject -> {
-                saveTag(Tag(id = action.id, name = action.name, category = action.category, color = action.color, date = Date()))
+                saveTag(
+                    Tag(
+                        id = action.id,
+                        name = action.name,
+                        category = action.category,
+                        color = action.color,
+                        date = Date()
+                    )
+                )
                 hideBottomSheet()
             }
             is TagCreateCategory -> showBottomSheet(BottomSheetUiState.CreateCategory)
             is AddCategory -> saveCategory(Category(id = 0, name = action.name))
             is DeleteCategory -> deleteCategory(action.id)
             is UpdateCategory -> saveCategory(Category(id = action.id, name = action.name))
+            is ActionClick.UpdateRoutine -> {
+                if (action.routine.isCompleted) {
+                    saveWikiNote(
+                        tag = "Today",
+                        content = "Wykonano rutynę \"${action.routine.name}\"",
+                    )
+                }
+                saveRoutine(action.routine)
+            }
+            is ActionClick.AddRoutine -> saveRoutine(Routine(name = action.name))
+            is ActionClick.DeleteRoutine -> deleteRoutine(action.id)
+
         }
     }
 
     private fun saveNoteAndUpdateTag(tag: Tag, content: String) {
-        val wikiNote = WikiNote(
-            id = 0,
-            tag = tag.name,
-            content = content,
-            category = tag.category,
-            date = Date(),
-            isSend = false
-        )
-        saveWikiNote(note = wikiNote)
+        saveWikiNote(tag.name, content, tag.category)
         saveTag(tag.copy(date = Date()))
     }
 
-    private fun saveWikiNote(note: WikiNote) {
+    private fun saveWikiNote(tag: String, content: String, category: String? = null) {
         viewModelScope.launch {
-            noteRepository.saveNote(note)
+            noteRepository.saveNote(WikiNote(tag = tag, content = content, category = category))
             loadNotes()
         }
     }
@@ -149,6 +185,20 @@ class MainViewModel(
         viewModelScope.launch {
             categoryRepository.deleteCategory(id)
             loadCategories()
+        }
+    }
+
+    private fun saveRoutine(routine: Routine) {
+        viewModelScope.launch {
+            routineRepository.saveRoutine(routine)
+            loadRoutines()
+        }
+    }
+
+    private fun deleteRoutine(id: Long) {
+        viewModelScope.launch {
+            routineRepository.deleteRoutine(id)
+            loadRoutines()
         }
     }
 
