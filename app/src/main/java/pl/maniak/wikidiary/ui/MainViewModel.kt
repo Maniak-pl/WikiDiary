@@ -129,7 +129,7 @@ class MainViewModel(
             is ActionClick.UpdateRoutine -> {
                 if (action.routine.isCompleted) {
                     saveWikiNote(
-                        tag = "Today",
+                        tag = "Routine",
                         content = "Wykonano rutynę \"${action.routine.name}\"",
                     )
                 }

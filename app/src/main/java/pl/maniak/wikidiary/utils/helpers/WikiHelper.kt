@@ -17,7 +17,9 @@ object WikiHelper {
 
         val allLinesNote = mutableListOf<String>()
 
-        for (day in dateMap.keys) {
+        val sortedDates = dateMap.keys.sorted()
+
+        for (day in sortedDates) {
             allLinesNote.add(WikiParser.addHeadline(day, 2))
             allLinesNote.add("")
             for (category in dateMap[day]?.keys.orEmpty()) {
