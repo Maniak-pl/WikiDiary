@@ -134,7 +134,11 @@ class MainActivity : ComponentActivity() {
                 year,
                 month,
                 day
-            ).show()
+            ).apply {
+                setOnCancelListener {
+                    viewModel.onActionClick(DataPickerChangeDate(viewModel.selectedDate.value))
+                }
+            }.show()
         }
     }
 }
