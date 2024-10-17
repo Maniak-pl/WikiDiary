@@ -8,7 +8,7 @@ data class WikiNote(
     val tag: String,
     val content: String,
     val category: String? = null,
-    val date: Date = Date(),
+    val date: Date,
     val isSend: Boolean = false
 ) {
     fun formatDateString(): String {

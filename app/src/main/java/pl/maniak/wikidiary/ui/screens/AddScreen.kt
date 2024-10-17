@@ -30,12 +30,15 @@ import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.screens.view.Tag
 import pl.maniak.wikidiary.ui.screens.view.TagDefaults
+import pl.maniak.wikidiary.utils.helpers.DateHelper.toDayString
+import java.util.Date
 import java.util.Locale
 
 
 @Composable
 fun AddScreen(
     tags: List<Tag> = emptyList(),
+    selectedDate: Date,
     onClick: (ActionClick) -> Unit,
 ) {
     var text by remember { mutableStateOf("") }
@@ -52,6 +55,7 @@ fun AddScreen(
                 .weight(1f)
                 .fillMaxSize(),
             tags = tags.sortedBy { it.date },
+            selectedDate = selectedDate,
             scrollState = vertScrollState,
             onTagClick = { tag ->
                 if (text.isNotBlank()) {
@@ -78,7 +82,9 @@ fun AddScreen(
                 .fillMaxWidth()
                 .height(55.dp),
             value = text,
-            onValueChange = { text = it.replaceFirstChar { char -> char.uppercase(Locale.getDefault()) } },
+            onValueChange = {
+                text = it.replaceFirstChar { char -> char.uppercase(Locale.getDefault()) }
+            },
             label = { Text(text = "Enter your note") },
         )
     }
@@ -90,6 +96,7 @@ fun AddScreen(
 private fun TagsLayout(
     modifier: Modifier = Modifier,
     tags: List<Tag> = emptyList(),
+    selectedDate: Date,
     scrollState: ScrollState,
     onTagClick: (Tag) -> Unit,
     onAddTagClick: () -> Unit = {},
@@ -128,6 +135,11 @@ private fun TagsLayout(
             text = "\uD83D\uDCC2",
             onClick = { onClick.invoke(ActionClick.TagCreateCategory) },
         )
+
+        Tag(
+            text = "\uD83D\uDDD3\uFE0F - ${selectedDate.toDayString()}",
+            onClick = { onClick.invoke(ActionClick.TagChangeDate) },
+        )
     }
 }
 
@@ -136,6 +148,7 @@ private fun TagsLayout(
 fun AddScreenPreview() {
     AddScreen(
         tags = listOf(Tag(1, "ToDo"), Tag(2, "Today"), Tag(3, "Gym with Szymon 2024", "Health:Physical")),
+        selectedDate = Date(),
         onClick = {}
     )
 }

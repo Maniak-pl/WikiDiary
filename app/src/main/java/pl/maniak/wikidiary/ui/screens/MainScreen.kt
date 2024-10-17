@@ -34,11 +34,13 @@ import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.screens.Screen.*
 import pl.maniak.wikidiary.ui.theme.WikiTheme
+import java.util.Date
 
 @Composable
 fun MainScreen(
     list: List<WikiNote> = mutableListOf(),
     tagList: List<Tag> = mutableListOf(),
+    selectedDate: Date,
     routines: List<Routine> = emptyList(),
     onClick: (ActionClick) -> Unit = {},
 ) {
@@ -84,6 +86,7 @@ fun MainScreen(
                 is Add -> {
                     AddScreen(
                         tags = tagList,
+                        selectedDate = selectedDate,
                         onClick = onClick,
                     )
                 }
@@ -120,6 +123,6 @@ sealed class Screen(val title: String) {
 @Composable
 fun MainScreenPreview() {
     WikiTheme {
-        MainScreen()
+        MainScreen(selectedDate = Date())
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.WikiNote
+import java.util.Date
 
 sealed class ActionClick {
     data class AddNote(val tag: Tag, val content: String) : ActionClick()
@@ -25,6 +26,8 @@ sealed class ActionClick {
 
     data object TagCreateCategory : ActionClick()
 
+    data object TagChangeDate : ActionClick()
+
     data class AddCategory(val name: String) : ActionClick()
 
     data class DeleteCategory(val id: Long) : ActionClick()
@@ -38,4 +41,6 @@ sealed class ActionClick {
     data class DeleteRoutine(val id: Long) : ActionClick()
 
     data class UpdateRoutine(val routine: Routine) : ActionClick()
+
+    data class DataPickerChangeDate(val date: Date) : ActionClick()
 }

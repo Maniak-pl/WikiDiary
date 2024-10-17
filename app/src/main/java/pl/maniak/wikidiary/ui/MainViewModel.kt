@@ -22,10 +22,12 @@ import pl.maniak.wikidiary.ui.model.ActionClick.AddCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.AddNote
 import pl.maniak.wikidiary.ui.model.ActionClick.AddTag
 import pl.maniak.wikidiary.ui.model.ActionClick.ConfirmProject
+import pl.maniak.wikidiary.ui.model.ActionClick.DataPickerChangeDate
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteNote
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteTag
 import pl.maniak.wikidiary.ui.model.ActionClick.EditTag
+import pl.maniak.wikidiary.ui.model.ActionClick.TagChangeDate
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateProject
 import pl.maniak.wikidiary.ui.model.ActionClick.UpdateCategory
@@ -58,6 +60,12 @@ class MainViewModel(
 
     private val _bottomSheetUiState = MutableStateFlow<BottomSheetUiState>(BottomSheetUiState.None)
     val bottomSheetUiState: StateFlow<BottomSheetUiState> = _bottomSheetUiState.asStateFlow()
+
+    private val _selectedDate = mutableStateOf(Date())
+    val selectedDate: State<Date> = _selectedDate
+
+    private val _showDatePickerDialog = mutableStateOf(false)
+    val showDatePickerDialog: State<Boolean> = _showDatePickerDialog
 
     init {
         loadNotes()
@@ -123,6 +131,7 @@ class MainViewModel(
                 hideBottomSheet()
             }
             is TagCreateCategory -> showBottomSheet(BottomSheetUiState.CreateCategory)
+            is TagChangeDate -> _showDatePickerDialog.value = true
             is AddCategory -> saveCategory(Category(id = 0, name = action.name))
             is DeleteCategory -> deleteCategory(action.id)
             is UpdateCategory -> saveCategory(Category(id = action.id, name = action.name))
@@ -137,6 +146,10 @@ class MainViewModel(
             }
             is ActionClick.AddRoutine -> saveRoutine(Routine(name = action.name))
             is ActionClick.DeleteRoutine -> deleteRoutine(action.id)
+            is DataPickerChangeDate -> {
+                _selectedDate.value = action.date
+                _showDatePickerDialog.value = false
+            }
 
         }
     }
@@ -148,7 +161,7 @@ class MainViewModel(
 
     private fun saveWikiNote(tag: String, content: String, category: String? = null) {
         viewModelScope.launch {
-            noteRepository.saveNote(WikiNote(tag = tag, content = content, category = category))
+            noteRepository.saveNote(WikiNote(tag = tag, content = content, category = category, date = selectedDate.value))
             loadNotes()
         }
     }
