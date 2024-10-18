@@ -36,5 +36,6 @@
 
     <string name="label_tag">🏷</string>
     <string name="label_project">🎯</string>
+    <string name="add_note">Complete the note</string>
 
 </resources>

@@ -162,6 +162,7 @@ class MainViewModel(
     private fun saveWikiNote(tag: String, content: String, category: String? = null) {
         viewModelScope.launch {
             noteRepository.saveNote(WikiNote(tag = tag, content = content, category = category, date = selectedDate.value))
+            config.setLastUpdated(System.currentTimeMillis())
             loadNotes()
         }
     }

@@ -22,6 +22,7 @@ import pl.maniak.wikidiary.domain.repository.TagRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.WikiNoteRepository
 import pl.maniak.wikidiary.domain.repository.WikiNoteRepositoryImpl
 import pl.maniak.wikidiary.ui.MainViewModel
+import pl.maniak.wikidiary.ui.widget.WikiWidgetProvider
 
 val appModule = module {
 
@@ -56,4 +57,7 @@ val appModule = module {
     factory<TagMapper> { TagMapperImpl() }
     factory<CategoryMapper> { CategoryMapper() }
     factory<RoutineMapper> { RoutineMapper() }
+
+    // WidgetProvider
+    factory { WikiWidgetProvider(get()) }
 }
