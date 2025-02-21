@@ -36,6 +36,6 @@
 
     <string name="label_tag">🏷</string>
     <string name="label_project">🎯</string>
-    <string name="add_note">Complete the note</string>
+    <string name="last_note_time">Complete the note. Time of last note %1$d hours ago</string>
 
 </resources>

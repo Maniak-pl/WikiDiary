@@ -59,5 +59,5 @@ val appModule = module {
     factory<RoutineMapper> { RoutineMapper() }
 
     // WidgetProvider
-    factory { WikiWidgetProvider(get()) }
+    factory { WikiWidgetProvider() }
 }

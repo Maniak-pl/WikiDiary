@@ -7,13 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
+import org.koin.java.KoinJavaComponent.inject
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.domain.repository.Config
 import pl.maniak.wikidiary.ui.MainActivity
-import pl.maniak.wikidiary.ui.model.BatteryInfo
 
-class WikiWidgetProvider(val config: Config) : AppWidgetProvider() {
+class WikiWidgetProvider : AppWidgetProvider() {
 
+    private val config: Config by inject(Config::class.java)
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -30,43 +31,53 @@ class WikiWidgetProvider(val config: Config) : AppWidgetProvider() {
         appWidgetId: Int
     ) {
         val lastUpdated = config.getLastUpdated()
-        val batteryLevel = calculateBatteryLevel(lastUpdated)
-
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
-        views.setTextViewText(R.id.noteTextView, context.getString(R.string.add_note))
+        val hoursSinceLastUpdate = calculateElapsedHours(lastUpdated)
+        val gridContent = generateSquares(hoursSinceLastUpdate)
+        val (color, textColor) = getColorForProgress(hoursSinceLastUpdate)
 
-        val batteryInfo = when (batteryLevel) {
-            in 0..20 -> BatteryInfo(R.drawable.ic_battery_20, R.color.red)
-            in 21..40 -> BatteryInfo(R.drawable.ic_battery_40, R.color.orange)
-            in 41..60 -> BatteryInfo(R.drawable.ic_battery_60, R.color.yellow)
-            in 61..80 -> BatteryInfo(R.drawable.ic_battery_80, R.color.green)
-            else -> BatteryInfo(R.drawable.ic_battery_100, R.color.white)
-        }
-
-        views.setImageViewResource(R.id.batteryImageView, batteryInfo.batteryIcon)
-        views.setTextColor(
+        views.setTextViewText(R.id.squaresTextView, gridContent)
+        views.setTextViewText(
             R.id.noteTextView,
-            ContextCompat.getColor(context, batteryInfo.textColor)
+            context.getString(R.string.last_note_time, hoursSinceLastUpdate)
         )
+        views.setTextColor(R.id.noteTextView, ContextCompat.getColor(context, textColor))
+        views.setTextColor(R.id.squaresTextView, ContextCompat.getColor(context, color))
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         views.setOnClickPendingIntent(R.id.widgetLayout, pendingIntent)
-
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
-    private fun calculateBatteryLevel(lastUpdated: Long): Int {
+    private fun calculateElapsedHours(lastUpdated: Long): Int {
         val currentTime = System.currentTimeMillis()
-        val elapsedHours = (currentTime - lastUpdated) / (1000 * 60 * 60)
+        val elapsedMillis = currentTime - lastUpdated
+        return (elapsedMillis / (1000 * 60 * 60)).toInt()
+    }
+
+    private fun generateSquares(hoursSinceLastUpdate: Int): String {
+        val filled = 24 - hoursSinceLastUpdate
+        val empty = hoursSinceLastUpdate
+        return "■".repeat(filled) + "□".repeat(empty)
+    }
+
+    private fun getColorForProgress(hoursSinceLastUpdate: Int): Pair<Int, Int> {
+        val progressPercentage: Double = (hoursSinceLastUpdate / 24.0) * 100
+
         return when {
-            elapsedHours >= 12 -> 20
-            elapsedHours >= 8 -> 40
-            elapsedHours >= 6 -> 60
-            elapsedHours >= 4 -> 80
-            else -> 100
+            progressPercentage <= 25 -> Pair(R.color.green, R.color.white)
+            progressPercentage <= 50 -> Pair(R.color.yellow, R.color.white)
+            progressPercentage <= 75 -> Pair(R.color.orange, R.color.white)
+            else -> Pair(R.color.red, R.color.red)
         }
     }
 }
