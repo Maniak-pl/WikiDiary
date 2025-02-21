@@ -43,4 +43,8 @@ sealed class ActionClick {
     data class UpdateRoutine(val routine: Routine) : ActionClick()
 
     data class DataPickerChangeDate(val date: Date) : ActionClick()
+
+    data class EditNote(val note: WikiNote) : ActionClick()
+
+    data class DeleteNotes(val notes: List<Long>) : ActionClick()
 }

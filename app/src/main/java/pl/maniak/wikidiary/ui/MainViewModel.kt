@@ -116,6 +116,7 @@ class MainViewModel(
                 deleteTag(id = action.id)
                 hideBottomSheet()
             }
+
             is EditTag -> showBottomSheet(CreateProject(action.tag))
             is TagCreateProject -> showBottomSheet(CreateProject(null))
             is ConfirmProject -> {
@@ -130,6 +131,7 @@ class MainViewModel(
                 )
                 hideBottomSheet()
             }
+
             is TagCreateCategory -> showBottomSheet(BottomSheetUiState.CreateCategory)
             is TagChangeDate -> _showDatePickerDialog.value = true
             is AddCategory -> saveCategory(Category(id = 0, name = action.name))
@@ -144,11 +146,22 @@ class MainViewModel(
                 }
                 saveRoutine(action.routine)
             }
+
             is ActionClick.AddRoutine -> saveRoutine(Routine(name = action.name))
             is ActionClick.DeleteRoutine -> deleteRoutine(action.id)
             is DataPickerChangeDate -> {
                 _selectedDate.value = action.date
                 _showDatePickerDialog.value = false
+            }
+
+            is ActionClick.EditNote -> Unit
+            is ActionClick.DeleteNotes -> {
+                action.notes.forEach { id ->
+                    viewModelScope.launch {
+                        noteRepository.deleteNoteById(id)
+                    }
+                }
+                loadNotes()
             }
 
         }
@@ -161,7 +174,14 @@ class MainViewModel(
 
     private fun saveWikiNote(tag: String, content: String, category: String? = null) {
         viewModelScope.launch {
-            noteRepository.saveNote(WikiNote(tag = tag, content = content, category = category, date = selectedDate.value))
+            noteRepository.saveNote(
+                WikiNote(
+                    tag = tag,
+                    content = content,
+                    category = category,
+                    date = selectedDate.value
+                )
+            )
             config.setLastUpdated(System.currentTimeMillis())
             loadNotes()
         }
