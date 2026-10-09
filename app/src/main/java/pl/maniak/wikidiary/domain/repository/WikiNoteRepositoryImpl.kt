@@ -26,6 +26,7 @@ class WikiNoteRepositoryImpl(
     override suspend fun saveNote(note: WikiNote) = withContext(Dispatchers.IO) {
         val entity = mapper.mapToEntity(note)
         wikiNoteDao.insert(entity)
+        Unit
     }
 
     override suspend fun deleteNoteById(id: Long) = withContext(Dispatchers.IO) {

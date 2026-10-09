@@ -2,6 +2,7 @@ package pl.maniak.wikidiary.data.database
 
 import android.content.Context
 import androidx.room.Database
+import androidx.room.migration.Migration
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -11,8 +12,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = [WikiNoteEntity::class, TagEntity::class, CategoryEntity::class, RoutineEntity::class],
-    version = 1,
+    entities = [
+        WikiNoteEntity::class,
+        TagEntity::class,
+        CategoryEntity::class,
+        RoutineEntity::class,
+        FilmEntity::class,
+        FilmNoteEntity::class
+    ],
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -22,9 +30,49 @@ abstract class WikiNoteDatabase : RoomDatabase() {
     abstract fun tagDao(): TagDao
     abstract fun categoryDao(): CategoryDao
     abstract fun routineDao(): RoutineDao
+    abstract fun filmDao(): FilmDao
+    abstract fun filmNoteDao(): FilmNoteDao
 
     companion object {
         private var INSTANCE: WikiNoteDatabase? = null
+
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `film_table` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `canonicalUrl` TEXT NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `year` INTEGER NOT NULL,
+                        `mediaType` TEXT NOT NULL,
+                        `posterUrl` TEXT
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS `index_film_table_canonicalUrl` " +
+                        "ON `film_table` (`canonicalUrl`)"
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `film_note_table` (
+                        `noteId` INTEGER NOT NULL,
+                        `filmId` INTEGER NOT NULL,
+                        PRIMARY KEY(`noteId`),
+                        FOREIGN KEY(`noteId`) REFERENCES `wiki_note_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE,
+                        FOREIGN KEY(`filmId`) REFERENCES `film_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_film_note_table_filmId` " +
+                        "ON `film_note_table` (`filmId`)"
+                )
+            }
+        }
 
         fun getDatabase(context: Context): WikiNoteDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -33,6 +81,7 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                     WikiNoteDatabase::class.java,
                     "wiki_database"
                 )
+                    .addMigrations(MIGRATION_1_2)
                     .addCallback(DatabaseCallback(context)) // Add callback
                     .build()
                 INSTANCE = instance

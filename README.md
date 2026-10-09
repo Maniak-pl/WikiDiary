@@ -4,8 +4,9 @@ WikiDiary to lokalna aplikacja na Androida do szybkiego zapisywania codziennych
 notatek, porządkowania ich za pomocą tagów i projektów oraz przygotowywania
 wpisów w formacie Wiki.
 
-Aplikacja nie wymaga konta ani połączenia z serwerem. Notatki, tagi, kategorie i
-rutyny są przechowywane lokalnie na urządzeniu.
+Aplikacja nie wymaga konta ani własnego backendu. Notatki, tagi, kategorie i
+rutyny są przechowywane lokalnie na urządzeniu. Połączenie z internetem jest
+potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
 
 ## Najważniejsze funkcje
 
@@ -21,8 +22,15 @@ rutyny są przechowywane lokalnie na urządzeniu.
   odhaczania i usuwania. Stan wykonania jest resetowany przy pierwszym
   uruchomieniu aplikacji w nowym dniu. Odhaczenie rutyny zapisuje również
   notatkę z tagiem `Routine`.
+- **Notatki Filmweb** - chip `🎬 Filmweb` otwiera natywne wyszukiwanie w
+  dolnym panelu aplikacji. Wyniki są pokazywane jako przewijana lista
+  maksymalnie 10 filmów i seriali z okładką, tytułem oraz rokiem. Po wybraniu
+  pozycji można poprawić jej metadane, a następnie zapisać zwykłą notatkę razem
+  ze strukturalnymi metadanymi Filmwebu.
 - **Przygotowanie wpisu Wiki** - notatki są grupowane według daty, tagów i
-  kategorii, a wygenerowany tekst można skopiować do schowka.
+  kategorii, a wygenerowany tekst można skopiować do schowka. Notatki Filmweb
+  zawierają klikalny link do wybranej strony oraz znacznik grafiki DokuWiki
+  dodany po listach danego dnia.
 - **Widget ekranu głównego** - pokazuje czas od ostatnio zapisanej notatki,
   wizualizuje upływ 24 godzin i otwiera aplikację po kliknięciu.
 
@@ -46,16 +54,27 @@ Górny pasek udostępnia cztery obszary:
 1. Na ekranie **Add Note** wpisz treść notatki.
 2. Wybierz tag, aby zapisać wpis. Chip z datą pozwala zmienić dzień, którego
    dotyczy notatka.
-3. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
-4. Wklej przygotowany tekst do docelowej strony Wiki.
+3. Aby dodać film lub serial, wybierz chip **🎬 Filmweb**, wyszukaj pozycję i
+   kliknij wynik na natywnej liście.
+4. Zatwierdź kartę wybranej pozycji, wybierz tag, sprawdź datę i opcjonalnie
+   zmień początek zdania lub metadane.
+5. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
+6. Wklej przygotowany tekst do docelowej strony Wiki.
 
 ## Dane i prywatność
 
 - Dane są przechowywane w lokalnej bazie Room `wiki_database`.
+- Pozycje Filmweb są przechowywane w katalogu `film_table`, a relacje między
+  nimi i notatkami w `film_note_table`; migracja bazy zachowuje istniejące
+  notatki, tagi, kategorie i rutyny.
 - Ustawienia pomocnicze, takie jak dzień ostatniego uruchomienia i czas ostatniej
   notatki, są przechowywane w `SharedPreferences`.
 - Aplikacja nie ma backendu, logowania ani synchronizacji z chmurą.
 - Usunięcie danych aplikacji lub jej odinstalowanie usuwa lokalną bazę danych.
+- Wyszukiwanie Filmweb korzysta z nieoficjalnych endpointów używanych przez
+  serwis (`/api/v1/live/search` i `/api/v1/title/{id}/info`). Zapytania są
+  wykonywane dopiero po użyciu funkcji Filmweb; wyniki i plakaty są pobierane
+  bezpośrednio z internetu i nie są zapisywane jako lokalny cache.
 
 ## Gotowy APK - instalacja bez kompilowania
 
@@ -71,8 +90,8 @@ W repozytorium znajduje się aktualny build debug:
 | `versionCode` | `1` |
 | Typ builda | `debug` |
 | Pakiet | `pl.maniak.wikidiary` |
-| Commit źródłowy APK | `28c609b` |
-| SHA-256 APK | `2186d1f57425425ed5ed0ed019b800b77e08f7957f29ca22cfaa68bbd7f3eda1` |
+| Źródło APK | `develop` + natywna lista wyników Filmweb |
+| SHA-256 APK | `a12579c43d0cff1c99877fc4e61d0b186b499e81be506f745892b0426967e2c3` |
 
 ### Instalacja przez ADB
 
@@ -147,3 +166,8 @@ i odpowiednie dane wersji w tej dokumentacji.
 - Eksport odbywa się przez kopiowanie tekstu do schowka; aplikacja nie wysyła
   wpisów bezpośrednio na serwer Wiki.
 - Brak synchronizacji między urządzeniami i kont użytkowników.
+- Integracja Filmweb korzysta z nieoficjalnego, nieudokumentowanego API.
+  Filmweb może zmienić jego strukturę, ograniczyć dostęp lub wyłączyć endpointy
+  bez zapowiedzi. W takim przypadku panel pokazuje błąd z opcją ponowienia.
+- Filmweb wymaga połączenia z internetem tylko podczas wyszukiwania i odczytu
+  wyników. Zapisane notatki i ich metadane pozostają lokalne.

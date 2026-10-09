@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
+import pl.maniak.wikidiary.domain.model.FilmNoteEntry
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.screens.Screen.*
@@ -42,6 +43,7 @@ fun MainScreen(
     tagList: List<Tag> = mutableListOf(),
     selectedDate: Date,
     routines: List<Routine> = emptyList(),
+    filmNotes: List<FilmNoteEntry> = emptyList(),
     onClick: (ActionClick) -> Unit = {},
 ) {
     var currentScreen by remember { mutableStateOf<Screen>(Add) }
@@ -98,6 +100,7 @@ fun MainScreen(
                 is PrepareNote -> {
                     PreparingNoteScreen(
                         notesList = list,
+                        filmNotes = filmNotes,
                         onCopyClick = {
                             clipboardManager.setPrimaryClip(ClipData.newPlainText("WikiNote", it))
                         }

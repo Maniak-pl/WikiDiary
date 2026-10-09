@@ -28,6 +28,7 @@ import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateProject
 import pl.maniak.wikidiary.ui.screens.MainScreen
 import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateCategoryScreen
 import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateProjectScreen
+import pl.maniak.wikidiary.ui.screens.bottomsheet.FilmwebSearchScreen
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 import java.util.Calendar
 import java.util.GregorianCalendar
@@ -84,6 +85,15 @@ class MainActivity : ComponentActivity() {
                                 categories = viewModel.categories.value,
                                 onClick = viewModel::onActionClick
                             )
+                            BottomSheetUiState.FilmwebSearch -> FilmwebSearchScreen(
+                                tags = viewModel.tags.value,
+                                selectedDate = viewModel.selectedDate.value,
+                                saveState = viewModel.filmwebSaveState.value,
+                                searchState = viewModel.filmwebSearchState.collectAsState().value,
+                                onQueryChange = viewModel::setFilmwebSearchQuery,
+                                onSearch = viewModel::searchFilmweb,
+                                onClick = viewModel::onActionClick
+                            )
                             BottomSheetUiState.None -> {}
                         }
                     },
@@ -100,6 +110,7 @@ class MainActivity : ComponentActivity() {
                             selectedDate = viewModel.selectedDate.value,
                             tagList = viewModel.tags.value,
                             routines = viewModel.routines.value,
+                            filmNotes = viewModel.filmNotes.value,
                             onClick = viewModel::onActionClick
                         )
                     }

@@ -132,6 +132,11 @@ private fun TagsLayout(
         )
 
         Tag(
+            text = "\uD83C\uDFAC Filmweb",
+            onClick = { onClick.invoke(ActionClick.TagCreateFilmweb) },
+        )
+
+        Tag(
             text = "\uD83D\uDCC2",
             onClick = { onClick.invoke(ActionClick.TagCreateCategory) },
         )

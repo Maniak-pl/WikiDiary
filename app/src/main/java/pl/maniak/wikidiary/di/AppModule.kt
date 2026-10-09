@@ -15,6 +15,10 @@ import pl.maniak.wikidiary.domain.repository.CategoryRepository
 import pl.maniak.wikidiary.domain.repository.CategoryRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.Config
 import pl.maniak.wikidiary.domain.repository.ConfigImpl
+import pl.maniak.wikidiary.domain.repository.FilmRepository
+import pl.maniak.wikidiary.domain.repository.FilmRepositoryImpl
+import pl.maniak.wikidiary.domain.repository.FilmwebSearchRepository
+import pl.maniak.wikidiary.domain.repository.FilmwebSearchRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.RoutineRepository
 import pl.maniak.wikidiary.domain.repository.RoutineRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.TagRepository
@@ -42,15 +46,19 @@ val appModule = module {
     single { get<WikiNoteDatabase>().tagDao() }
     single { get<WikiNoteDatabase>().categoryDao() }
     single { get<WikiNoteDatabase>().routineDao() }
+    single { get<WikiNoteDatabase>().filmDao() }
+    single { get<WikiNoteDatabase>().filmNoteDao() }
 
     // Repository
     single<WikiNoteRepository> { WikiNoteRepositoryImpl(get(), get()) }
     single<TagRepository> { TagRepositoryImpl(get(), get()) }
     single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
     single<RoutineRepository> { RoutineRepositoryImpl(get(), get()) }
+    single<FilmRepository> { FilmRepositoryImpl(get(), get(), get(), get(), get()) }
+    single<FilmwebSearchRepository> { FilmwebSearchRepositoryImpl() }
 
     // ViewModel
-    viewModel { MainViewModel(get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     // Mapper
     factory<WikiNoteMapper> { WikiNoteMapperImpl() }

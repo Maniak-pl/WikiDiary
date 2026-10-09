@@ -1,5 +1,8 @@
 package pl.maniak.wikidiary.utils.helpers
 
+import pl.maniak.wikidiary.domain.model.FilmMediaType
+import pl.maniak.wikidiary.domain.model.FilmMetadata
+
 object WikiParser {
 
     fun addHeadline(note: String, level: Int): String {
@@ -32,6 +35,20 @@ object WikiParser {
         str.append("* ")
         str.append(note)
         return str.toString()
+    }
+
+    fun addFilmNote(prefix: String, metadata: FilmMetadata): String {
+        val sentencePrefix = prefix.trim().ifBlank { "Obejrzałem" }
+        val mediaType = when (metadata.mediaType) {
+            FilmMediaType.FILM -> "film"
+            FilmMediaType.SERIAL -> "serial"
+        }
+        return "$sentencePrefix $mediaType " +
+            "[[${metadata.canonicalUrl}|${metadata.title} (${metadata.year})]]"
+    }
+
+    fun addImage(fileName: String): String {
+        return "{{ :movies:$fileName?200 |}}"
     }
 
     fun addProject(tag: String, folder: String, year: String, date: String): String {

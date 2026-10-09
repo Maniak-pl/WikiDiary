@@ -14,7 +14,7 @@ interface WikiNoteDao {
     fun getAllByTag(tag: String): List<WikiNoteEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(wikiNote: WikiNoteEntity)
+    fun insert(wikiNote: WikiNoteEntity): Long
 
     @Query("DELETE FROM wiki_note_table WHERE id = :id")
     fun deleteById(id: Long)
