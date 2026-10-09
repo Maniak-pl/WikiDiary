@@ -91,7 +91,7 @@ W repozytorium znajduje się aktualny build debug:
 | Typ builda | `debug` |
 | Pakiet | `pl.maniak.wikidiary` |
 | Źródło APK | `develop` + natywna lista wyników Filmweb |
-| SHA-256 APK | `a12579c43d0cff1c99877fc4e61d0b186b499e81be506f745892b0426967e2c3` |
+| SHA-256 APK | `78ecfa664036ca78981238ae88c4ed6e1d57e4dbaf97fc1c1e13a018467941e1` |
 
 ### Instalacja przez ADB
 

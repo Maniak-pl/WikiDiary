@@ -2,6 +2,7 @@ package pl.maniak.wikidiary.ui.screens.bottomsheet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Card
@@ -32,9 +35,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,7 +49,7 @@ import pl.maniak.wikidiary.domain.model.FilmSearchResult
 import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.model.FilmwebSaveState
 import pl.maniak.wikidiary.ui.model.FilmwebSearchUiState
-import pl.maniak.wikidiary.utils.helpers.DateHelper.toDayString
+import pl.maniak.wikidiary.utils.helpers.formatDateString
 import pl.maniak.wikidiary.utils.helpers.WikiParser
 import java.util.Date
 
@@ -67,7 +70,7 @@ fun FilmwebSearchScreen(
     var posterUrl by remember { mutableStateOf("") }
     var sentencePrefix by remember { mutableStateOf("Obejrzałem") }
     var selectedTag by remember { mutableStateOf<Tag?>(null) }
-    var tagMenuExpanded by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
 
     LaunchedEffect(selectedResult) {
         selectedResult?.let { result ->
@@ -76,6 +79,7 @@ fun FilmwebSearchScreen(
             mediaType = result.mediaType
             posterUrl = result.posterUrl.orEmpty()
         }
+        listState.animateScrollToItem(0)
     }
 
     val selectedUrl = selectedResult?.canonicalUrl
@@ -97,6 +101,7 @@ fun FilmwebSearchScreen(
     val uriHandler = LocalUriHandler.current
 
     LazyColumn(
+        state = listState,
         modifier = Modifier
             .fillMaxWidth()
             .height(680.dp)
@@ -177,7 +182,7 @@ fun FilmwebSearchScreen(
             }
         }
 
-        if (searchState.results.isNotEmpty()) {
+        if (selectedResult == null && searchState.results.isNotEmpty()) {
             item {
                 Text(
                     text = "Wyniki wyszukiwania (${searchState.results.size})",
@@ -193,7 +198,6 @@ fun FilmwebSearchScreen(
             ) { result ->
                 FilmwebSearchResultCard(
                     result = result,
-                    isSelected = result == selectedResult,
                     onClick = { selectedResult = result }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -202,6 +206,13 @@ fun FilmwebSearchScreen(
 
         selectedResult?.let { result ->
             item {
+                TextButton(
+                    onClick = { selectedResult = null },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Wybierz inną pozycję")
+                }
+
                 FilmwebMetadataCard(
                     url = result.canonicalUrl,
                     title = title,
@@ -210,7 +221,6 @@ fun FilmwebSearchScreen(
                     posterUrl = posterUrl,
                     onTitleChange = { title = it },
                     onYearChange = { year = it.filter(Char::isDigit).take(4) },
-                    onPosterUrlChange = { posterUrl = it },
                     onMediaTypeChange = { mediaType = it },
                     onOpenUrl = { uriHandler.openUri(result.canonicalUrl) }
                 )
@@ -224,37 +234,39 @@ fun FilmwebSearchScreen(
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Box {
-                    OutlinedTextField(
-                        value = selectedTag?.name ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Tag") },
-                        placeholder = { Text("Wybierz tag") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { tagMenuExpanded = true }
+                Text(
+                    text = "Tag",
+                    style = MaterialTheme.typography.subtitle1,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp)
+                )
+                if (tags.isEmpty()) {
+                    Text(
+                        text = "Brak dostępnych tagów.",
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
-                    DropdownMenu(
-                        expanded = tagMenuExpanded,
-                        onDismissRequest = { tagMenuExpanded = false }
+                } else {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        tags.sortedBy { it.name }.forEach { tag ->
-                            DropdownMenuItem(
-                                onClick = {
-                                    selectedTag = tag
-                                    tagMenuExpanded = false
-                                }
-                            ) {
-                                Text(tag.name)
-                            }
+                        items(
+                            items = tags.sortedBy { it.name },
+                            key = { tag -> tag.id }
+                        ) { tag ->
+                            FilmTagChip(
+                                tag = tag,
+                                isSelected = tag.id == selectedTag?.id,
+                                onClick = { selectedTag = tag }
+                            )
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
                 TextButton(onClick = { onClick(ActionClick.TagChangeDate) }) {
-                    Text("Data: ${selectedDate.toDayString()}")
+                    Text("Data: ${formatDateString(selectedDate)}")
                 }
 
                 Text(
@@ -264,16 +276,28 @@ fun FilmwebSearchScreen(
                         .fillMaxWidth()
                         .padding(top = 8.dp)
                 )
-                Text(
-                    text = if (canSave && metadata != null) {
-                        WikiParser.addFilmNote(sentencePrefix, metadata)
-                    } else {
-                        "Wybierz tag i uzupełnij tytuł oraz czterocyfrowy rok."
-                    },
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                )
+                        .padding(vertical = 4.dp),
+                    backgroundColor = MaterialTheme.colors.onSurface.copy(alpha = 0.06f),
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+                    ),
+                    elevation = 0.dp,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = if (canSave && metadata != null) {
+                            WikiParser.addFilmNote(sentencePrefix, metadata)
+                        } else {
+                            "Wybierz tag i uzupełnij tytuł oraz czterocyfrowy rok."
+                        },
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
 
                 if (saveState is FilmwebSaveState.Error) {
                     Text(text = saveState.message, modifier = Modifier.padding(vertical = 8.dp))
@@ -325,20 +349,13 @@ fun FilmwebSearchScreen(
 @Composable
 private fun FilmwebSearchResultCard(
     result: FilmSearchResult,
-    isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val cardColor = if (isSelected) {
-        MaterialTheme.colors.primary.copy(alpha = 0.12f)
-    } else {
-        MaterialTheme.colors.surface
-    }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        backgroundColor = cardColor,
+        backgroundColor = MaterialTheme.colors.surface,
         elevation = 2.dp
     ) {
         Row(
@@ -351,7 +368,7 @@ private fun FilmwebSearchResultCard(
                     modifier = Modifier
                         .size(88.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(Color.LightGray),
+                        .background(MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = "Brak\nokładki", fontSize = 12.sp)
@@ -391,7 +408,6 @@ private fun FilmwebMetadataCard(
     posterUrl: String,
     onTitleChange: (String) -> Unit,
     onYearChange: (String) -> Unit,
-    onPosterUrlChange: (String) -> Unit,
     onMediaTypeChange: (FilmMediaType) -> Unit,
     onOpenUrl: () -> Unit
 ) {
@@ -472,13 +488,43 @@ private fun FilmwebMetadataCard(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = posterUrl,
-            onValueChange = onPosterUrlChange,
-            label = { Text("URL plakatu (opcjonalnie)") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+    }
+}
+
+@Composable
+private fun FilmTagChip(
+    tag: Tag,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.clickable(onClick = onClick),
+        backgroundColor = if (isSelected) {
+            MaterialTheme.colors.primary
+        } else {
+            MaterialTheme.colors.surface
+        },
+        contentColor = if (isSelected) {
+            MaterialTheme.colors.onPrimary
+        } else {
+            MaterialTheme.colors.onSurface
+        },
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isSelected) {
+                MaterialTheme.colors.primary
+            } else {
+                MaterialTheme.colors.onSurface.copy(alpha = 0.24f)
+            }
+        ),
+        elevation = 0.dp,
+        shape = RoundedCornerShape(18.dp)
+    ) {
+        Text(
+            text = tag.name,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
