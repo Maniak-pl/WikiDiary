@@ -20,9 +20,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -105,25 +106,38 @@ fun SelectionToolbar(
     onDelete: () -> Unit,
     onSelectAllToggle: () -> Unit
 ) {
+    val toolbarBackground = MaterialTheme.colors.primarySurface
+    val toolbarContent = contentColorFor(toolbarBackground)
+
     TopAppBar(
+        backgroundColor = toolbarBackground,
+        contentColor = toolbarContent,
         title = { Text("Zaznaczono: $selectedCount / $totalCount") },
         actions = {
             Checkbox(
                 checked = selectedCount == totalCount && totalCount > 0,
                 onCheckedChange = { onSelectAllToggle() },
                 colors = CheckboxDefaults.colors(
-                    checkedColor = Color.White,
-                    uncheckedColor = Color.White,
-                    checkmarkColor = Color.Black
+                    checkedColor = toolbarContent,
+                    uncheckedColor = toolbarContent,
+                    checkmarkColor = toolbarBackground
                 )
             )
 
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Usuń", tint = Color.White)
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Usuń",
+                    tint = toolbarContent
+                )
             }
 
             IconButton(onClick = onCancel) {
-                Icon(Icons.Default.Close, contentDescription = "Anuluj", tint = Color.White)
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Anuluj",
+                    tint = toolbarContent
+                )
             }
         }
     )

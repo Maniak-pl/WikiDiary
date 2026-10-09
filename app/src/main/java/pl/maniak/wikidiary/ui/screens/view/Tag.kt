@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -42,7 +41,7 @@ fun Tag(
     onLongClick: () -> Unit = {},
     enabled: Boolean = true,
     shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-    border: BorderStroke? = BorderStroke(2.dp, Color.Black),
+    border: BorderStroke? = null,
     colors: TagColors = TagDefaults.tagColors(),
     content: @Composable () -> Unit = {
         Text(
@@ -52,6 +51,10 @@ fun Tag(
     },
 ) {
     val contentColor by colors.contentColor(enabled)
+    val resolvedBorder = border ?: BorderStroke(
+        width = 1.dp,
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.24f)
+    )
     Surface(
         modifier = modifier
             .wrapContentSize()
@@ -68,7 +71,7 @@ fun Tag(
         shape = shape,
         color = colors.backgroundColor(enabled).value,
         contentColor = contentColor.copy(1.0f),
-        border = border,
+        border = resolvedBorder,
     ) {
         Box(
             modifier = Modifier.wrapContentSize(),
@@ -94,9 +97,8 @@ object TagDefaults {
 
     @Composable
     fun tagColors(
-        backgroundColor: Color = Color.White
-            .compositeOver(MaterialTheme.colors.surface),
-        contentColor: Color = Color.Black,
+        backgroundColor: Color = MaterialTheme.colors.surface,
+        contentColor: Color = MaterialTheme.colors.onSurface,
     ): TagColors = DefaultTagColors(
         backgroundColor = backgroundColor,
         contentColor = contentColor,

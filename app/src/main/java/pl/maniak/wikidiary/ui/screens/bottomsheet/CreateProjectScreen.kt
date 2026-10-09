@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -80,7 +81,10 @@ fun CreateProjectScreen(
                 .padding(8.dp)
                 .width(40.dp)
                 .height(4.dp)
-                .background(Color.Gray, shape = RoundedCornerShape(50))
+                .background(
+                    MaterialTheme.colors.onSurface.copy(alpha = 0.38f),
+                    shape = RoundedCornerShape(50)
+                )
         )
 
         Text(
@@ -188,7 +192,11 @@ fun ColorCircle(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val borderColor = if (isSelected) Color.Black else Color.Transparent
+    val borderColor = if (isSelected) {
+        MaterialTheme.colors.onSurface
+    } else {
+        Color.Transparent
+    }
 
     Box(
         modifier = Modifier
@@ -200,4 +208,3 @@ fun ColorCircle(
             .border(2.dp, borderColor, shape = CircleShape)
     )
 }
-

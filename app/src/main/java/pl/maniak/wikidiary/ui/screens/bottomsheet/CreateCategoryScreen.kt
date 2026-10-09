@@ -25,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.data.Category
@@ -50,7 +49,10 @@ fun CreateCategoryScreen(
                 .padding(8.dp)
                 .width(40.dp)
                 .height(4.dp)
-                .background(Color.Gray, shape = RoundedCornerShape(50))
+                .background(
+                    MaterialTheme.colors.onSurface.copy(alpha = 0.38f),
+                    shape = RoundedCornerShape(50)
+                )
         )
 
         Text(
