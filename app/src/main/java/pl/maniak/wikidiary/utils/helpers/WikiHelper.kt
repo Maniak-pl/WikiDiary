@@ -1,6 +1,7 @@
 package pl.maniak.wikidiary.utils.helpers
 
 import pl.maniak.wikidiary.domain.model.FilmNoteEntry
+import pl.maniak.wikidiary.domain.model.PictogramEntry
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.utils.helpers.DateHelper.toFormattedStringWithDayName
 import pl.maniak.wikidiary.utils.helpers.DateHelper.toYearString
@@ -13,12 +14,14 @@ object WikiHelper {
     private data class DayNotes(
         val displayDate: String,
         val groups: LinkedHashMap<String, MutableList<String>> = LinkedHashMap(),
+        val pictograms: LinkedHashMap<String, MutableList<PictogramEntry>> = LinkedHashMap(),
         val images: LinkedHashMap<String, String> = LinkedHashMap()
     )
 
     fun preparingEntryOnWiki(
         noteList: List<WikiNote>,
-        filmNotes: List<FilmNoteEntry> = emptyList()
+        filmNotes: List<FilmNoteEntry> = emptyList(),
+        pictogramEntries: List<PictogramEntry> = emptyList()
     ): String {
         val filmByNoteId = filmNotes.associateBy { it.noteId }
         val dayMap = LinkedHashMap<String, DayNotes>()
@@ -36,8 +39,7 @@ object WikiHelper {
                     WikiParser.addProject(
                         note.tag,
                         note.category,
-                        note.date.toYearString(),
-                        dayNotes.displayDate
+                        note.date.toYearString()
                     )
                 }
                 dayNotes.groups.getOrPut(group) { mutableListOf() }.add(note.content)
@@ -59,14 +61,38 @@ object WikiHelper {
                 }
         }
 
+        pictogramEntries
+            .sortedBy(PictogramEntry::date)
+            .forEach { pictogram ->
+                val dayKey = pictogram.date.toDayKey()
+                val dayNotes = dayMap.getOrPut(dayKey) {
+                    DayNotes(displayDate = pictogram.date.toFormattedStringWithDayName())
+                }
+                val group = groupName(
+                    tag = pictogram.tag,
+                    category = pictogram.category,
+                    date = pictogram.date
+                )
+                dayNotes.pictograms
+                    .getOrPut(group) { mutableListOf() }
+                    .add(pictogram)
+            }
+
         return buildString {
             dayMap.values.forEach { dayNotes ->
                 appendLine(WikiParser.addHeadline(dayNotes.displayDate, 2))
                 appendLine()
-                dayNotes.groups.forEach { (group, notes) ->
+                val groupNames = LinkedHashSet<String>().apply {
+                    addAll(dayNotes.groups.keys)
+                    addAll(dayNotes.pictograms.keys)
+                }
+                groupNames.forEach { group ->
                     appendLine(WikiParser.addListBold(group, 1))
-                    notes.forEach { note ->
+                    dayNotes.groups[group].orEmpty().forEach { note ->
                         appendLine(WikiParser.addList(note, 2))
+                    }
+                    dayNotes.pictograms[group].orEmpty().forEach { pictogram ->
+                        appendLine(WikiParser.addPictogram(pictogram.name))
                     }
                     appendLine()
                 }
@@ -77,6 +103,22 @@ object WikiHelper {
                     appendLine()
                 }
             }
+        }
+    }
+
+    private fun groupName(
+        tag: String,
+        category: String?,
+        date: Date
+    ): String {
+        return if (category.isNullOrBlank()) {
+            tag
+        } else {
+            WikiParser.addProject(
+                tag,
+                category,
+                date.toYearString()
+            )
         }
     }
 

@@ -17,33 +17,41 @@ import pl.maniak.wikidiary.data.Category
 import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.domain.model.FilmNoteEntry
+import pl.maniak.wikidiary.domain.model.Pictogram
+import pl.maniak.wikidiary.domain.model.PictogramEntry
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.domain.repository.CategoryRepository
 import pl.maniak.wikidiary.domain.repository.Config
 import pl.maniak.wikidiary.domain.repository.FilmRepository
 import pl.maniak.wikidiary.domain.repository.FilmwebSearchRepository
+import pl.maniak.wikidiary.domain.repository.PictogramRepository
 import pl.maniak.wikidiary.domain.repository.RoutineRepository
 import pl.maniak.wikidiary.domain.repository.TagRepository
 import pl.maniak.wikidiary.domain.repository.WikiNoteRepository
 import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.model.ActionClick.AddCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.AddNote
+import pl.maniak.wikidiary.ui.model.ActionClick.AddPictogramToTag
 import pl.maniak.wikidiary.ui.model.ActionClick.AddTag
 import pl.maniak.wikidiary.ui.model.ActionClick.ConfirmProject
 import pl.maniak.wikidiary.ui.model.ActionClick.DataPickerChangeDate
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteNote
+import pl.maniak.wikidiary.ui.model.ActionClick.DeletePictogram
+import pl.maniak.wikidiary.ui.model.ActionClick.DeletePictogramEntry
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteTag
 import pl.maniak.wikidiary.ui.model.ActionClick.EditTag
 import pl.maniak.wikidiary.ui.model.ActionClick.TagChangeDate
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateFilmweb
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateProject
+import pl.maniak.wikidiary.ui.model.ActionClick.TagCreatePictogram
 import pl.maniak.wikidiary.ui.model.ActionClick.UpdateCategory
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateProject
 import pl.maniak.wikidiary.ui.model.FilmwebSaveState
 import pl.maniak.wikidiary.ui.model.FilmwebSearchUiState
+import pl.maniak.wikidiary.ui.model.ActionClick.SavePictogram
 import pl.maniak.wikidiary.utils.helpers.WikiParser
 
 class MainViewModel(
@@ -54,6 +62,7 @@ class MainViewModel(
     private val config: Config,
     private val filmRepository: FilmRepository,
     private val filmwebSearchRepository: FilmwebSearchRepository,
+    private val pictogramRepository: PictogramRepository,
 ) : ViewModel() {
 
     private val _notes = mutableStateOf<List<WikiNote>>(emptyList())
@@ -89,6 +98,15 @@ class MainViewModel(
     private val _filmwebSearchState = MutableStateFlow(FilmwebSearchUiState())
     val filmwebSearchState: StateFlow<FilmwebSearchUiState> = _filmwebSearchState.asStateFlow()
 
+    private val _pictograms = mutableStateOf<List<Pictogram>>(emptyList())
+    val pictograms: State<List<Pictogram>> = _pictograms
+
+    private val _pictogramEntries = mutableStateOf<List<PictogramEntry>>(emptyList())
+    val pictogramEntries: State<List<PictogramEntry>> = _pictogramEntries
+
+    private val _pictogramError = mutableStateOf<String?>(null)
+    val pictogramError: State<String?> = _pictogramError
+
     private var filmwebSearchJob: Job? = null
 
     init {
@@ -97,6 +115,8 @@ class MainViewModel(
         loadCategories()
         loadRoutines()
         loadFilmNotes()
+        loadPictograms()
+        loadPictogramEntries()
     }
 
     private fun loadNotes() {
@@ -138,6 +158,18 @@ class MainViewModel(
         }
     }
 
+    private fun loadPictograms() {
+        viewModelScope.launch {
+            _pictograms.value = pictogramRepository.getPictograms()
+        }
+    }
+
+    private fun loadPictogramEntries() {
+        viewModelScope.launch {
+            _pictogramEntries.value = pictogramRepository.getPictogramEntries()
+        }
+    }
+
     fun onActionClick(action: ActionClick) {
         when (action) {
             is AddNote -> saveNoteAndUpdateTag(action.tag, action.content)
@@ -155,6 +187,14 @@ class MainViewModel(
                 resetFilmwebSearch()
                 showBottomSheet(BottomSheetUiState.FilmwebSearch)
             }
+            is TagCreatePictogram -> {
+                _pictogramError.value = null
+                showBottomSheet(BottomSheetUiState.PictogramManager)
+            }
+            is SavePictogram -> savePictogram(action)
+            is DeletePictogram -> deletePictogram(action.id)
+            is AddPictogramToTag -> addPictogramToTag(action)
+            is DeletePictogramEntry -> deletePictogramEntry(action.id)
             is ConfirmProject -> {
                 saveTag(
                     Tag(
@@ -306,6 +346,85 @@ class MainViewModel(
         viewModelScope.launch {
             tagRepository.saveTag(tag)
             loadTags()
+        }
+    }
+
+    private fun savePictogram(action: SavePictogram) {
+        val name = action.name.trim()
+        val icon = action.icon.trim()
+        if (name.isBlank()) {
+            _pictogramError.value = "Podaj nazwę pictogramu."
+            return
+        }
+        if (icon.isBlank()) {
+            _pictogramError.value = "Wybierz ikonę pictogramu."
+            return
+        }
+        val fileName = WikiParser.pictogramFileName(name)
+        val hasFileNameCollision = _pictograms.value.any {
+            it.id != action.id && WikiParser.pictogramFileName(it.name) == fileName
+        }
+        if (hasFileNameCollision) {
+            _pictogramError.value = "Ta nazwa generuje już istniejący plik pictogramu."
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                pictogramRepository.savePictogram(
+                    Pictogram(id = action.id, name = name, icon = icon)
+                )
+                _pictogramError.value = null
+                _pictograms.value = pictogramRepository.getPictograms()
+            } catch (exception: SQLiteException) {
+                _pictogramError.value = if (action.id == 0L) {
+                    "Pictogram o tej nazwie już istnieje."
+                } else {
+                    exception.message ?: "Nie udało się zapisać pictogramu."
+                }
+            }
+        }
+    }
+
+    private fun deletePictogram(id: Long) {
+        viewModelScope.launch {
+            pictogramRepository.deletePictogram(id)
+            _pictograms.value = pictogramRepository.getPictograms()
+            _pictogramEntries.value = pictogramRepository.getPictogramEntries()
+        }
+    }
+
+    private fun addPictogramToTag(action: AddPictogramToTag) {
+        val pictogram = _pictograms.value.firstOrNull { it.id == action.pictogramId }
+        if (pictogram == null) {
+            _pictogramError.value = "Wybrany pictogram nie jest już dostępny."
+            return
+        }
+        viewModelScope.launch {
+            try {
+                pictogramRepository.addPictogramEntry(
+                    PictogramEntry(
+                        pictogramId = pictogram.id,
+                        tag = action.tag.name,
+                        category = action.tag.category,
+                        date = action.date,
+                        name = pictogram.name,
+                        icon = pictogram.icon
+                    )
+                )
+                _pictogramError.value = null
+                _pictogramEntries.value = pictogramRepository.getPictogramEntries()
+            } catch (exception: SQLiteException) {
+                _pictogramError.value = exception.message
+                    ?: "Nie udało się przypisać pictogramu."
+            }
+        }
+    }
+
+    private fun deletePictogramEntry(id: Long) {
+        viewModelScope.launch {
+            pictogramRepository.deletePictogramEntry(id)
+            _pictogramEntries.value = pictogramRepository.getPictogramEntries()
         }
     }
 

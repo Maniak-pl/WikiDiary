@@ -18,9 +18,11 @@ import kotlinx.coroutines.launch
         CategoryEntity::class,
         RoutineEntity::class,
         FilmEntity::class,
-        FilmNoteEntity::class
+        FilmNoteEntity::class,
+        PictogramEntity::class,
+        PictogramEntryEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -32,6 +34,8 @@ abstract class WikiNoteDatabase : RoomDatabase() {
     abstract fun routineDao(): RoutineDao
     abstract fun filmDao(): FilmDao
     abstract fun filmNoteDao(): FilmNoteDao
+    abstract fun pictogramDao(): PictogramDao
+    abstract fun pictogramEntryDao(): PictogramEntryDao
 
     companion object {
         private var INSTANCE: WikiNoteDatabase? = null
@@ -74,6 +78,45 @@ abstract class WikiNoteDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `pictogram_table` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `icon` TEXT NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS `index_pictogram_table_name` " +
+                        "ON `pictogram_table` (`name`)"
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `pictogram_entry_table` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `pictogramId` INTEGER NOT NULL,
+                        `tag` TEXT NOT NULL,
+                        `category` TEXT,
+                        `date` INTEGER NOT NULL,
+                        FOREIGN KEY(`pictogramId`) REFERENCES `pictogram_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_pictogram_entry_table_pictogramId` " +
+                        "ON `pictogram_entry_table` (`pictogramId`)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_pictogram_entry_table_date_tag` " +
+                        "ON `pictogram_entry_table` (`date`, `tag`)"
+                )
+            }
+        }
+
         fun getDatabase(context: Context): WikiNoteDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = databaseBuilder(
@@ -81,7 +124,7 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                     WikiNoteDatabase::class.java,
                     "wiki_database"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .addCallback(DatabaseCallback(context)) // Add callback
                     .build()
                 INSTANCE = instance

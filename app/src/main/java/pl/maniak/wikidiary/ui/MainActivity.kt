@@ -29,6 +29,7 @@ import pl.maniak.wikidiary.ui.screens.MainScreen
 import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateCategoryScreen
 import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateProjectScreen
 import pl.maniak.wikidiary.ui.screens.bottomsheet.FilmwebSearchScreen
+import pl.maniak.wikidiary.ui.screens.bottomsheet.PictogramManagerScreen
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 import java.util.Calendar
 import java.util.GregorianCalendar
@@ -94,6 +95,14 @@ class MainActivity : ComponentActivity() {
                                 onSearch = viewModel::searchFilmweb,
                                 onClick = viewModel::onActionClick
                             )
+                            BottomSheetUiState.PictogramManager -> PictogramManagerScreen(
+                                pictograms = viewModel.pictograms.value,
+                                pictogramEntries = viewModel.pictogramEntries.value,
+                                tags = viewModel.tags.value,
+                                selectedDate = viewModel.selectedDate.value,
+                                error = viewModel.pictogramError.value,
+                                onClick = viewModel::onActionClick
+                            )
                             BottomSheetUiState.None -> {}
                         }
                     },
@@ -111,6 +120,7 @@ class MainActivity : ComponentActivity() {
                             tagList = viewModel.tags.value,
                             routines = viewModel.routines.value,
                             filmNotes = viewModel.filmNotes.value,
+                            pictogramEntries = viewModel.pictogramEntries.value,
                             onClick = viewModel::onActionClick
                         )
                     }

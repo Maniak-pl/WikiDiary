@@ -27,10 +27,18 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   maksymalnie 10 filmów i seriali z okładką, tytułem oraz rokiem. Po wybraniu
   pozycji można poprawić jej metadane, a następnie zapisać zwykłą notatkę razem
   ze strukturalnymi metadanymi Filmwebu.
+- **Pictogramy** - chip `🖼️ Pictogramy` otwiera katalog ikon. Można utworzyć
+  pictogram, wybierając ikonę i nazwę, przypisać go do wybranego taga oraz
+  edytować lub usunąć definicję. Przycisk `+` pokazuje dodatkowy zestaw ikon.
+  Usuwanie przypisania jest dostępne bezpośrednio przy pictogramie na ekranie
+  List Notes. Eksport tworzy osobny wpis DokuWiki, np.
+  `{{ :pictograms_-_love.png?200 |}}`, pod właściwym tagiem i dniem;
+  pictogramy nie są dopisywane do treści notatek.
 - **Przygotowanie wpisu Wiki** - notatki są grupowane według daty, tagów i
-  kategorii, a wygenerowany tekst można skopiować do schowka. Notatki Filmweb
-  zawierają klikalny link do wybranej strony oraz znacznik grafiki DokuWiki
-  dodany po listach danego dnia.
+  kategorii, a wygenerowany tekst można skopiować do schowka. Pictogramy są
+  grupowane osobno pod odpowiednim tagiem. Notatki Filmweb zawierają klikalny
+  link do wybranej strony oraz znacznik grafiki DokuWiki dodany po listach
+  danego dnia.
 - **Widget ekranu głównego** - pokazuje czas od ostatnio zapisanej notatki,
   wizualizuje upływ 24 godzin i otwiera aplikację po kliknięciu.
 
@@ -58,8 +66,11 @@ Górny pasek udostępnia cztery obszary:
    kliknij wynik na natywnej liście.
 4. Zatwierdź kartę wybranej pozycji, wybierz tag, sprawdź datę i opcjonalnie
    zmień początek zdania lub metadane.
-5. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
-6. Wklej przygotowany tekst do docelowej strony Wiki.
+5. Aby dodać pictogram, wybierz **🖼️ Pictogramy**, wybierz tag, utwórz lub
+   wybierz pictogram i kliknij **Dodaj**. Data jest pobierana z aktualnie
+   wybranego dnia.
+6. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
+7. Wklej przygotowany tekst do docelowej strony Wiki.
 
 ## Dane i prywatność
 
@@ -67,6 +78,11 @@ Górny pasek udostępnia cztery obszary:
 - Pozycje Filmweb są przechowywane w katalogu `film_table`, a relacje między
   nimi i notatkami w `film_note_table`; migracja bazy zachowuje istniejące
   notatki, tagi, kategorie i rutyny.
+- Definicje pictogramów są przechowywane w `pictogram_table`, a ich użycia
+  przypisane do dnia i taga w `pictogram_entry_table`.
+- Aplikacja przechowuje referencję DokuWiki i ikonę podglądu pictogramu, ale
+  nie generuje ani nie przesyła plików PNG. Plik `pictograms_-_<nazwa>.png`
+  powinien istnieć w docelowej Wiki.
 - Ustawienia pomocnicze, takie jak dzień ostatniego uruchomienia i czas ostatniej
   notatki, są przechowywane w `SharedPreferences`.
 - Aplikacja nie ma backendu, logowania ani synchronizacji z chmurą.

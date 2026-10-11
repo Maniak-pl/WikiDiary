@@ -2,6 +2,8 @@ package pl.maniak.wikidiary.utils.helpers
 
 import pl.maniak.wikidiary.domain.model.FilmMediaType
 import pl.maniak.wikidiary.domain.model.FilmMetadata
+import java.text.Normalizer
+import java.util.Locale
 
 object WikiParser {
 
@@ -51,7 +53,21 @@ object WikiParser {
         return "{{ :movies:$fileName?200 |}}"
     }
 
-    fun addProject(tag: String, folder: String, year: String, date: String): String {
+    fun addPictogram(name: String): String {
+        return "{{ :${pictogramFileName(name)}?200 |}}"
+    }
+
+    fun pictogramFileName(name: String): String {
+        val normalizedName = Normalizer
+            .normalize(name.trim().lowercase(Locale.ROOT), Normalizer.Form.NFD)
+            .replace("\\p{M}+".toRegex(), "")
+            .replace("[^a-z0-9]+".toRegex(), "_")
+            .trim('_')
+            .ifBlank { "pictogram" }
+        return "pictograms_-_$normalizedName.png"
+    }
+
+    fun addProject(tag: String, folder: String, year: String): String {
         return "${addIconCategory(folder)}[[:$folder]] - [[:$folder:Projekt - $tag ${year}]]"
     }
 

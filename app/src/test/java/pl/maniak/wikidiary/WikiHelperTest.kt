@@ -6,8 +6,10 @@ import org.junit.Test
 import pl.maniak.wikidiary.domain.model.FilmMediaType
 import pl.maniak.wikidiary.domain.model.FilmMetadata
 import pl.maniak.wikidiary.domain.model.FilmNoteEntry
+import pl.maniak.wikidiary.domain.model.PictogramEntry
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.utils.helpers.WikiHelper
+import pl.maniak.wikidiary.utils.helpers.WikiParser
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -78,5 +80,81 @@ class WikiHelperTest {
 
         assertTrue(result.contains("{{ :movies:Example_2020.jpg?200 |}}"))
         assertTrue(result.contains("{{ :movies:Example_2020_2.jpg?200 |}}"))
+    }
+
+    @Test
+    fun preparingEntryOnWiki_keepsPictogramsUnderTheirOwnTagGroup() {
+        val firstDate = dateFormat.parse("2024-10-09 18:00")!!
+        val secondDate = dateFormat.parse("2024-10-09 21:00")!!
+        val todayNote = WikiNote(
+            id = 1,
+            tag = "Today",
+            content = "Worked on WikiDiary",
+            date = firstDate
+        )
+        val workNote = WikiNote(
+            id = 2,
+            tag = "Work",
+            content = "Had a meeting",
+            date = secondDate
+        )
+
+        val result = WikiHelper.preparingEntryOnWiki(
+            noteList = listOf(todayNote, workNote),
+            pictogramEntries = listOf(
+                PictogramEntry(
+                    id = 1,
+                    pictogramId = 1,
+                    tag = "Today",
+                    date = firstDate,
+                    name = "love",
+                    icon = "❤️"
+                ),
+                PictogramEntry(
+                    id = 2,
+                    pictogramId = 2,
+                    tag = "Today",
+                    date = firstDate,
+                    name = "doctor",
+                    icon = "🩺"
+                ),
+                PictogramEntry(
+                    id = 3,
+                    pictogramId = 3,
+                    tag = "Work",
+                    date = secondDate,
+                    name = "meeting",
+                    icon = "🤝"
+                )
+            )
+        )
+
+        val todayGroup = result.indexOf("* **Today**")
+        val workGroup = result.indexOf("* **Work**")
+        val todayNoteIndex = result.indexOf("* Worked on WikiDiary")
+        val loveImage = result.indexOf("{{ :pictograms_-_love.png?200 |}}")
+        val doctorImage = result.indexOf("{{ :pictograms_-_doctor.png?200 |}}")
+        val meetingImage = result.indexOf("{{ :pictograms_-_meeting.png?200 |}}")
+
+        assertTrue(todayGroup >= 0)
+        assertTrue(todayNoteIndex in todayGroup until loveImage)
+        assertTrue(loveImage < doctorImage)
+        assertTrue(doctorImage < workGroup)
+        assertTrue(workGroup < meetingImage)
+        assertEquals(1, result.split("{{ :pictograms_-_love.png?200 |}}").size - 1)
+        assertEquals(1, result.split("{{ :pictograms_-_doctor.png?200 |}}").size - 1)
+        assertEquals(1, result.split("{{ :pictograms_-_meeting.png?200 |}}").size - 1)
+    }
+
+    @Test
+    fun pictogramName_generatesDokuWikiFileReference() {
+        assertEquals(
+            "{{ :pictograms_-_love.png?200 |}}",
+            WikiParser.addPictogram("love")
+        )
+        assertEquals(
+            "{{ :pictograms_-_spacer_na_dzien.png?200 |}}",
+            WikiParser.addPictogram(" Späcer na dzień ")
+        )
     }
 }

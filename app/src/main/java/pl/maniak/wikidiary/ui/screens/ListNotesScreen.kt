@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Icon
@@ -37,17 +36,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pl.maniak.wikidiary.domain.model.PictogramEntry
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.ui.model.ActionClick
+import pl.maniak.wikidiary.utils.helpers.formatDateString
 import java.util.Date
 
 @Composable
 fun ListNotesScreen(
     notesList: List<WikiNote> = emptyList(),
+    pictogramEntries: List<PictogramEntry> = emptyList(),
     onClick: (ActionClick) -> Unit = {},
 ) {
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedNotes by remember { mutableStateOf(setOf<Long>()) }
+    val pictogramsByGroup = pictogramEntries.groupBy { it.groupKey() }
+    val lastNoteByGroup = notesList
+        .groupBy { it.groupKey() }
+        .mapValues { (_, notes) -> notes.last().id }
 
     Column {
         if (isSelectionMode) {
@@ -72,27 +78,114 @@ fun ListNotesScreen(
         }
 
         LazyColumn {
-            items(items = notesList) { note ->
-                WikiNoteItem(
-                    note = note,
-                    isSelected = selectedNotes.contains(note.id),
-                    isSelectionMode = isSelectionMode,
-                    onClick = { selected ->
-                        if (isSelectionMode) {
-                            selectedNotes = if (selected) {
-                                selectedNotes + note.id
+            notesList.forEach { note ->
+                item(key = "note_${note.id}") {
+                    WikiNoteItem(
+                        note = note,
+                        isSelected = selectedNotes.contains(note.id),
+                        isSelectionMode = isSelectionMode,
+                        onClick = { selected ->
+                            if (isSelectionMode) {
+                                selectedNotes = if (selected) {
+                                    selectedNotes + note.id
+                                } else {
+                                    selectedNotes - note.id
+                                }
                             } else {
-                                selectedNotes - note.id
+                                onClick(ActionClick.EditNote(note))
                             }
-                        } else {
-                            onClick(ActionClick.EditNote(note))
+                        },
+                        onLongClick = {
+                            isSelectionMode = true
+                            selectedNotes = setOf(note.id)
                         }
-                    },
-                    onLongClick = {
-                        isSelectionMode = true
-                        selectedNotes = setOf(note.id)
+                    )
+                }
+
+                val groupKey = note.groupKey()
+                val entries = pictogramsByGroup[groupKey]
+                if (lastNoteByGroup[groupKey] == note.id && !entries.isNullOrEmpty()) {
+                    item(key = "pictograms_${groupKey.tag}_${groupKey.day}") {
+                        PictogramEntriesItem(
+                            tag = groupKey.tag,
+                            date = note.date,
+                            entries = entries,
+                            onClick = onClick
+                        )
                     }
+                }
+            }
+
+            pictogramsByGroup
+                .filterKeys { it !in lastNoteByGroup.keys }
+                .forEach { (groupKey, entries) ->
+                    item(key = "pictograms_${groupKey.tag}_${groupKey.day}") {
+                        PictogramEntriesItem(
+                            tag = groupKey.tag,
+                            date = entries.first().date,
+                            entries = entries,
+                            onClick = onClick
+                        )
+                    }
+                }
+        }
+    }
+}
+
+@Composable
+private fun PictogramEntriesItem(
+    tag: String,
+    date: Date,
+    entries: List<PictogramEntry>,
+    onClick: (ActionClick) -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp, vertical = 5.dp),
+        elevation = 3.dp
+    ) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "$tag - pictogramy",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp
                 )
+                Text(
+                    text = formatDateString(date),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp
+                )
+            }
+            entries.forEach { entry ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = entry.icon, fontSize = 22.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = entry.name,
+                        modifier = Modifier.weight(1f),
+                        fontSize = 13.sp
+                    )
+                    IconButton(
+                        onClick = {
+                            onClick(ActionClick.DeletePictogramEntry(entry.id))
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Usuń pictogram"
+                        )
+                    }
+                }
             }
         }
     }
@@ -219,3 +312,17 @@ fun ListNotesScreenPreview() {
         )
     )
 }
+
+private data class NoteGroupKey(
+    val tag: String,
+    val day: String
+)
+
+private fun WikiNote.groupKey(): NoteGroupKey =
+    NoteGroupKey(tag = tag, day = date.toDayKey())
+
+private fun PictogramEntry.groupKey(): NoteGroupKey =
+    NoteGroupKey(tag = tag, day = date.toDayKey())
+
+private fun Date.toDayKey(): String =
+    java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(this)

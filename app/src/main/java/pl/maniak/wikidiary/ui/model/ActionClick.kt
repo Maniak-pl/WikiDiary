@@ -20,6 +20,24 @@ sealed class ActionClick {
 
     data object TagCreateFilmweb : ActionClick()
 
+    data object TagCreatePictogram : ActionClick()
+
+    data class SavePictogram(
+        val id: Long,
+        val name: String,
+        val icon: String
+    ) : ActionClick()
+
+    data class DeletePictogram(val id: Long) : ActionClick()
+
+    data class AddPictogramToTag(
+        val pictogramId: Long,
+        val tag: Tag,
+        val date: Date
+    ) : ActionClick()
+
+    data class DeletePictogramEntry(val id: Long) : ActionClick()
+
     data class ConfirmProject(
         val id: Long,
         val name: String,

@@ -6,6 +6,8 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import pl.maniak.wikidiary.data.database.WikiNoteDatabase
 import pl.maniak.wikidiary.data.mapper.CategoryMapper
+import pl.maniak.wikidiary.data.mapper.PictogramEntryMapper
+import pl.maniak.wikidiary.data.mapper.PictogramMapper
 import pl.maniak.wikidiary.data.mapper.RoutineMapper
 import pl.maniak.wikidiary.data.mapper.TagMapper
 import pl.maniak.wikidiary.data.mapper.TagMapperImpl
@@ -19,6 +21,8 @@ import pl.maniak.wikidiary.domain.repository.FilmRepository
 import pl.maniak.wikidiary.domain.repository.FilmRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.FilmwebSearchRepository
 import pl.maniak.wikidiary.domain.repository.FilmwebSearchRepositoryImpl
+import pl.maniak.wikidiary.domain.repository.PictogramRepository
+import pl.maniak.wikidiary.domain.repository.PictogramRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.RoutineRepository
 import pl.maniak.wikidiary.domain.repository.RoutineRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.TagRepository
@@ -48,6 +52,8 @@ val appModule = module {
     single { get<WikiNoteDatabase>().routineDao() }
     single { get<WikiNoteDatabase>().filmDao() }
     single { get<WikiNoteDatabase>().filmNoteDao() }
+    single { get<WikiNoteDatabase>().pictogramDao() }
+    single { get<WikiNoteDatabase>().pictogramEntryDao() }
 
     // Repository
     single<WikiNoteRepository> { WikiNoteRepositoryImpl(get(), get()) }
@@ -55,16 +61,19 @@ val appModule = module {
     single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
     single<RoutineRepository> { RoutineRepositoryImpl(get(), get()) }
     single<FilmRepository> { FilmRepositoryImpl(get(), get(), get(), get(), get()) }
+    single<PictogramRepository> { PictogramRepositoryImpl(get(), get(), get(), get()) }
     single<FilmwebSearchRepository> { FilmwebSearchRepositoryImpl() }
 
     // ViewModel
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
     // Mapper
     factory<WikiNoteMapper> { WikiNoteMapperImpl() }
     factory<TagMapper> { TagMapperImpl() }
     factory<CategoryMapper> { CategoryMapper() }
     factory<RoutineMapper> { RoutineMapper() }
+    factory { PictogramMapper() }
+    factory { PictogramEntryMapper() }
 
     // WidgetProvider
     factory { WikiWidgetProvider() }

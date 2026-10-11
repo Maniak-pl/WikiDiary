@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.domain.model.FilmNoteEntry
+import pl.maniak.wikidiary.domain.model.PictogramEntry
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.utils.helpers.WikiHelper
 import java.util.Date
@@ -27,11 +28,12 @@ import java.util.Date
 fun PreparingNoteScreen(
     notesList: List<WikiNote> = emptyList(),
     filmNotes: List<FilmNoteEntry> = emptyList(),
+    pictogramEntries: List<PictogramEntry> = emptyList(),
     onCopyClick: (content: String) -> Unit = {}
 ) {
     val state = rememberScrollState()
-    val content = remember(notesList, filmNotes) {
-        WikiHelper.preparingEntryOnWiki(notesList, filmNotes)
+    val content = remember(notesList, filmNotes, pictogramEntries) {
+        WikiHelper.preparingEntryOnWiki(notesList, filmNotes, pictogramEntries)
     }
 
     Scaffold(

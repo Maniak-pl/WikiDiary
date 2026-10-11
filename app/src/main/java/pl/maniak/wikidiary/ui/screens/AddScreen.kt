@@ -142,6 +142,11 @@ private fun TagsLayout(
         )
 
         Tag(
+            text = "\uD83D\uDDBC\uFE0F Pictogramy",
+            onClick = { onClick.invoke(ActionClick.TagCreatePictogram) },
+        )
+
+        Tag(
             text = "\uD83D\uDCC2",
             onClick = { onClick.invoke(ActionClick.TagCreateCategory) },
         )
