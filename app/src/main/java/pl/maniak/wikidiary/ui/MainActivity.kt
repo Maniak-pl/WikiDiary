@@ -121,6 +121,7 @@ class MainActivity : ComponentActivity() {
                             routines = viewModel.routines.value,
                             filmNotes = viewModel.filmNotes.value,
                             pictogramEntries = viewModel.pictogramEntries.value,
+                            wikiPageUrl = viewModel.wikiPageUrl.value,
                             onClick = viewModel::onActionClick
                         )
                     }

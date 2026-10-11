@@ -6,6 +6,7 @@ import java.util.Calendar
 class ConfigImpl(private val sharedPreferences: SharedPreferences) : Config {
     private val lastLaunchDayKey = "last_launch_day"
     private val lastUpdatedKey = "last_updated"
+    private val wikiPageUrlKey = "wiki_page_url"
 
     override fun isFirstLaunchToday(): Boolean {
         val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
@@ -24,5 +25,13 @@ class ConfigImpl(private val sharedPreferences: SharedPreferences) : Config {
 
     override fun setLastUpdated(time: Long) {
         sharedPreferences.edit().putLong(lastUpdatedKey, time).apply()
+    }
+
+    override fun getWikiPageUrl(): String {
+        return sharedPreferences.getString(wikiPageUrlKey, "").orEmpty()
+    }
+
+    override fun setWikiPageUrl(url: String) {
+        sharedPreferences.edit().putString(wikiPageUrlKey, url).apply()
     }
 }

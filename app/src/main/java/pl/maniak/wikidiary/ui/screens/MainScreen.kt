@@ -1,7 +1,11 @@
 package pl.maniak.wikidiary.ui.screens
 
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +38,7 @@ import pl.maniak.wikidiary.domain.model.FilmNoteEntry
 import pl.maniak.wikidiary.domain.model.PictogramEntry
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.ui.model.ActionClick
+import pl.maniak.wikidiary.ui.model.ActionClick.SaveWikiPageUrl
 import pl.maniak.wikidiary.ui.screens.Screen.*
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 import java.util.Date
@@ -46,9 +51,11 @@ fun MainScreen(
     routines: List<Routine> = emptyList(),
     filmNotes: List<FilmNoteEntry> = emptyList(),
     pictogramEntries: List<PictogramEntry> = emptyList(),
+    wikiPageUrl: String = "",
     onClick: (ActionClick) -> Unit = {},
 ) {
     var currentScreen by remember { mutableStateOf<Screen>(Add) }
+    val context = LocalContext.current
     val clipboardManager =
         LocalContext.current.getSystemService(ComponentActivity.CLIPBOARD_SERVICE) as ClipboardManager
 
@@ -104,8 +111,33 @@ fun MainScreen(
                         notesList = list,
                         filmNotes = filmNotes,
                         pictogramEntries = pictogramEntries,
+                        wikiPageUrl = wikiPageUrl,
                         onCopyClick = {
                             clipboardManager.setPrimaryClip(ClipData.newPlainText("WikiNote", it))
+                        },
+                        onSaveWikiPageUrl = {
+                            onClick(SaveWikiPageUrl(it))
+                        },
+                        onOpenWikiClick = { url, content ->
+                            clipboardManager.setPrimaryClip(
+                                ClipData.newPlainText("WikiNote", content)
+                            )
+                            try {
+                                context.startActivity(
+                                    Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                )
+                                Toast.makeText(
+                                    context,
+                                    "Notatki skopiowano do schowka. Wklej je na stronie Wiki.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } catch (_: ActivityNotFoundException) {
+                                Toast.makeText(
+                                    context,
+                                    "Nie znaleziono aplikacji do otwarcia strony Wiki.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
                     )
                 }

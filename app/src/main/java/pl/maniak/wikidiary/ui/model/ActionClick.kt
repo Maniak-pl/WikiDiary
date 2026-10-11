@@ -38,6 +38,8 @@ sealed class ActionClick {
 
     data class DeletePictogramEntry(val id: Long) : ActionClick()
 
+    data class SaveWikiPageUrl(val url: String) : ActionClick()
+
     data class ConfirmProject(
         val id: Long,
         val name: String,

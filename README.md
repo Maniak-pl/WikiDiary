@@ -38,7 +38,9 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   kategorii, a wygenerowany tekst można skopiować do schowka. Pictogramy są
   grupowane osobno pod odpowiednim tagiem. Notatki Filmweb zawierają klikalny
   link do wybranej strony oraz znacznik grafiki DokuWiki dodany po listach
-  danego dnia.
+  danego dnia. Nad przyciskiem kopiowania można zapisać adres strony Wiki;
+  po jego zapisaniu przycisk web kopiuje pełny eksport do schowka i otwiera
+  tę stronę w przeglądarce, aby można było wkleić treść.
 - **Widget ekranu głównego** - pokazuje czas od ostatnio zapisanej notatki,
   wizualizuje upływ 24 godzin i otwiera aplikację po kliknięciu.
 
@@ -70,7 +72,10 @@ Górny pasek udostępnia cztery obszary:
    wybierz pictogram i kliknij **Dodaj**. Data jest pobierana z aktualnie
    wybranego dnia.
 6. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
-7. Wklej przygotowany tekst do docelowej strony Wiki.
+7. Opcjonalnie wybierz `+` nad przyciskiem kopiowania i zapisz pełny adres
+   strony Wiki (`http://` lub `https://`). Później przycisk web skopiuje
+   eksport i otworzy zapisany adres.
+8. Wklej przygotowany tekst do docelowej strony Wiki.
 
 ## Dane i prywatność
 
@@ -84,7 +89,7 @@ Górny pasek udostępnia cztery obszary:
   nie generuje ani nie przesyła plików PNG. Plik `pictograms_-_<nazwa>.png`
   powinien istnieć w docelowej Wiki.
 - Ustawienia pomocnicze, takie jak dzień ostatniego uruchomienia i czas ostatniej
-  notatki, są przechowywane w `SharedPreferences`.
+  notatki oraz zapisany adres strony Wiki są przechowywane w `SharedPreferences`.
 - Aplikacja nie ma backendu, logowania ani synchronizacji z chmurą.
 - Usunięcie danych aplikacji lub jej odinstalowanie usuwa lokalną bazę danych.
 - Wyszukiwanie Filmweb korzysta z nieoficjalnych endpointów używanych przez
@@ -180,7 +185,9 @@ i odpowiednie dane wersji w tej dokumentacji.
 - Edycja istniejącej notatki jest obecnie widoczna w modelu zdarzeń, ale nie ma
   jeszcze implementacji w interfejsie.
 - Eksport odbywa się przez kopiowanie tekstu do schowka; aplikacja nie wysyła
-  wpisów bezpośrednio na serwer Wiki.
+  wpisów bezpośrednio na serwer Wiki. Przycisk web otwiera stronę w zewnętrznej
+  przeglądarce, więc wklejenie skopiowanej treści wymaga potwierdzenia przez
+  użytkownika.
 - Brak synchronizacji między urządzeniami i kont użytkowników.
 - Integracja Filmweb korzysta z nieoficjalnego, nieudokumentowanego API.
   Filmweb może zmienić jego strukturę, ograniczyć dostęp lub wyłączyć endpointy

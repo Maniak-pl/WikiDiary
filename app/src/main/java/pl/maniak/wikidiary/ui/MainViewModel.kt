@@ -52,6 +52,7 @@ import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateProject
 import pl.maniak.wikidiary.ui.model.FilmwebSaveState
 import pl.maniak.wikidiary.ui.model.FilmwebSearchUiState
 import pl.maniak.wikidiary.ui.model.ActionClick.SavePictogram
+import pl.maniak.wikidiary.ui.model.ActionClick.SaveWikiPageUrl
 import pl.maniak.wikidiary.utils.helpers.WikiParser
 
 class MainViewModel(
@@ -106,6 +107,9 @@ class MainViewModel(
 
     private val _pictogramError = mutableStateOf<String?>(null)
     val pictogramError: State<String?> = _pictogramError
+
+    private val _wikiPageUrl = mutableStateOf(config.getWikiPageUrl())
+    val wikiPageUrl: State<String> = _wikiPageUrl
 
     private var filmwebSearchJob: Job? = null
 
@@ -195,6 +199,7 @@ class MainViewModel(
             is DeletePictogram -> deletePictogram(action.id)
             is AddPictogramToTag -> addPictogramToTag(action)
             is DeletePictogramEntry -> deletePictogramEntry(action.id)
+            is SaveWikiPageUrl -> saveWikiPageUrl(action.url)
             is ConfirmProject -> {
                 saveTag(
                     Tag(
@@ -426,6 +431,12 @@ class MainViewModel(
             pictogramRepository.deletePictogramEntry(id)
             _pictogramEntries.value = pictogramRepository.getPictogramEntries()
         }
+    }
+
+    private fun saveWikiPageUrl(url: String) {
+        val normalizedUrl = url.trim()
+        config.setWikiPageUrl(normalizedUrl)
+        _wikiPageUrl.value = normalizedUrl
     }
 
     private fun deleteNote(note: WikiNote) {
