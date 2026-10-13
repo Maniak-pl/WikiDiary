@@ -1,5 +1,15 @@
 package pl.maniak.wikidiary.feature.export.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import android.net.Uri
+import android.content.Intent
+import android.content.Context
+import android.content.ClipboardManager
+import android.content.ClipData
+import android.content.ActivityNotFoundException
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +44,39 @@ import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.R
 import java.net.URI
 import java.net.URISyntaxException
+
+@Composable
+fun ExportRoute(viewModel: ExportViewModel = koinViewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+    PreparingNoteScreen(
+        content = state.document,
+        wikiPageUrl = state.wikiPageUrl,
+        onCopyClick = {
+            clipboardManager.setPrimaryClip(ClipData.newPlainText("WikiNote", it))
+        },
+        onSaveWikiPageUrl = { viewModel.onIntent(ExportIntent.SaveWikiPageUrl(it)) },
+        onOpenWikiClick = { url, content ->
+            clipboardManager.setPrimaryClip(ClipData.newPlainText("WikiNote", content))
+            try {
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                Toast.makeText(
+                    context,
+                    "Notatki skopiowano do schowka. Wklej je na stronie Wiki.",
+                    Toast.LENGTH_LONG
+                ).show()
+            } catch (_: ActivityNotFoundException) {
+                Toast.makeText(
+                    context,
+                    "Nie znaleziono aplikacji do otwarcia strony Wiki.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    )
+}
 
 @Composable
 fun PreparingNoteScreen(

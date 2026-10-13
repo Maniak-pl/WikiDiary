@@ -1,6 +1,7 @@
 package pl.maniak.wikidiary.ui
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -12,31 +13,30 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.rememberBottomSheetScaffoldState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import org.koin.android.ext.android.inject
-import pl.maniak.wikidiary.ui.model.ActionClick.DataPickerChangeDate
-import pl.maniak.wikidiary.ui.model.BottomSheetUiState
-import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateCategory
-import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateProject
-import pl.maniak.wikidiary.feature.diary.ui.CreateCategoryScreen
-import pl.maniak.wikidiary.feature.diary.ui.CreateProjectScreen
-import pl.maniak.wikidiary.feature.filmweb.ui.FilmwebSearchScreen
-import pl.maniak.wikidiary.feature.pictograms.ui.PictogramManagerScreen
-import pl.maniak.wikidiary.feature.people.ui.PersonManagerScreen
-import pl.maniak.wikidiary.core.ui.theme.WikiTheme
 import java.util.Calendar
 import java.util.GregorianCalendar
+import org.koin.android.ext.android.inject
+import pl.maniak.wikidiary.core.date.SelectedDateStore
+import pl.maniak.wikidiary.core.ui.theme.WikiTheme
+import pl.maniak.wikidiary.feature.diary.ui.CreateCategoryRoute
+import pl.maniak.wikidiary.feature.diary.ui.CreateProjectRoute
+import pl.maniak.wikidiary.feature.diary.ui.DiaryNavigation
+import pl.maniak.wikidiary.feature.filmweb.ui.FilmwebRoute
+import pl.maniak.wikidiary.feature.people.ui.PersonManagerRoute
+import pl.maniak.wikidiary.feature.pictograms.ui.PictogramManagerRoute
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: MainViewModel by inject()
+    private val selectedDate: SelectedDateStore by inject()
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,71 +44,34 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             WikiTheme {
-                val bottomSheetExpanded by viewModel.bottomSheetExpanded.collectAsState()
-                val bottomSheetUiState by viewModel.bottomSheetUiState.collectAsState()
+                var sheet by remember { mutableStateOf<AppSheet>(AppSheet.None) }
                 val scaffoldState = rememberBottomSheetScaffoldState()
+                val context = LocalContext.current
+                val closeSheet = { sheet = AppSheet.None }
+                val pickDate = { showDatePicker(context) }
 
-                observableState(viewModel)
+                LaunchedEffect(sheet) {
+                    with(scaffoldState.bottomSheetState) {
+                        if (sheet != AppSheet.None) expand() else collapse()
+                    }
+                }
 
                 LaunchedEffect(scaffoldState.bottomSheetState) {
-                    snapshotFlow { scaffoldState.bottomSheetState.isExpanded }
-                        .collect { isExpanded ->
-                            if (bottomSheetExpanded != isExpanded) {
-                                viewModel.setBottomSheetExpanded(isExpanded)
-                            }
-                        }
+                    snapshotFlow { scaffoldState.bottomSheetState.isCollapsed }
+                        .collect { isCollapsed -> if (isCollapsed) sheet = AppSheet.None }
                 }
 
-                LaunchedEffect(bottomSheetExpanded) {
-                    with(scaffoldState.bottomSheetState) {
-                        if (bottomSheetExpanded) expand() else collapse()
-                    }
-                }
-
-                BackHandler(onBack = {
-                    if (scaffoldState.bottomSheetState.isExpanded) {
-                        viewModel.setBottomSheetExpanded(false)
-                    } else {
-                        finish()
-                    }
-                })
+                BackHandler(enabled = sheet != AppSheet.None, onBack = closeSheet)
 
                 BottomSheetScaffold(
                     sheetContent = {
-                        when (val state = bottomSheetUiState) {
-                            is CreateProject ->
-                                CreateProjectScreen(
-                                    tag = state.tag,
-                                    categories = viewModel.categories.value,
-                                    onClick = viewModel::onActionClick
-                                )
-                            is CreateCategory -> CreateCategoryScreen(
-                                categories = viewModel.categories.value,
-                                onClick = viewModel::onActionClick
-                            )
-                            BottomSheetUiState.FilmwebSearch -> FilmwebSearchScreen(
-                                tags = viewModel.tags.value,
-                                selectedDate = viewModel.selectedDate.value,
-                                saveState = viewModel.filmwebSaveState.value,
-                                searchState = viewModel.filmwebSearchState.collectAsState().value,
-                                onQueryChange = viewModel::setFilmwebSearchQuery,
-                                onSearch = viewModel::searchFilmweb,
-                                onClick = viewModel::onActionClick
-                            )
-                            BottomSheetUiState.PictogramManager -> PictogramManagerScreen(
-                                pictograms = viewModel.pictograms.value,
-                                pictogramEntries = viewModel.pictogramEntries.value,
-                                tags = viewModel.tags.value,
-                                selectedDate = viewModel.selectedDate.value,
-                                error = viewModel.pictogramError.value,
-                                onClick = viewModel::onActionClick
-                            )
-                            BottomSheetUiState.PersonManager -> PersonManagerScreen(
-                                people = viewModel.people.value,
-                                error = viewModel.personError.value,
-                                onClick = viewModel::onActionClick
-                            )
-                            BottomSheetUiState.None -> {}
+                        when (val current = sheet) {
+                            is AppSheet.TagEditor -> CreateProjectRoute(tag = current.tag, onDone = closeSheet)
+                            AppSheet.Categories -> CreateCategoryRoute()
+                            AppSheet.Filmweb -> FilmwebRoute(onPickDate = pickDate, onClose = closeSheet)
+                            AppSheet.Pictograms -> PictogramManagerRoute()
+                            AppSheet.People -> PersonManagerRoute()
+                            AppSheet.None -> {}
                         }
                     },
                     scaffoldState = scaffoldState,
@@ -120,16 +83,17 @@ class MainActivity : ComponentActivity() {
                         color = MaterialTheme.colors.background
                     ) {
                         MainScreen(
-                            list = viewModel.notes.value,
-                            selectedDate = viewModel.selectedDate.value,
-                            tagList = viewModel.tags.value,
-                            people = viewModel.people.value,
-                            routines = viewModel.routines.value,
-                            todos = viewModel.todos.value,
-                            wikiDocument = viewModel.wikiDocument.collectAsState().value,
-                            pictogramEntries = viewModel.pictogramEntries.value,
-                            wikiPageUrl = viewModel.wikiPageUrl.value,
-                            onClick = viewModel::onActionClick
+                            onNavigate = { destination ->
+                                when (destination) {
+                                    DiaryNavigation.CreateTag -> sheet = AppSheet.TagEditor()
+                                    is DiaryNavigation.EditTag -> sheet = AppSheet.TagEditor(destination.tag)
+                                    DiaryNavigation.Categories -> sheet = AppSheet.Categories
+                                    DiaryNavigation.Filmweb -> sheet = AppSheet.Filmweb
+                                    DiaryNavigation.Pictograms -> sheet = AppSheet.Pictograms
+                                    DiaryNavigation.People -> sheet = AppSheet.People
+                                    DiaryNavigation.PickDate -> pickDate()
+                                }
+                            }
                         )
                     }
                 }
@@ -137,37 +101,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    private fun observableState(viewModel: MainViewModel) {
-        if (viewModel.showDatePickerDialog.value) {
-            val context = LocalContext.current
-            val calendar = Calendar.getInstance()
-            calendar.time = viewModel.selectedDate.value
-            val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
-            val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-            DatePickerDialog(
-                context,
-                { _, selectedYear, selectedMonth, selectedDay ->
-                    viewModel.onActionClick(
-                        DataPickerChangeDate(
-                            GregorianCalendar(
-                                selectedYear,
-                                selectedMonth,
-                                selectedDay
-                            ).time
-                        )
-                    )
-                },
-                year,
-                month,
-                day
-            ).apply {
-                setOnCancelListener {
-                    viewModel.onActionClick(DataPickerChangeDate(viewModel.selectedDate.value))
-                }
-            }.show()
-        }
+    private fun showDatePicker(context: Context) {
+        val calendar = Calendar.getInstance().apply { time = selectedDate.date.value }
+        DatePickerDialog(
+            context,
+            { _, year, month, day -> selectedDate.select(GregorianCalendar(year, month, day).time) },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 }

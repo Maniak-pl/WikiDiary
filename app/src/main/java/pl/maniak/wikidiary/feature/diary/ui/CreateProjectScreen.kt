@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.diary.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,7 +39,6 @@ import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.feature.diary.domain.Category
 import pl.maniak.wikidiary.feature.diary.domain.Tag
-import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.feature.diary.ui.ScreenValues.SpacerHeight
 
 private object ScreenValues {
@@ -45,10 +46,27 @@ private object ScreenValues {
 }
 
 @Composable
+fun CreateProjectRoute(
+    tag: Tag?,
+    onDone: () -> Unit,
+    viewModel: TagEditorViewModel = koinViewModel(),
+) {
+    val state by viewModel.uiState.collectAsState()
+    CreateProjectScreen(
+        tag = tag,
+        categories = state.categories,
+        onIntent = { intent ->
+            viewModel.onIntent(intent)
+            onDone()
+        }
+    )
+}
+
+@Composable
 fun CreateProjectScreen(
     tag: Tag?,
     categories: List<Category>,
-    onClick: (ActionClick) -> Unit
+    onIntent: (TagEditorIntent) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
@@ -122,8 +140,7 @@ fun CreateProjectScreen(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(
                 onClick = {
-                    onClick(
-                        ActionClick.ConfirmProject(
+                    onIntent(TagEditorIntent.SaveTag(
                             tag?.id ?: 0,
                             name = name,
                             category = category,
@@ -144,7 +161,7 @@ fun CreateProjectScreen(
             Button(
                 onClick = {
                     tag?.let {
-                        onClick(ActionClick.DeleteTag(it.id))
+                        onIntent(TagEditorIntent.DeleteTag(it.id))
                         name = ""
                         selectedCategory = null
                     }

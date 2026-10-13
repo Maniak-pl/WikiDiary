@@ -188,6 +188,14 @@ własny moduł Koin:
 Nowa funkcja powinna powstać jako osobny pakiet `feature/<nazwa>` z własnym
 modułem Koin dołączonym w `di/AppModule.kt`.
 
+Warstwa UI działa w modelu jednokierunkowego przepływu danych (MVI). Każdy
+ekran ma własny `ViewModel` (rejestrowany przez `viewModel { }` w module
+funkcji), który wystawia `StateFlow<XxxUiState>` i przyjmuje zdarzenia przez
+`onIntent(XxxIntent)`. Funkcja `XxxRoute` pobiera `ViewModel` przez
+`koinViewModel()` i przekazuje stan do bezstanowego ekranu Compose.
+Wybrany dzień jest współdzielony przez `SelectedDateStore`, a `MainActivity`
+jedynie przełącza ekrany i arkusze (`AppSheet`).
+
 Eksport do Wiki składa `WikiExporter` z wpisów dostarczanych przez funkcje.
 Aby nowa funkcja pojawiła się w notatce Wiki, wystarczy w jej module Koin
 zarejestrować implementację `WikiExportContributor` (`bind

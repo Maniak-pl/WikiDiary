@@ -1,6 +1,8 @@
 package pl.maniak.wikidiary.feature.pictograms
 
 import org.koin.dsl.module
+import pl.maniak.wikidiary.feature.pictograms.ui.PictogramsViewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import pl.maniak.wikidiary.feature.pictograms.domain.PictogramExportContributor
 import pl.maniak.wikidiary.feature.export.domain.WikiExportContributor
 import org.koin.dsl.bind
@@ -19,4 +21,5 @@ val pictogramsModule = module {
     single {
         PictogramExportContributor(get<PictogramRepository>().observePictogramEntries())
     } bind WikiExportContributor::class
+    viewModel { PictogramsViewModel(get(), get(), get()) }
 }

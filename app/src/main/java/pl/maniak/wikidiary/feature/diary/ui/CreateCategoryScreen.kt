@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.diary.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,13 +30,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.feature.diary.domain.Category
-import pl.maniak.wikidiary.ui.model.ActionClick
 
+
+@Composable
+fun CreateCategoryRoute(viewModel: TagEditorViewModel = koinViewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    CreateCategoryScreen(categories = state.categories, onIntent = viewModel::onIntent)
+}
 
 @Composable
 fun CreateCategoryScreen(
     categories: List<Category>,
-    onClick: (ActionClick) -> Unit
+    onIntent: (TagEditorIntent) -> Unit
 ) {
     var categoryName by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
@@ -73,7 +80,7 @@ fun CreateCategoryScreen(
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
-                onClick(ActionClick.AddCategory(name = categoryName))
+                onIntent(TagEditorIntent.SaveCategory(name = categoryName))
                 categoryName = ""
             })
         )
@@ -91,9 +98,9 @@ fun CreateCategoryScreen(
             Button(
                 onClick = {
                     if (selectedCategory != null) {
-                        onClick(ActionClick.UpdateCategory(selectedCategory!!.id, categoryName))
+                        onIntent(TagEditorIntent.SaveCategory(selectedCategory!!.id, categoryName))
                     } else {
-                        onClick(ActionClick.AddCategory(name = categoryName))
+                        onIntent(TagEditorIntent.SaveCategory(name = categoryName))
                     }
                     categoryName = ""
                     selectedCategory = null
@@ -109,7 +116,7 @@ fun CreateCategoryScreen(
             Button(
                 onClick = {
                     selectedCategory?.let {
-                        onClick(ActionClick.DeleteCategory(id = it.id))
+                        onIntent(TagEditorIntent.DeleteCategory(id = it.id))
                         categoryName = ""
                         selectedCategory = null
                     }

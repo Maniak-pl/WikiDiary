@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.diary.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.feature.people.domain.Person
 import pl.maniak.wikidiary.feature.diary.domain.Tag
-import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.core.ui.component.Tag
 import pl.maniak.wikidiary.core.ui.component.TagDefaults
 import pl.maniak.wikidiary.core.util.DateHelper.toDayString
@@ -42,11 +43,27 @@ import java.util.Date
 
 
 @Composable
+fun DiaryRoute(
+    onNavigate: (DiaryNavigation) -> Unit,
+    viewModel: DiaryViewModel = koinViewModel(),
+) {
+    val state by viewModel.uiState.collectAsState()
+    AddScreen(
+        tags = state.tags,
+        people = state.people,
+        selectedDate = state.selectedDate,
+        onIntent = viewModel::onIntent,
+        onNavigate = onNavigate
+    )
+}
+
+@Composable
 fun AddScreen(
     tags: List<Tag> = emptyList(),
     people: List<Person> = emptyList(),
     selectedDate: Date,
-    onClick: (ActionClick) -> Unit,
+    onIntent: (DiaryIntent) -> Unit,
+    onNavigate: (DiaryNavigation) -> Unit,
 ) {
     var text by remember { mutableStateOf(TextFieldValue("")) }
     val mentionQuery = currentMentionQuery(text)
@@ -74,20 +91,20 @@ fun AddScreen(
             scrollState = vertScrollState,
             onTagClick = { tag ->
                 if (text.text.isNotBlank()) {
-                    onClick.invoke(ActionClick.AddNote(tag, text.text))
+                    onIntent(DiaryIntent.AddNote(tag, text.text))
                     text = TextFieldValue("")
                 }
             },
             onAddTagClick = {
                 if (text.text.isNotBlank()) {
-                    onClick.invoke(ActionClick.AddTag(tag = text.text))
+                    onIntent(DiaryIntent.AddTag(name = text.text))
                     text = TextFieldValue("")
                 }
             },
             onEditTagClick = { tag ->
-                onClick.invoke(ActionClick.EditTag(tag))
+                onNavigate(DiaryNavigation.EditTag(tag))
             },
-            onClick = onClick
+            onNavigate = onNavigate
         )
 
         Divider(
@@ -140,7 +157,7 @@ private fun TagsLayout(
     onTagClick: (Tag) -> Unit,
     onAddTagClick: () -> Unit = {},
     onEditTagClick: (Tag) -> Unit = {},
-    onClick: (ActionClick) -> Unit
+    onNavigate: (DiaryNavigation) -> Unit
 ) {
     FlowRow(
         modifier = modifier
@@ -168,32 +185,32 @@ private fun TagsLayout(
 
         Tag(
             text = stringResource(id = R.string.label_project),
-            onClick = { onClick.invoke(ActionClick.TagCreateProject) },
+            onClick = { onNavigate(DiaryNavigation.CreateTag) },
         )
 
         Tag(
             text = "\uD83C\uDFAC Filmweb",
-            onClick = { onClick.invoke(ActionClick.TagCreateFilmweb) },
+            onClick = { onNavigate(DiaryNavigation.Filmweb) },
         )
 
         Tag(
             text = "\uD83D\uDDBC\uFE0F Pictogramy",
-            onClick = { onClick.invoke(ActionClick.TagCreatePictogram) },
+            onClick = { onNavigate(DiaryNavigation.Pictograms) },
         )
 
         Tag(
             text = "\uD83D\uDC65 Osoby",
-            onClick = { onClick.invoke(ActionClick.TagCreatePerson) },
+            onClick = { onNavigate(DiaryNavigation.People) },
         )
 
         Tag(
             text = "\uD83D\uDCC2",
-            onClick = { onClick.invoke(ActionClick.TagCreateCategory) },
+            onClick = { onNavigate(DiaryNavigation.Categories) },
         )
 
         Tag(
             text = "\uD83D\uDDD3\uFE0F - ${selectedDate.toDayString()}",
-            onClick = { onClick.invoke(ActionClick.TagChangeDate) },
+            onClick = { onNavigate(DiaryNavigation.PickDate) },
         )
     }
 
@@ -234,6 +251,7 @@ fun AddScreenPreview() {
     AddScreen(
         tags = listOf(Tag(1, "ToDo"), Tag(2, "Today"), Tag(3, "Gym with Szymon 2024", "Health:Physical")),
         selectedDate = Date(),
-        onClick = {}
+        onIntent = {},
+        onNavigate = {}
     )
 }

@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.todo.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,12 +30,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.feature.todo.domain.Todo
-import pl.maniak.wikidiary.ui.model.ActionClick
+
+@Composable
+fun TodoRoute(viewModel: TodoViewModel = koinViewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    TodoScreen(todos = state.todos, onIntent = viewModel::onIntent)
+}
 
 @Composable
 fun TodoScreen(
     todos: List<Todo> = emptyList(),
-    onClick: (ActionClick) -> Unit
+    onIntent: (TodoIntent) -> Unit
 ) {
     var newTodoTitle by remember { mutableStateOf("") }
 
@@ -59,7 +66,7 @@ fun TodoScreen(
             IconButton(
                 onClick = {
                     if (newTodoTitle.isNotBlank()) {
-                        onClick(ActionClick.AddTodo(newTodoTitle.trim()))
+                        onIntent(TodoIntent.Add(newTodoTitle.trim()))
                         newTodoTitle = ""
                     }
                 },
@@ -75,9 +82,9 @@ fun TodoScreen(
             items(todos, key = { it.id }) { todo ->
                 TodoItem(
                     todo = todo,
-                    onRemove = { onClick(ActionClick.DeleteTodo(todo.id)) },
+                    onRemove = { onIntent(TodoIntent.Delete(todo.id)) },
                     onToggle = { isChecked ->
-                        onClick(ActionClick.UpdateTodo(todo.copy(isCompleted = isChecked)))
+                        onIntent(TodoIntent.SetCompleted(todo.id, isChecked))
                     }
                 )
             }
@@ -121,6 +128,6 @@ fun TodoScreenPreview() {
             Todo(id = 1, title = "Prepare release"),
             Todo(id = 2, title = "Review notes", isCompleted = true)
         ),
-        onClick = {}
+        onIntent = {}
     )
 }

@@ -1,6 +1,10 @@
 package pl.maniak.wikidiary.feature.diary
 
 import org.koin.dsl.module
+import pl.maniak.wikidiary.feature.diary.ui.NotesListViewModel
+import pl.maniak.wikidiary.feature.diary.ui.TagEditorViewModel
+import pl.maniak.wikidiary.feature.diary.ui.DiaryViewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import pl.maniak.wikidiary.feature.diary.domain.NotesExportContributor
 import pl.maniak.wikidiary.feature.export.domain.WikiExportContributor
 import org.koin.dsl.bind
@@ -29,4 +33,7 @@ val diaryModule = module {
     single<TagRepository> { TagRepositoryImpl(get(), get()) }
     single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
     single { NotesExportContributor(get<WikiNoteRepository>().observeNotes()) } bind WikiExportContributor::class
+    viewModel { DiaryViewModel(get(), get(), get(), get(), get()) }
+    viewModel { TagEditorViewModel(get(), get()) }
+    viewModel { NotesListViewModel(get(), get()) }
 }

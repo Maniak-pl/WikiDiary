@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.filmweb.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.BorderStroke
@@ -46,10 +48,34 @@ import pl.maniak.wikidiary.feature.diary.domain.Tag
 import pl.maniak.wikidiary.feature.filmweb.domain.FilmMediaType
 import pl.maniak.wikidiary.feature.filmweb.domain.FilmMetadata
 import pl.maniak.wikidiary.feature.filmweb.domain.FilmSearchResult
-import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.core.util.formatDateString
 import pl.maniak.wikidiary.core.wiki.WikiParser
 import java.util.Date
+
+@Composable
+fun FilmwebRoute(
+    onPickDate: () -> Unit,
+    onClose: () -> Unit,
+    viewModel: FilmwebViewModel = koinViewModel(),
+) {
+    val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(Unit) { viewModel.onIntent(FilmwebIntent.Reset) }
+    LaunchedEffect(state.save) {
+        if (state.save == FilmwebSaveState.Saved) {
+            viewModel.onIntent(FilmwebIntent.Reset)
+            onClose()
+        }
+    }
+    FilmwebSearchScreen(
+        tags = state.tags,
+        selectedDate = state.selectedDate,
+        saveState = state.save,
+        searchState = state.search,
+        onIntent = viewModel::onIntent,
+        onPickDate = onPickDate,
+        onClose = onClose
+    )
+}
 
 @Composable
 fun FilmwebSearchScreen(
@@ -57,9 +83,9 @@ fun FilmwebSearchScreen(
     selectedDate: Date,
     saveState: FilmwebSaveState,
     searchState: FilmwebSearchUiState,
-    onQueryChange: (String) -> Unit,
-    onSearch: () -> Unit,
-    onClick: (ActionClick) -> Unit
+    onIntent: (FilmwebIntent) -> Unit,
+    onPickDate: () -> Unit,
+    onClose: () -> Unit
 ) {
     var selectedResult by remember { mutableStateOf<FilmSearchResult?>(null) }
     var title by remember { mutableStateOf("") }
@@ -123,7 +149,7 @@ fun FilmwebSearchScreen(
             ) {
                 OutlinedTextField(
                     value = searchState.query,
-                    onValueChange = onQueryChange,
+                    onValueChange = { onIntent(FilmwebIntent.ChangeQuery(it)) },
                     label = { Text("Szukaj filmu lub serialu") },
                     singleLine = true,
                     modifier = Modifier.weight(1f)
@@ -131,7 +157,7 @@ fun FilmwebSearchScreen(
                 Button(
                     onClick = {
                         selectedResult = null
-                        onSearch()
+                        onIntent(FilmwebIntent.Search)
                     },
                     enabled = searchState.query.isNotBlank() && !searchState.isLoading
                 ) {
@@ -157,7 +183,7 @@ fun FilmwebSearchScreen(
                 Button(
                     onClick = {
                         selectedResult = null
-                        onSearch()
+                        onIntent(FilmwebIntent.Search)
                     },
                     enabled = !searchState.isLoading
                 ) {
@@ -263,7 +289,7 @@ fun FilmwebSearchScreen(
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-                TextButton(onClick = { onClick(ActionClick.TagChangeDate) }) {
+                TextButton(onClick = { onPickDate() }) {
                     Text("Data: ${formatDateString(selectedDate)}")
                 }
 
@@ -310,8 +336,8 @@ fun FilmwebSearchScreen(
                             val tag = selectedTag
                             val filmMetadata = metadata
                             if (tag != null && filmMetadata != null) {
-                                onClick(
-                                    ActionClick.SaveFilmNote(
+                                onIntent(
+                                    FilmwebIntent.Save(
                                         tag = tag,
                                         date = selectedDate,
                                         metadata = filmMetadata,
@@ -332,7 +358,7 @@ fun FilmwebSearchScreen(
                         )
                     }
                     TextButton(
-                        onClick = { onClick(ActionClick.CloseBottomSheet) },
+                        onClick = { onClose() },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Zamknij")

@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.diary.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -38,15 +40,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.feature.pictograms.domain.PictogramEntry
 import pl.maniak.wikidiary.feature.diary.domain.WikiNote
-import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.core.util.formatDateString
 import java.util.Date
+
+@Composable
+fun NotesListRoute(viewModel: NotesListViewModel = koinViewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    ListNotesScreen(
+        notesList = state.notes,
+        pictogramEntries = state.pictogramEntries,
+        onIntent = viewModel::onIntent
+    )
+}
 
 @Composable
 fun ListNotesScreen(
     notesList: List<WikiNote> = emptyList(),
     pictogramEntries: List<PictogramEntry> = emptyList(),
-    onClick: (ActionClick) -> Unit = {},
+    onIntent: (NotesListIntent) -> Unit = {},
 ) {
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedNotes by remember { mutableStateOf(setOf<Long>()) }
@@ -65,7 +76,7 @@ fun ListNotesScreen(
                     selectedNotes = emptySet()
                 },
                 onDelete = {
-                    onClick(ActionClick.DeleteNotes(selectedNotes.toList()))
+                    onIntent(NotesListIntent.DeleteNotes(selectedNotes.toList()))
                     isSelectionMode = false
                     selectedNotes = emptySet()
                 },
@@ -91,8 +102,6 @@ fun ListNotesScreen(
                                 } else {
                                     selectedNotes - note.id
                                 }
-                            } else {
-                                onClick(ActionClick.EditNote(note))
                             }
                         },
                         onLongClick = {
@@ -110,7 +119,7 @@ fun ListNotesScreen(
                             tag = groupKey.tag,
                             date = note.date,
                             entries = entries,
-                            onClick = onClick
+                            onIntent = onIntent
                         )
                     }
                 }
@@ -124,7 +133,7 @@ fun ListNotesScreen(
                             tag = groupKey.tag,
                             date = entries.first().date,
                             entries = entries,
-                            onClick = onClick
+                            onIntent = onIntent
                         )
                     }
                 }
@@ -137,7 +146,7 @@ private fun PictogramEntriesItem(
     tag: String,
     date: Date,
     entries: List<PictogramEntry>,
-    onClick: (ActionClick) -> Unit
+    onIntent: (NotesListIntent) -> Unit
 ) {
     Surface(
         modifier = Modifier
@@ -177,7 +186,7 @@ private fun PictogramEntriesItem(
                     )
                     IconButton(
                         onClick = {
-                            onClick(ActionClick.DeletePictogramEntry(entry.id))
+                            onIntent(NotesListIntent.DeletePictogramEntry(entry.id))
                         }
                     ) {
                         Icon(

@@ -1,5 +1,8 @@
 package pl.maniak.wikidiary.feature.people.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,13 +35,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.feature.people.domain.Person
 import pl.maniak.wikidiary.feature.people.domain.PersonGender
-import pl.maniak.wikidiary.ui.model.ActionClick
+
+@Composable
+fun PersonManagerRoute(viewModel: PeopleViewModel = koinViewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(Unit) { viewModel.onIntent(PeopleIntent.DismissError) }
+    PersonManagerScreen(people = state.people, error = state.error, onIntent = viewModel::onIntent)
+}
 
 @Composable
 fun PersonManagerScreen(
     people: List<Person>,
     error: String?,
-    onClick: (ActionClick) -> Unit
+    onIntent: (PeopleIntent) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf(PersonGender.NEUTRAL) }
@@ -107,7 +116,7 @@ fun PersonManagerScreen(
         Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = {
-                onClick(ActionClick.AddPerson(name = name, gender = gender))
+                onIntent(PeopleIntent.Add(name = name, gender = gender))
                 name = ""
             },
             enabled = name.isNotBlank(),
@@ -148,7 +157,7 @@ fun PersonManagerScreen(
                             .weight(1f)
                             .padding(start = 8.dp)
                     )
-                    IconButton(onClick = { onClick(ActionClick.DeletePerson(person.id)) }) {
+                    IconButton(onClick = { onIntent(PeopleIntent.Delete(person.id)) }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Usuń osobę"

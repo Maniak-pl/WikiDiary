@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.pictograms.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +43,6 @@ import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.feature.diary.domain.Tag
 import pl.maniak.wikidiary.feature.pictograms.domain.Pictogram
 import pl.maniak.wikidiary.feature.pictograms.domain.PictogramEntry
-import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.core.wiki.WikiParser
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -84,13 +85,27 @@ private val additionalPictogramIcons = listOf(
 )
 
 @Composable
+fun PictogramManagerRoute(viewModel: PictogramsViewModel = koinViewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(Unit) { viewModel.onIntent(PictogramIntent.DismissError) }
+    PictogramManagerScreen(
+        pictograms = state.pictograms,
+        pictogramEntries = state.entries,
+        tags = state.tags,
+        selectedDate = state.selectedDate,
+        error = state.error,
+        onIntent = viewModel::onIntent
+    )
+}
+
+@Composable
 fun PictogramManagerScreen(
     pictograms: List<Pictogram>,
     pictogramEntries: List<PictogramEntry>,
     tags: List<Tag>,
     selectedDate: Date,
     error: String?,
-    onClick: (ActionClick) -> Unit
+    onIntent: (PictogramIntent) -> Unit
 ) {
     var selectedTag by remember(tags) { mutableStateOf(tags.firstOrNull()) }
     var name by remember { mutableStateOf("") }
@@ -199,7 +214,7 @@ fun PictogramManagerScreen(
         ) {
             Button(
                 onClick = {
-                    onClick(ActionClick.SavePictogram(editingId, name, icon))
+                    onIntent(PictogramIntent.Save(editingId, name, icon))
                 },
                 enabled = name.isNotBlank(),
                 modifier = Modifier.weight(1f)
@@ -245,8 +260,7 @@ fun PictogramManagerScreen(
                     attached = selectedEntries.any { it.pictogramId == pictogram.id },
                     onAttach = {
                         selectedTag?.let { tag ->
-                            onClick(
-                                ActionClick.AddPictogramToTag(
+                            onIntent(PictogramIntent.AttachToTag(
                                     pictogramId = pictogram.id,
                                     tag = tag,
                                     date = selectedDate
@@ -260,7 +274,7 @@ fun PictogramManagerScreen(
                         icon = pictogram.icon
                         showAdditionalIcons = pictogram.icon in additionalPictogramIcons
                     },
-                    onDelete = { onClick(ActionClick.DeletePictogram(pictogram.id)) }
+                    onDelete = { onIntent(PictogramIntent.Delete(pictogram.id)) }
                 )
             }
         }

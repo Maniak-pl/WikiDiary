@@ -1,6 +1,8 @@
 package pl.maniak.wikidiary.feature.filmweb
 
 import org.koin.dsl.module
+import pl.maniak.wikidiary.feature.filmweb.ui.FilmwebViewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import pl.maniak.wikidiary.feature.diary.domain.WikiNoteRepository
 import pl.maniak.wikidiary.feature.filmweb.domain.FilmPosterExportContributor
 import pl.maniak.wikidiary.feature.export.domain.WikiExportContributor
@@ -22,4 +24,5 @@ val filmwebModule = module {
             get<FilmRepository>().observeFilmNotes()
         )
     } bind WikiExportContributor::class
+    viewModel { FilmwebViewModel(get(), get(), get(), get(), get()) }
 }

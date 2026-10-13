@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.routines.ui
 
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,10 +30,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.feature.routines.domain.Routine
-import pl.maniak.wikidiary.ui.model.ActionClick
 
 @Composable
-fun RoutineScreen(routines: List<Routine> = emptyList(), onClick: (ActionClick) -> Unit) {
+fun RoutinesRoute(viewModel: RoutinesViewModel = koinViewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    RoutineScreen(routines = state.routines, onIntent = viewModel::onIntent)
+}
+
+@Composable
+fun RoutineScreen(routines: List<Routine> = emptyList(), onIntent: (RoutinesIntent) -> Unit) {
     var newRoutineName by remember { mutableStateOf("") }
 
     Column(
@@ -56,7 +63,7 @@ fun RoutineScreen(routines: List<Routine> = emptyList(), onClick: (ActionClick) 
             IconButton(
                 onClick = {
                     if (newRoutineName.isNotEmpty()) {
-                        onClick.invoke(ActionClick.AddRoutine(newRoutineName))
+                        onIntent(RoutinesIntent.Add(newRoutineName))
                         newRoutineName = ""
                     }
                 },
@@ -72,9 +79,9 @@ fun RoutineScreen(routines: List<Routine> = emptyList(), onClick: (ActionClick) 
             items(routines) { routine ->
                 RoutineItem(
                     routine,
-                    onRemove = { onClick.invoke(ActionClick.DeleteRoutine(routine.id)) },
+                    onRemove = { onIntent(RoutinesIntent.Delete(routine.id)) },
                     onToggle = { isChecked ->
-                        onClick.invoke(ActionClick.UpdateRoutine(routine.copy(isCompleted = isChecked)))
+                        onIntent(RoutinesIntent.SetCompleted(routine.id, isChecked))
                     }
                 )
             }

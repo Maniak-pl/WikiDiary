@@ -1,17 +1,5 @@
 package pl.maniak.wikidiary.ui
 
-import pl.maniak.wikidiary.feature.diary.ui.AddScreen
-import pl.maniak.wikidiary.feature.diary.ui.ListNotesScreen
-import pl.maniak.wikidiary.feature.export.ui.PreparingNoteScreen
-import pl.maniak.wikidiary.feature.routines.ui.RoutineScreen
-import pl.maniak.wikidiary.feature.todo.ui.TodoScreen
-import android.content.ActivityNotFoundException
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,41 +21,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
-import pl.maniak.wikidiary.feature.routines.domain.Routine
-import pl.maniak.wikidiary.feature.people.domain.Person
-import pl.maniak.wikidiary.feature.diary.domain.Tag
-import pl.maniak.wikidiary.feature.todo.domain.Todo
-import pl.maniak.wikidiary.feature.filmweb.domain.FilmNoteEntry
-import pl.maniak.wikidiary.feature.pictograms.domain.PictogramEntry
-import pl.maniak.wikidiary.feature.diary.domain.WikiNote
-import pl.maniak.wikidiary.ui.model.ActionClick
-import pl.maniak.wikidiary.ui.model.ActionClick.SaveWikiPageUrl
+import pl.maniak.wikidiary.feature.diary.ui.DiaryNavigation
+import pl.maniak.wikidiary.feature.diary.ui.DiaryRoute
+import pl.maniak.wikidiary.feature.diary.ui.NotesListRoute
+import pl.maniak.wikidiary.feature.export.ui.ExportRoute
+import pl.maniak.wikidiary.feature.routines.ui.RoutinesRoute
+import pl.maniak.wikidiary.feature.todo.ui.TodoRoute
 import pl.maniak.wikidiary.ui.Screen.*
-import pl.maniak.wikidiary.core.ui.theme.WikiTheme
-import java.util.Date
 
 @Composable
 fun MainScreen(
-    list: List<WikiNote> = mutableListOf(),
-    tagList: List<Tag> = mutableListOf(),
-    selectedDate: Date,
-    people: List<Person> = emptyList(),
-    routines: List<Routine> = emptyList(),
-    todos: List<Todo> = emptyList(),
-    pictogramEntries: List<PictogramEntry> = emptyList(),
-    wikiDocument: String = "",
-    wikiPageUrl: String = "",
-    onClick: (ActionClick) -> Unit = {},
+    onNavigate: (DiaryNavigation) -> Unit = {},
 ) {
     var currentScreen by remember { mutableStateOf<Screen>(Add) }
-    val context = LocalContext.current
-    val clipboardManager =
-        LocalContext.current.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     Scaffold(
         topBar = {
@@ -107,64 +76,11 @@ fun MainScreen(
             modifier = Modifier.padding(paddingValues)
         ) {
             when (currentScreen) {
-                is Add -> {
-                    AddScreen(
-                        tags = tagList,
-                        people = people,
-                        selectedDate = selectedDate,
-                        onClick = onClick,
-                    )
-                }
-
-                is ListRoutines -> {
-                    RoutineScreen(routines = routines, onClick = onClick)
-                }
-
-                is ToDo -> {
-                    TodoScreen(todos = todos, onClick = onClick)
-                }
-
-                is PrepareNote -> {
-                    PreparingNoteScreen(
-                        content = wikiDocument,
-                        wikiPageUrl = wikiPageUrl,
-                        onCopyClick = {
-                            clipboardManager.setPrimaryClip(ClipData.newPlainText("WikiNote", it))
-                        },
-                        onSaveWikiPageUrl = {
-                            onClick(SaveWikiPageUrl(it))
-                        },
-                        onOpenWikiClick = { url, content ->
-                            clipboardManager.setPrimaryClip(
-                                ClipData.newPlainText("WikiNote", content)
-                            )
-                            try {
-                                context.startActivity(
-                                    Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                                )
-                                Toast.makeText(
-                                    context,
-                                    "Notatki skopiowano do schowka. Wklej je na stronie Wiki.",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            } catch (_: ActivityNotFoundException) {
-                                Toast.makeText(
-                                    context,
-                                    "Nie znaleziono aplikacji do otwarcia strony Wiki.",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        }
-                    )
-                }
-
-                is ListNotes -> {
-                    ListNotesScreen(
-                        notesList = list,
-                        pictogramEntries = pictogramEntries,
-                        onClick = onClick
-                    )
-                }
+                is Add -> DiaryRoute(onNavigate = onNavigate)
+                is ListRoutines -> RoutinesRoute()
+                is ToDo -> TodoRoute()
+                is PrepareNote -> ExportRoute()
+                is ListNotes -> NotesListRoute()
             }
         }
     }
@@ -176,12 +92,4 @@ sealed class Screen(val title: String) {
     data object ToDo : Screen("ToDo")
     data object PrepareNote : Screen("Prepare Note")
     data object ListNotes : Screen("List Notes")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    WikiTheme {
-        MainScreen(selectedDate = Date())
-    }
 }
