@@ -3,6 +3,7 @@ package pl.maniak.wikidiary.ui.model
 import androidx.compose.ui.graphics.Color
 import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
+import pl.maniak.wikidiary.data.Todo
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.domain.model.FilmMetadata
 import java.util.Date
@@ -64,6 +65,12 @@ sealed class ActionClick {
     data class DeleteRoutine(val id: Long) : ActionClick()
 
     data class UpdateRoutine(val routine: Routine) : ActionClick()
+
+    data class AddTodo(val title: String) : ActionClick()
+
+    data class DeleteTodo(val id: Long) : ActionClick()
+
+    data class UpdateTodo(val todo: Todo) : ActionClick()
 
     data class DataPickerChangeDate(val date: Date) : ActionClick()
 

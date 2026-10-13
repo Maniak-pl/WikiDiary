@@ -20,9 +20,10 @@ import kotlinx.coroutines.launch
         FilmEntity::class,
         FilmNoteEntity::class,
         PictogramEntity::class,
-        PictogramEntryEntity::class
+        PictogramEntryEntity::class,
+        TodoEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -36,6 +37,7 @@ abstract class WikiNoteDatabase : RoomDatabase() {
     abstract fun filmNoteDao(): FilmNoteDao
     abstract fun pictogramDao(): PictogramDao
     abstract fun pictogramEntryDao(): PictogramEntryDao
+    abstract fun todoDao(): TodoDao
 
     companion object {
         private var INSTANCE: WikiNoteDatabase? = null
@@ -117,6 +119,20 @@ abstract class WikiNoteDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `todo_table` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `isCompleted` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): WikiNoteDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = databaseBuilder(
@@ -124,7 +140,7 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                     WikiNoteDatabase::class.java,
                     "wiki_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .addCallback(DatabaseCallback(context)) // Add callback
                     .build()
                 INSTANCE = instance

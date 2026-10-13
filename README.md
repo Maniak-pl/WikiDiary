@@ -22,6 +22,10 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   odhaczania i usuwania. Stan wykonania jest resetowany przy pierwszym
   uruchomieniu aplikacji w nowym dniu. Odhaczenie rutyny zapisuje również
   notatkę z tagiem `Routine`.
+- **ToDo** - osobna lista zadań do wykonania. Dodanie zadania pozostawia
+  notatkę z tagiem `ToDo`, a jego ukończenie zapisuje notatkę z tagiem `Today`.
+  Ukończone zadania pozostają na liście jako odhaczone, a zadania są
+  przechowywane lokalnie niezależnie od codziennego resetu rutyn.
 - **Notatki Filmweb** - chip `🎬 Filmweb` otwiera natywne wyszukiwanie w
   dolnym panelu aplikacji. Wyniki są pokazywane jako przewijana lista
   maksymalnie 10 filmów i seriali z okładką, tytułem oraz rokiem. Po wybraniu
@@ -50,12 +54,13 @@ kroków`.
 
 ## Ekrany aplikacji
 
-Górny pasek udostępnia cztery obszary:
+Górny pasek udostępnia pięć obszarów:
 
 | Ekran | Zastosowanie |
 | --- | --- |
 | **Add Note** | Wpisywanie treści i zapisywanie jej pod wybranym tagiem. |
 | **Routines** | Zarządzanie i wykonywanie codziennych rutyn. |
+| **ToDo** | Dodawanie, odhaczanie i usuwanie zadań do wykonania. |
 | **Prepare Note** | Podgląd oraz kopiowanie tekstu przygotowanego w formacie Wiki. |
 | **List Notes** | Przeglądanie i masowe usuwanie zapisanych notatek. |
 
@@ -71,11 +76,15 @@ Górny pasek udostępnia cztery obszary:
 5. Aby dodać pictogram, wybierz **🖼️ Pictogramy**, wybierz tag, utwórz lub
    wybierz pictogram i kliknij **Dodaj**. Data jest pobierana z aktualnie
    wybranego dnia.
-6. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
-7. Opcjonalnie wybierz `+` nad przyciskiem kopiowania i zapisz pełny adres
+6. Na ekranie **ToDo** dodaj zadanie. Aplikacja zapisze jego dodanie jako
+   notatkę pod tagiem `ToDo`.
+7. Po wykonaniu zadania odhacz je. Aplikacja zapisze zakończenie jako notatkę
+   pod tagiem `Today`; ukończone zadanie pozostanie na liście.
+8. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
+9. Opcjonalnie wybierz `+` nad przyciskiem kopiowania i zapisz pełny adres
    strony Wiki (`http://` lub `https://`). Później przycisk web skopiuje
    eksport i otworzy zapisany adres.
-8. Wklej przygotowany tekst do docelowej strony Wiki.
+10. Wklej przygotowany tekst do docelowej strony Wiki.
 
 ## Dane i prywatność
 
@@ -85,6 +94,9 @@ Górny pasek udostępnia cztery obszary:
   notatki, tagi, kategorie i rutyny.
 - Definicje pictogramów są przechowywane w `pictogram_table`, a ich użycia
   przypisane do dnia i taga w `pictogram_entry_table`.
+- Zadania ToDo są przechowywane w lokalnej tabeli `todo_table`. Wpisy o dodaniu
+  i ukończeniu zadania są zwykłymi notatkami, odpowiednio z tagami `ToDo` i
+  `Today`.
 - Aplikacja przechowuje referencję DokuWiki i ikonę podglądu pictogramu, ale
   nie generuje ani nie przesyła plików PNG. Plik `pictograms_-_<nazwa>.png`
   powinien istnieć w docelowej Wiki.

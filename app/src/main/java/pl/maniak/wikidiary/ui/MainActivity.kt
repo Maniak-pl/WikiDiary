@@ -119,6 +119,7 @@ class MainActivity : ComponentActivity() {
                             selectedDate = viewModel.selectedDate.value,
                             tagList = viewModel.tags.value,
                             routines = viewModel.routines.value,
+                            todos = viewModel.todos.value,
                             filmNotes = viewModel.filmNotes.value,
                             pictogramEntries = viewModel.pictogramEntries.value,
                             wikiPageUrl = viewModel.wikiPageUrl.value,

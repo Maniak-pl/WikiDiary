@@ -16,6 +16,7 @@ import java.util.Date
 import pl.maniak.wikidiary.data.Category
 import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
+import pl.maniak.wikidiary.data.Todo
 import pl.maniak.wikidiary.domain.model.FilmNoteEntry
 import pl.maniak.wikidiary.domain.model.Pictogram
 import pl.maniak.wikidiary.domain.model.PictogramEntry
@@ -27,6 +28,7 @@ import pl.maniak.wikidiary.domain.repository.FilmwebSearchRepository
 import pl.maniak.wikidiary.domain.repository.PictogramRepository
 import pl.maniak.wikidiary.domain.repository.RoutineRepository
 import pl.maniak.wikidiary.domain.repository.TagRepository
+import pl.maniak.wikidiary.domain.repository.TodoRepository
 import pl.maniak.wikidiary.domain.repository.WikiNoteRepository
 import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.model.ActionClick.AddCategory
@@ -53,6 +55,7 @@ import pl.maniak.wikidiary.ui.model.FilmwebSaveState
 import pl.maniak.wikidiary.ui.model.FilmwebSearchUiState
 import pl.maniak.wikidiary.ui.model.ActionClick.SavePictogram
 import pl.maniak.wikidiary.ui.model.ActionClick.SaveWikiPageUrl
+import pl.maniak.wikidiary.utils.helpers.TodoNoteFactory
 import pl.maniak.wikidiary.utils.helpers.WikiParser
 
 class MainViewModel(
@@ -60,6 +63,7 @@ class MainViewModel(
     private val tagRepository: TagRepository,
     private val categoryRepository: CategoryRepository,
     private val routineRepository: RoutineRepository,
+    private val todoRepository: TodoRepository,
     private val config: Config,
     private val filmRepository: FilmRepository,
     private val filmwebSearchRepository: FilmwebSearchRepository,
@@ -77,6 +81,9 @@ class MainViewModel(
 
     private val _routines = mutableStateOf<List<Routine>>(emptyList())
     val routines: State<List<Routine>> = _routines
+
+    private val _todos = mutableStateOf<List<Todo>>(emptyList())
+    val todos: State<List<Todo>> = _todos
 
     private val _filmNotes = mutableStateOf<List<FilmNoteEntry>>(emptyList())
     val filmNotes: State<List<FilmNoteEntry>> = _filmNotes
@@ -118,6 +125,7 @@ class MainViewModel(
         loadTags()
         loadCategories()
         loadRoutines()
+        loadTodos()
         loadFilmNotes()
         loadPictograms()
         loadPictogramEntries()
@@ -159,6 +167,12 @@ class MainViewModel(
     private fun loadFilmNotes() {
         viewModelScope.launch {
             _filmNotes.value = filmRepository.getFilmNotes()
+        }
+    }
+
+    private fun loadTodos() {
+        viewModelScope.launch {
+            _todos.value = todoRepository.getTodos()
         }
     }
 
@@ -230,6 +244,9 @@ class MainViewModel(
 
             is ActionClick.AddRoutine -> saveRoutine(Routine(name = action.name))
             is ActionClick.DeleteRoutine -> deleteRoutine(action.id)
+            is ActionClick.AddTodo -> addTodo(action.title)
+            is ActionClick.DeleteTodo -> deleteTodo(action.id)
+            is ActionClick.UpdateTodo -> updateTodo(action.todo)
             is DataPickerChangeDate -> {
                 _selectedDate.value = action.date
                 _showDatePickerDialog.value = false
@@ -479,6 +496,42 @@ class MainViewModel(
         viewModelScope.launch {
             routineRepository.deleteRoutine(id)
             loadRoutines()
+        }
+    }
+
+    private fun addTodo(title: String) {
+        val normalizedTitle = title.trim()
+        if (normalizedTitle.isBlank()) {
+            return
+        }
+
+        viewModelScope.launch {
+            val todo = Todo(title = normalizedTitle)
+            todoRepository.saveTodo(todo)
+            noteRepository.saveNote(TodoNoteFactory.createAddedNote(todo, Date()))
+            config.setLastUpdated(System.currentTimeMillis())
+            _todos.value = todoRepository.getTodos()
+            _notes.value = noteRepository.getNotes()
+        }
+    }
+
+    private fun updateTodo(todo: Todo) {
+        val previousTodo = _todos.value.firstOrNull { it.id == todo.id }
+        viewModelScope.launch {
+            todoRepository.updateTodo(todo)
+            if (previousTodo?.isCompleted == false && todo.isCompleted) {
+                noteRepository.saveNote(TodoNoteFactory.createCompletedNote(todo, Date()))
+                config.setLastUpdated(System.currentTimeMillis())
+                _notes.value = noteRepository.getNotes()
+            }
+            _todos.value = todoRepository.getTodos()
+        }
+    }
+
+    private fun deleteTodo(id: Long) {
+        viewModelScope.launch {
+            todoRepository.deleteTodo(id)
+            _todos.value = todoRepository.getTodos()
         }
     }
 

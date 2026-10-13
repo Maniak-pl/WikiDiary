@@ -19,6 +19,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.List
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
+import pl.maniak.wikidiary.data.Todo
 import pl.maniak.wikidiary.domain.model.FilmNoteEntry
 import pl.maniak.wikidiary.domain.model.PictogramEntry
 import pl.maniak.wikidiary.domain.model.WikiNote
@@ -49,6 +51,7 @@ fun MainScreen(
     tagList: List<Tag> = mutableListOf(),
     selectedDate: Date,
     routines: List<Routine> = emptyList(),
+    todos: List<Todo> = emptyList(),
     filmNotes: List<FilmNoteEntry> = emptyList(),
     pictogramEntries: List<PictogramEntry> = emptyList(),
     wikiPageUrl: String = "",
@@ -75,6 +78,9 @@ fun MainScreen(
                         }
                         IconButton(onClick = { currentScreen = ListRoutines }) {
                             Icon(Icons.Default.Check, contentDescription = null)
+                        }
+                        IconButton(onClick = { currentScreen = ToDo }) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null)
                         }
                         IconButton(onClick = { currentScreen = PrepareNote }) {
                             Icon(
@@ -104,6 +110,10 @@ fun MainScreen(
 
                 is ListRoutines -> {
                     RoutineScreen(routines = routines, onClick = onClick)
+                }
+
+                is ToDo -> {
+                    TodoScreen(todos = todos, onClick = onClick)
                 }
 
                 is PrepareNote -> {
@@ -157,6 +167,7 @@ fun MainScreen(
 sealed class Screen(val title: String) {
     data object Add : Screen("Add Note")
     data object ListRoutines : Screen("Routines")
+    data object ToDo : Screen("ToDo")
     data object PrepareNote : Screen("Prepare Note")
     data object ListNotes : Screen("List Notes")
 }
