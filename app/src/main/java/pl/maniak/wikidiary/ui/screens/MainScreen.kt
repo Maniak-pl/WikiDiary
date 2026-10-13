@@ -3,10 +3,10 @@ package pl.maniak.wikidiary.ui.screens
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,7 +62,7 @@ fun MainScreen(
     var currentScreen by remember { mutableStateOf<Screen>(Add) }
     val context = LocalContext.current
     val clipboardManager =
-        LocalContext.current.getSystemService(ComponentActivity.CLIPBOARD_SERVICE) as ClipboardManager
+        LocalContext.current.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     Scaffold(
         topBar = {

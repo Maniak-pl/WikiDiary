@@ -159,13 +159,13 @@ produkcyjnej.
 
 ## Technologia i architektura
 
-- Kotlin
-- Jetpack Compose i Material
-- Room jako lokalna baza danych
+- Kotlin `2.0` z kompilatorem Compose (K2)
+- Jetpack Compose (BOM) i Material
+- Room jako lokalna baza danych (generowanie kodu przez KSP)
 - Koin do wstrzykiwania zależności
 - Coroutines
-- Gradle z Android Gradle Plugin `7.4.0`
-- Kotlin plugin `1.9.10`
+- Gradle `8.11` z Android Gradle Plugin `8.7`
+- wersje zależności w katalogu `gradle/libs.versions.toml`
 - `compileSdk` / `targetSdk`: `34`
 - `minSdk`: `24`
 
@@ -179,7 +179,7 @@ Główne warstwy projektu:
 ## Budowanie lokalne (opcjonalnie)
 
 Gotowy APK nie wymaga kompilowania. Jeśli potrzebny jest nowy build, wymagane
-są Android SDK z platformą 34 oraz JDK zgodne z Android Gradle Plugin 7.4.
+są Android SDK z platformą 34 oraz JDK 17 lub nowsze.
 
 Przykładowe polecenia dla środowiska z SDK w
 `/opt/homebrew/share/android-commandlinetools`:
@@ -187,12 +187,6 @@ Przykładowe polecenia dla środowiska z SDK w
 ```bash
 export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
-
-# Potrzebne przy uruchamianiu starego KAPT na JDK 21.
-export JAVA_TOOL_OPTIONS="--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED \
---add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED \
---add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED \
---add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED"
 
 bash ./gradlew assembleDebug --no-daemon
 bash ./gradlew testDebugUnitTest --no-daemon
