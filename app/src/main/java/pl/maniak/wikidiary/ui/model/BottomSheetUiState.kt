@@ -7,5 +7,6 @@ sealed interface BottomSheetUiState {
     data object CreateCategory : BottomSheetUiState
     data object FilmwebSearch : BottomSheetUiState
     data object PictogramManager : BottomSheetUiState
+    data object PersonManager : BottomSheetUiState
     data object None : BottomSheetUiState
 }

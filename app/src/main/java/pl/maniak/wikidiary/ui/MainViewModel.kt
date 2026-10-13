@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Date
 import pl.maniak.wikidiary.data.Category
+import pl.maniak.wikidiary.data.Person
 import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.data.Todo
@@ -26,6 +27,7 @@ import pl.maniak.wikidiary.domain.repository.Config
 import pl.maniak.wikidiary.domain.repository.FilmRepository
 import pl.maniak.wikidiary.domain.repository.FilmwebSearchRepository
 import pl.maniak.wikidiary.domain.repository.PictogramRepository
+import pl.maniak.wikidiary.domain.repository.PersonRepository
 import pl.maniak.wikidiary.domain.repository.RoutineRepository
 import pl.maniak.wikidiary.domain.repository.TagRepository
 import pl.maniak.wikidiary.domain.repository.TodoRepository
@@ -34,6 +36,7 @@ import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.model.ActionClick.AddCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.AddNote
 import pl.maniak.wikidiary.ui.model.ActionClick.AddPictogramToTag
+import pl.maniak.wikidiary.ui.model.ActionClick.AddPerson
 import pl.maniak.wikidiary.ui.model.ActionClick.AddTag
 import pl.maniak.wikidiary.ui.model.ActionClick.ConfirmProject
 import pl.maniak.wikidiary.ui.model.ActionClick.DataPickerChangeDate
@@ -41,6 +44,7 @@ import pl.maniak.wikidiary.ui.model.ActionClick.DeleteCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteNote
 import pl.maniak.wikidiary.ui.model.ActionClick.DeletePictogram
 import pl.maniak.wikidiary.ui.model.ActionClick.DeletePictogramEntry
+import pl.maniak.wikidiary.ui.model.ActionClick.DeletePerson
 import pl.maniak.wikidiary.ui.model.ActionClick.DeleteTag
 import pl.maniak.wikidiary.ui.model.ActionClick.EditTag
 import pl.maniak.wikidiary.ui.model.ActionClick.TagChangeDate
@@ -48,6 +52,7 @@ import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateCategory
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateFilmweb
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreateProject
 import pl.maniak.wikidiary.ui.model.ActionClick.TagCreatePictogram
+import pl.maniak.wikidiary.ui.model.ActionClick.TagCreatePerson
 import pl.maniak.wikidiary.ui.model.ActionClick.UpdateCategory
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateProject
@@ -56,6 +61,7 @@ import pl.maniak.wikidiary.ui.model.FilmwebSearchUiState
 import pl.maniak.wikidiary.ui.model.ActionClick.SavePictogram
 import pl.maniak.wikidiary.ui.model.ActionClick.SaveWikiPageUrl
 import pl.maniak.wikidiary.utils.helpers.TodoNoteFactory
+import pl.maniak.wikidiary.utils.helpers.PersonMentionResolver
 import pl.maniak.wikidiary.utils.helpers.WikiParser
 
 class MainViewModel(
@@ -68,6 +74,7 @@ class MainViewModel(
     private val filmRepository: FilmRepository,
     private val filmwebSearchRepository: FilmwebSearchRepository,
     private val pictogramRepository: PictogramRepository,
+    private val personRepository: PersonRepository,
 ) : ViewModel() {
 
     private val _notes = mutableStateOf<List<WikiNote>>(emptyList())
@@ -115,6 +122,12 @@ class MainViewModel(
     private val _pictogramError = mutableStateOf<String?>(null)
     val pictogramError: State<String?> = _pictogramError
 
+    private val _people = mutableStateOf<List<Person>>(emptyList())
+    val people: State<List<Person>> = _people
+
+    private val _personError = mutableStateOf<String?>(null)
+    val personError: State<String?> = _personError
+
     private val _wikiPageUrl = mutableStateOf(config.getWikiPageUrl())
     val wikiPageUrl: State<String> = _wikiPageUrl
 
@@ -129,6 +142,7 @@ class MainViewModel(
         loadFilmNotes()
         loadPictograms()
         loadPictogramEntries()
+        loadPeople()
     }
 
     private fun loadNotes() {
@@ -188,6 +202,12 @@ class MainViewModel(
         }
     }
 
+    private fun loadPeople() {
+        viewModelScope.launch {
+            _people.value = personRepository.getPeople()
+        }
+    }
+
     fun onActionClick(action: ActionClick) {
         when (action) {
             is AddNote -> saveNoteAndUpdateTag(action.tag, action.content)
@@ -209,6 +229,12 @@ class MainViewModel(
                 _pictogramError.value = null
                 showBottomSheet(BottomSheetUiState.PictogramManager)
             }
+            is TagCreatePerson -> {
+                _personError.value = null
+                showBottomSheet(BottomSheetUiState.PersonManager)
+            }
+            is AddPerson -> addPerson(action)
+            is DeletePerson -> deletePerson(action.id)
             is SavePictogram -> savePictogram(action)
             is DeletePictogram -> deletePictogram(action.id)
             is AddPictogramToTag -> addPictogramToTag(action)
@@ -345,7 +371,22 @@ class MainViewModel(
     }
 
     private fun saveNoteAndUpdateTag(tag: Tag, content: String) {
-        saveWikiNote(tag.name, content, tag.category)
+        viewModelScope.launch {
+            val people = PersonMentionResolver.resolve(content, _people.value)
+            val formattedContent = PersonMentionResolver.replaceWithWikiLinks(content, people)
+            noteRepository.saveNoteWithPeople(
+                note = WikiNote(
+                    tag = tag.name,
+                    content = formattedContent,
+                    category = tag.category,
+                    date = selectedDate.value,
+                    people = people
+                ),
+                personIds = people.map(Person::id)
+            )
+            config.setLastUpdated(System.currentTimeMillis())
+            loadNotes()
+        }
         saveTag(tag.copy(date = Date()))
     }
 
@@ -454,6 +495,30 @@ class MainViewModel(
         val normalizedUrl = url.trim()
         config.setWikiPageUrl(normalizedUrl)
         _wikiPageUrl.value = normalizedUrl
+    }
+
+    private fun addPerson(action: AddPerson) {
+        val normalizedName = action.name.trim()
+        if (normalizedName.isBlank()) {
+            _personError.value = "Podaj imię i nazwisko."
+            return
+        }
+        if (_people.value.any { it.name.equals(normalizedName, ignoreCase = true) }) {
+            _personError.value = "Ta osoba jest już zapisana."
+            return
+        }
+        viewModelScope.launch {
+            personRepository.savePerson(Person(name = normalizedName, gender = action.gender))
+            _personError.value = null
+            loadPeople()
+        }
+    }
+
+    private fun deletePerson(id: Long) {
+        viewModelScope.launch {
+            personRepository.deletePerson(id)
+            loadPeople()
+        }
     }
 
     private fun deleteNote(note: WikiNote) {

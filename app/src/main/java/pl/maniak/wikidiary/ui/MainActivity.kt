@@ -30,6 +30,7 @@ import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateCategoryScreen
 import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateProjectScreen
 import pl.maniak.wikidiary.ui.screens.bottomsheet.FilmwebSearchScreen
 import pl.maniak.wikidiary.ui.screens.bottomsheet.PictogramManagerScreen
+import pl.maniak.wikidiary.ui.screens.bottomsheet.PersonManagerScreen
 import pl.maniak.wikidiary.ui.theme.WikiTheme
 import java.util.Calendar
 import java.util.GregorianCalendar
@@ -103,6 +104,11 @@ class MainActivity : ComponentActivity() {
                                 error = viewModel.pictogramError.value,
                                 onClick = viewModel::onActionClick
                             )
+                            BottomSheetUiState.PersonManager -> PersonManagerScreen(
+                                people = viewModel.people.value,
+                                error = viewModel.personError.value,
+                                onClick = viewModel::onActionClick
+                            )
                             BottomSheetUiState.None -> {}
                         }
                     },
@@ -118,6 +124,7 @@ class MainActivity : ComponentActivity() {
                             list = viewModel.notes.value,
                             selectedDate = viewModel.selectedDate.value,
                             tagList = viewModel.tags.value,
+                            people = viewModel.people.value,
                             routines = viewModel.routines.value,
                             todos = viewModel.todos.value,
                             filmNotes = viewModel.filmNotes.value,

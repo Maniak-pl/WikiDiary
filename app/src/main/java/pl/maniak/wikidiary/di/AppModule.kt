@@ -6,6 +6,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import pl.maniak.wikidiary.data.database.WikiNoteDatabase
 import pl.maniak.wikidiary.data.mapper.CategoryMapper
+import pl.maniak.wikidiary.data.mapper.PersonMapper
 import pl.maniak.wikidiary.data.mapper.PictogramEntryMapper
 import pl.maniak.wikidiary.data.mapper.PictogramMapper
 import pl.maniak.wikidiary.data.mapper.RoutineMapper
@@ -24,6 +25,8 @@ import pl.maniak.wikidiary.domain.repository.FilmwebSearchRepository
 import pl.maniak.wikidiary.domain.repository.FilmwebSearchRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.PictogramRepository
 import pl.maniak.wikidiary.domain.repository.PictogramRepositoryImpl
+import pl.maniak.wikidiary.domain.repository.PersonRepository
+import pl.maniak.wikidiary.domain.repository.PersonRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.RoutineRepository
 import pl.maniak.wikidiary.domain.repository.RoutineRepositoryImpl
 import pl.maniak.wikidiary.domain.repository.TagRepository
@@ -58,19 +61,22 @@ val appModule = module {
     single { get<WikiNoteDatabase>().pictogramDao() }
     single { get<WikiNoteDatabase>().pictogramEntryDao() }
     single { get<WikiNoteDatabase>().todoDao() }
+    single { get<WikiNoteDatabase>().personDao() }
+    single { get<WikiNoteDatabase>().notePersonDao() }
 
     // Repository
-    single<WikiNoteRepository> { WikiNoteRepositoryImpl(get(), get()) }
+    single<WikiNoteRepository> { WikiNoteRepositoryImpl(get(), get(), get(), get()) }
     single<TagRepository> { TagRepositoryImpl(get(), get()) }
     single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
     single<RoutineRepository> { RoutineRepositoryImpl(get(), get()) }
     single<TodoRepository> { TodoRepositoryImpl(get(), get()) }
+    single<PersonRepository> { PersonRepositoryImpl(get(), get()) }
     single<FilmRepository> { FilmRepositoryImpl(get(), get(), get(), get(), get()) }
     single<PictogramRepository> { PictogramRepositoryImpl(get(), get(), get(), get()) }
     single<FilmwebSearchRepository> { FilmwebSearchRepositoryImpl() }
 
     // ViewModel
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 
     // Mapper
     factory<WikiNoteMapper> { WikiNoteMapperImpl() }
@@ -78,6 +84,7 @@ val appModule = module {
     factory<CategoryMapper> { CategoryMapper() }
     factory<RoutineMapper> { RoutineMapper() }
     factory<TodoMapper> { TodoMapper() }
+    factory { PersonMapper() }
     factory { PictogramMapper() }
     factory { PictogramEntryMapper() }
 

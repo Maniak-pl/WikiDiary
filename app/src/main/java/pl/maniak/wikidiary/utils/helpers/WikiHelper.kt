@@ -13,7 +13,7 @@ import java.util.Locale
 object WikiHelper {
     private data class DayNotes(
         val displayDate: String,
-        val groups: LinkedHashMap<String, MutableList<String>> = LinkedHashMap(),
+        val groups: LinkedHashMap<String, MutableList<WikiNote>> = LinkedHashMap(),
         val pictograms: LinkedHashMap<String, MutableList<PictogramEntry>> = LinkedHashMap(),
         val images: LinkedHashMap<String, String> = LinkedHashMap()
     )
@@ -42,7 +42,7 @@ object WikiHelper {
                         note.date.toYearString()
                     )
                 }
-                dayNotes.groups.getOrPut(group) { mutableListOf() }.add(note.content)
+                dayNotes.groups.getOrPut(group) { mutableListOf() }.add(note)
 
                 filmByNoteId[note.id]?.let { filmNote ->
                     if (filmNote.metadata.canonicalUrl !in dayNotes.images) {
@@ -89,7 +89,15 @@ object WikiHelper {
                 groupNames.forEach { group ->
                     appendLine(WikiParser.addListBold(group, 1))
                     dayNotes.groups[group].orEmpty().forEach { note ->
-                        appendLine(WikiParser.addList(note, 2))
+                        appendLine(
+                            WikiParser.addList(
+                                PersonMentionResolver.replaceWithWikiLinks(
+                                    note.content,
+                                    note.people
+                                ),
+                                2
+                            )
+                        )
                     }
                     dayNotes.pictograms[group].orEmpty().forEach { pictogram ->
                         appendLine(WikiParser.addPictogram(pictogram.name))

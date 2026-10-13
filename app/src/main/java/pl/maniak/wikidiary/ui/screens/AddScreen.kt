@@ -1,6 +1,7 @@
 package pl.maniak.wikidiary.ui.screens
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -8,9 +9,11 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Surface
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -25,24 +28,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
+import pl.maniak.wikidiary.data.Person
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.ui.model.ActionClick
 import pl.maniak.wikidiary.ui.screens.view.Tag
 import pl.maniak.wikidiary.ui.screens.view.TagDefaults
 import pl.maniak.wikidiary.utils.helpers.DateHelper.toDayString
 import java.util.Date
-import java.util.Locale
 
 
 @Composable
 fun AddScreen(
     tags: List<Tag> = emptyList(),
+    people: List<Person> = emptyList(),
     selectedDate: Date,
     onClick: (ActionClick) -> Unit,
 ) {
-    var text by remember { mutableStateOf("") }
+    var text by remember { mutableStateOf(TextFieldValue("")) }
+    val mentionQuery = currentMentionQuery(text)
+    val personSuggestions = if (mentionQuery != null) {
+        people
+            .filter { it.name.contains(mentionQuery.trim(), ignoreCase = true) }
+            .take(5)
+    } else {
+        emptyList()
+    }
     val vertScrollState = rememberScrollState()
     LaunchedEffect(text) {
         vertScrollState.animateScrollTo(Int.MAX_VALUE)
@@ -59,15 +73,15 @@ fun AddScreen(
             selectedDate = selectedDate,
             scrollState = vertScrollState,
             onTagClick = { tag ->
-                if (text.isNotBlank()) {
-                    onClick.invoke(ActionClick.AddNote(tag, text))
-                    text = ""
+                if (text.text.isNotBlank()) {
+                    onClick.invoke(ActionClick.AddNote(tag, text.text))
+                    text = TextFieldValue("")
                 }
             },
             onAddTagClick = {
-                if (text.isNotBlank()) {
-                    onClick.invoke(ActionClick.AddTag(tag = text))
-                    text = ""
+                if (text.text.isNotBlank()) {
+                    onClick.invoke(ActionClick.AddTag(tag = text.text))
+                    text = TextFieldValue("")
                 }
             },
             onEditTagClick = { tag ->
@@ -81,14 +95,35 @@ fun AddScreen(
             color = MaterialTheme.colors.onSurface.copy(alpha = 0.24f)
         )
 
+        if (personSuggestions.isNotEmpty()) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 180.dp),
+                elevation = 4.dp
+            ) {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    personSuggestions.forEach { person ->
+                        Text(
+                            text = "${person.gender.icon} ${person.name}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp)
+                                .clickable {
+                                    text = insertPersonMention(text, person)
+                                }
+                        )
+                    }
+                }
+            }
+        }
+
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp),
             value = text,
-            onValueChange = {
-                text = it.replaceFirstChar { char -> char.uppercase(Locale.getDefault()) }
-            },
+            onValueChange = { text = it },
             label = { Text(text = "Enter your note") },
         )
     }
@@ -147,6 +182,11 @@ private fun TagsLayout(
         )
 
         Tag(
+            text = "\uD83D\uDC65 Osoby",
+            onClick = { onClick.invoke(ActionClick.TagCreatePerson) },
+        )
+
+        Tag(
             text = "\uD83D\uDCC2",
             onClick = { onClick.invoke(ActionClick.TagCreateCategory) },
         )
@@ -156,6 +196,36 @@ private fun TagsLayout(
             onClick = { onClick.invoke(ActionClick.TagChangeDate) },
         )
     }
+
+}
+
+private fun currentMentionQuery(value: TextFieldValue): String? {
+    val cursor = value.selection.start.coerceIn(0, value.text.length)
+    val beforeCursor = value.text.substring(0, cursor)
+    val atIndex = beforeCursor.lastIndexOf('@')
+    if (atIndex < 0 || beforeCursor.substring(atIndex + 1).contains('\n')) {
+        return null
+    }
+    if (atIndex > 0 && beforeCursor[atIndex - 1].isLetterOrDigit()) {
+        return null
+    }
+    val query = beforeCursor.substring(atIndex + 1)
+    return if (query.endsWith(" ") || query.endsWith("\t")) null else query
+}
+
+private fun insertPersonMention(value: TextFieldValue, person: Person): TextFieldValue {
+    val cursor = value.selection.start.coerceIn(0, value.text.length)
+    val beforeCursor = value.text.substring(0, cursor)
+    val atIndex = beforeCursor.lastIndexOf('@')
+    if (atIndex < 0) {
+        return value
+    }
+    val mention = "@${person.name} "
+    val newText = value.text.removeRange(atIndex, cursor).let {
+        it.substring(0, atIndex) + mention + it.substring(atIndex)
+    }
+    val newCursor = atIndex + mention.length
+    return TextFieldValue(newText, TextRange(newCursor))
 }
 
 @Preview(showBackground = true)

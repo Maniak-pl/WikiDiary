@@ -1,6 +1,7 @@
 package pl.maniak.wikidiary
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pl.maniak.wikidiary.domain.model.FilmMediaType
@@ -10,6 +11,8 @@ import pl.maniak.wikidiary.domain.model.PictogramEntry
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.utils.helpers.WikiHelper
 import pl.maniak.wikidiary.utils.helpers.WikiParser
+import pl.maniak.wikidiary.data.Person
+import pl.maniak.wikidiary.data.PersonGender
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -155,6 +158,37 @@ class WikiHelperTest {
         assertEquals(
             "{{ :pictograms_-_spacer_na_dzien.png?200 |}}",
             WikiParser.addPictogram(" Späcer na dzień ")
+        )
+    }
+
+    @Test
+    fun preparingEntryOnWiki_replacesPeopleMentionsInline() {
+        val note = WikiNote(
+            tag = "Today",
+            content = "Rozmowa zespołu z @Dorota Płachno i @Damian Hanusiak",
+            date = dateFormat.parse("2024-10-09 18:00")!!,
+            people = listOf(
+                Person(1, "Dorota Płachno", PersonGender.FEMALE),
+                Person(2, "Damian Hanusiak", PersonGender.MALE)
+            )
+        )
+
+        val result = WikiHelper.preparingEntryOnWiki(listOf(note))
+
+        assertTrue(
+            result.contains(
+                "* Rozmowa zespołu z **🙍🏻‍♀️ [[:Community:Dorota Płachno]]** " +
+                    "i **🙍🏻‍♂️ [[:Community:Damian Hanusiak]]**"
+            )
+        )
+        assertFalse(result.contains("\n**🙍🏻‍♀️ [[:Community:Dorota Płachno]]**"))
+    }
+
+    @Test
+    fun addPerson_generatesBoldCommunityLink() {
+        assertEquals(
+            "**🙍🏻‍♀️ [[:Community:Dorota Płachno]]**",
+            WikiParser.addPerson(Person(1, "Dorota Płachno", PersonGender.FEMALE))
         )
     }
 }

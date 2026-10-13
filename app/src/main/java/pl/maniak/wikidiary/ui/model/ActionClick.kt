@@ -4,12 +4,16 @@ import androidx.compose.ui.graphics.Color
 import pl.maniak.wikidiary.data.Routine
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.data.Todo
+import pl.maniak.wikidiary.data.PersonGender
 import pl.maniak.wikidiary.domain.model.WikiNote
 import pl.maniak.wikidiary.domain.model.FilmMetadata
 import java.util.Date
 
 sealed class ActionClick {
-    data class AddNote(val tag: Tag, val content: String) : ActionClick()
+    data class AddNote(
+        val tag: Tag,
+        val content: String
+    ) : ActionClick()
 
     data class AddTag(val tag: String) : ActionClick()
 
@@ -22,6 +26,15 @@ sealed class ActionClick {
     data object TagCreateFilmweb : ActionClick()
 
     data object TagCreatePictogram : ActionClick()
+
+    data object TagCreatePerson : ActionClick()
+
+    data class AddPerson(
+        val name: String,
+        val gender: PersonGender
+    ) : ActionClick()
+
+    data class DeletePerson(val id: Long) : ActionClick()
 
     data class SavePictogram(
         val id: Long,

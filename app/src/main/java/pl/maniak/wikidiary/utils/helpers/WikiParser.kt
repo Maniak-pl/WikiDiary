@@ -2,6 +2,7 @@ package pl.maniak.wikidiary.utils.helpers
 
 import pl.maniak.wikidiary.domain.model.FilmMediaType
 import pl.maniak.wikidiary.domain.model.FilmMetadata
+import pl.maniak.wikidiary.data.Person
 import java.text.Normalizer
 import java.util.Locale
 
@@ -55,6 +56,10 @@ object WikiParser {
 
     fun addPictogram(name: String): String {
         return "{{ :${pictogramFileName(name)}?200 |}}"
+    }
+
+    fun addPerson(person: Person): String {
+        return "**${person.gender.icon} [[:Community:${person.name}]]**"
     }
 
     fun pictogramFileName(name: String): String {

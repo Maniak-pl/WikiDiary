@@ -26,6 +26,12 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   notatkę z tagiem `ToDo`, a jego ukończenie zapisuje notatkę z tagiem `Today`.
   Ukończone zadania pozostają na liście jako odhaczone, a zadania są
   przechowywane lokalnie niezależnie od codziennego resetu rutyn.
+- **Osoby i wzmianki** - chip `👥 Osoby` otwiera katalog osób, w którym można
+  zapisać imię i nazwisko oraz wybrać ikonę osoby. W treści notatki wpisz `@`
+  i pierwsze litery imienia, aby wybrać podpowiedź z katalogu. Po zapisaniu
+  wzmianka jest zamieniana bezpośrednio w treści na pogrubiony link DokuWiki
+  do przestrzeni `Community`, np.
+  `**🙍🏻‍♀️ [[:Community:Dorota Płachno]]**`.
 - **Notatki Filmweb** - chip `🎬 Filmweb` otwiera natywne wyszukiwanie w
   dolnym panelu aplikacji. Wyniki są pokazywane jako przewijana lista
   maksymalnie 10 filmów i seriali z okładką, tytułem oraz rokiem. Po wybraniu
@@ -80,11 +86,13 @@ Górny pasek udostępnia pięć obszarów:
    notatkę pod tagiem `ToDo`.
 7. Po wykonaniu zadania odhacz je. Aplikacja zapisze zakończenie jako notatkę
    pod tagiem `Today`; ukończone zadanie pozostanie na liście.
-8. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
-9. Opcjonalnie wybierz `+` nad przyciskiem kopiowania i zapisz pełny adres
+8. Wybierz **👥 Osoby**, dodaj imię i nazwisko oraz ikonę. W treści notatki
+   wpisz `@` i pierwszą literę, a następnie wybierz osobę z podpowiedzi.
+9. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
+10. Opcjonalnie wybierz `+` nad przyciskiem kopiowania i zapisz pełny adres
    strony Wiki (`http://` lub `https://`). Później przycisk web skopiuje
    eksport i otworzy zapisany adres.
-10. Wklej przygotowany tekst do docelowej strony Wiki.
+11. Wklej przygotowany tekst do docelowej strony Wiki.
 
 ## Dane i prywatność
 
@@ -97,6 +105,10 @@ Górny pasek udostępnia pięć obszarów:
 - Zadania ToDo są przechowywane w lokalnej tabeli `todo_table`. Wpisy o dodaniu
   i ukończeniu zadania są zwykłymi notatkami, odpowiednio z tagami `ToDo` i
   `Today`.
+- Katalog osób jest przechowywany w tabeli `person_table`, a przypisania osób
+  do notatek w `note_person_table`. Usunięcie osoby z katalogu jest
+  archiwizacją, dlatego wcześniejsze notatki nadal mogą eksportować poprawne
+  linki do tej osoby.
 - Aplikacja przechowuje referencję DokuWiki i ikonę podglądu pictogramu, ale
   nie generuje ani nie przesyła plików PNG. Plik `pictograms_-_<nazwa>.png`
   powinien istnieć w docelowej Wiki.

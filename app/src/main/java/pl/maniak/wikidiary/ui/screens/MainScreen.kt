@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.data.Routine
+import pl.maniak.wikidiary.data.Person
 import pl.maniak.wikidiary.data.Tag
 import pl.maniak.wikidiary.data.Todo
 import pl.maniak.wikidiary.domain.model.FilmNoteEntry
@@ -50,6 +51,7 @@ fun MainScreen(
     list: List<WikiNote> = mutableListOf(),
     tagList: List<Tag> = mutableListOf(),
     selectedDate: Date,
+    people: List<Person> = emptyList(),
     routines: List<Routine> = emptyList(),
     todos: List<Todo> = emptyList(),
     filmNotes: List<FilmNoteEntry> = emptyList(),
@@ -103,6 +105,7 @@ fun MainScreen(
                 is Add -> {
                     AddScreen(
                         tags = tagList,
+                        people = people,
                         selectedDate = selectedDate,
                         onClick = onClick,
                     )
