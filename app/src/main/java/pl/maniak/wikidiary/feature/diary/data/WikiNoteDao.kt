@@ -1,5 +1,6 @@
 package pl.maniak.wikidiary.feature.diary.data
 
+import kotlinx.coroutines.flow.Flow
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -9,6 +10,21 @@ import androidx.room.Query
 interface WikiNoteDao {
     @Query("SELECT * FROM wiki_note_table")
     fun getAll(): List<WikiNoteEntity>
+
+    @Query(
+        """
+        SELECT wiki_note_table.*,
+            person_table.id AS person_id,
+            person_table.name AS person_name,
+            person_table.gender AS person_gender,
+            person_table.isActive AS person_isActive
+        FROM wiki_note_table
+        LEFT JOIN note_person_table ON note_person_table.noteId = wiki_note_table.id
+        LEFT JOIN person_table ON person_table.id = note_person_table.personId
+        ORDER BY wiki_note_table.id, note_person_table.position
+        """
+    )
+    fun observeAllWithPeople(): Flow<List<NoteWithPersonRow>>
 
     @Query("SELECT * FROM wiki_note_table WHERE tag = :tag")
     fun getAllByTag(tag: String): List<WikiNoteEntity>

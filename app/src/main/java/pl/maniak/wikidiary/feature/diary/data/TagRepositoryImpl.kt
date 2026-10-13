@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.diary.data
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.Flow
 import pl.maniak.wikidiary.feature.diary.domain.TagRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,6 +11,9 @@ class TagRepositoryImpl(
     private val mapper: TagMapper,
     private val tagDao: TagDao
 ) : TagRepository {
+    override fun observeTags(): Flow<List<Tag>> =
+        tagDao.observeAll().map { tags -> tags.map(mapper::mapToDomain) }
+
     override suspend fun getTags(): List<Tag> = withContext(Dispatchers.IO) {
         tagDao.getAll().map { mapper.mapToDomain(it) }
     }

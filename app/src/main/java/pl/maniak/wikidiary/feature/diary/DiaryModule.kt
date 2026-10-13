@@ -22,7 +22,7 @@ val diaryModule = module {
     factory<WikiNoteMapper> { WikiNoteMapperImpl() }
     factory<TagMapper> { TagMapperImpl() }
     factory { CategoryMapper() }
-    single<WikiNoteRepository> { WikiNoteRepositoryImpl(get(), get(), get(), get()) }
+    single<WikiNoteRepository> { WikiNoteRepositoryImpl(get(), get(), get(), get(), get()) }
     single<TagRepository> { TagRepositoryImpl(get(), get()) }
     single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
 }

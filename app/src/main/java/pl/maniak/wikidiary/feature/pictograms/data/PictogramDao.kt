@@ -1,5 +1,6 @@
 package pl.maniak.wikidiary.feature.pictograms.data
 
+import kotlinx.coroutines.flow.Flow
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -10,6 +11,9 @@ import androidx.room.Update
 interface PictogramDao {
     @Query("SELECT * FROM pictogram_table ORDER BY name")
     fun getAll(): List<PictogramEntity>
+
+    @Query("SELECT * FROM pictogram_table ORDER BY name")
+    fun observeAll(): Flow<List<PictogramEntity>>
 
     @Query("SELECT * FROM pictogram_table WHERE id = :id")
     fun getById(id: Long): PictogramEntity?

@@ -1,5 +1,6 @@
 package pl.maniak.wikidiary.feature.filmweb.data
 
+import kotlinx.coroutines.flow.Flow
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -24,4 +25,19 @@ interface FilmNoteDao {
         """
     )
     fun getAll(): List<FilmNoteRecord>
+
+    @Query(
+        """
+        SELECT
+            link.noteId AS noteId,
+            film.canonicalUrl AS canonicalUrl,
+            film.title AS title,
+            film.year AS year,
+            film.mediaType AS mediaType,
+            film.posterUrl AS posterUrl
+        FROM film_note_table AS link
+        INNER JOIN film_table AS film ON film.id = link.filmId
+        """
+    )
+    fun observeAll(): Flow<List<FilmNoteRecord>>
 }

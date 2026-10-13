@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.routines.data
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.Flow
 import pl.maniak.wikidiary.feature.routines.domain.RoutineRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,6 +11,9 @@ class RoutineRepositoryImpl(
     private val mapper: RoutineMapper,
     private val dao: RoutineDao
 ) : RoutineRepository {
+    override fun observeRoutines(): Flow<List<Routine>> =
+        dao.observeAll().map { routines -> routines.map(mapper::mapToDomain) }
+
     override suspend fun getRoutines(): List<Routine> = withContext(Dispatchers.IO) {
         dao.getAllRoutines().map { mapper.mapToDomain(it) }
     }

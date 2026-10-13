@@ -1,7 +1,9 @@
 package pl.maniak.wikidiary.feature.diary.domain
 
+import kotlinx.coroutines.flow.Flow
 
 interface WikiNoteRepository {
+    fun observeNotes(): Flow<List<WikiNote>>
 
     suspend fun getNotes(): List<WikiNote>
     suspend fun getWikiNotesWithTag(tag: String): List<WikiNote>

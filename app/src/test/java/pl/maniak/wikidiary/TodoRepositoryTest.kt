@@ -1,27 +1,34 @@
 package pl.maniak.wikidiary
 
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pl.maniak.wikidiary.feature.todo.domain.Todo
-import pl.maniak.wikidiary.feature.todo.data.TodoDao
-import pl.maniak.wikidiary.feature.todo.data.TodoEntity
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import pl.maniak.wikidiary.feature.todo.data.TodoMapper
-import pl.maniak.wikidiary.feature.todo.domain.TodoRepository
 import pl.maniak.wikidiary.feature.todo.data.TodoRepositoryImpl
+import pl.maniak.wikidiary.feature.todo.domain.Todo
+import pl.maniak.wikidiary.feature.todo.domain.TodoRepository
+import pl.maniak.wikidiary.testing.inMemoryDatabase
+import pl.maniak.wikidiary.testing.nextValueAfter
 
+@RunWith(RobolectricTestRunner::class)
 class TodoRepositoryTest {
+
+    private val database = inMemoryDatabase()
+    private val repository: TodoRepository = TodoRepositoryImpl(
+        mapper = TodoMapper(),
+        dao = database.todoDao()
+    )
+
+    @After
+    fun tearDown() = database.close()
 
     @Test
     fun todosCanBeCreatedUpdatedAndDeleted() = runBlocking {
-        val dao = InMemoryTodoDao()
-        val repository: TodoRepository = TodoRepositoryImpl(
-            mapper = TodoMapper(),
-            dao = dao
-        )
-
         repository.saveTodo(Todo(title = "Prepare release"))
         val created = repository.getTodos().single()
 
@@ -36,25 +43,13 @@ class TodoRepositoryTest {
 
         assertTrue(repository.getTodos().isEmpty())
     }
-}
 
-private class InMemoryTodoDao : TodoDao {
-    private val values = linkedMapOf<Long, TodoEntity>()
-    private var nextId = 1L
+    @Test
+    fun observedTodosReflectSavedTodo() = runBlocking {
+        val todos = repository.observeTodos().nextValueAfter {
+            repository.saveTodo(Todo(title = "Buy milk"))
+        }
 
-    override fun getAll(): List<TodoEntity> = values.values.toList()
-
-    override fun insert(todo: TodoEntity): Long {
-        val id = if (todo.id == 0L) nextId++ else todo.id
-        values[id] = todo.copy(id = id)
-        return id
-    }
-
-    override fun update(todo: TodoEntity) {
-        values[todo.id] = todo
-    }
-
-    override fun deleteById(id: Long) {
-        values.remove(id)
+        assertEquals(listOf("Buy milk"), todos.map(Todo::title))
     }
 }

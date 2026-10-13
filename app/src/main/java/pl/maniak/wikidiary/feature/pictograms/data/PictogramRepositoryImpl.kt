@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.pictograms.data
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.Flow
 import pl.maniak.wikidiary.feature.pictograms.domain.PictogramRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,6 +14,12 @@ class PictogramRepositoryImpl(
     private val pictogramMapper: PictogramMapper,
     private val pictogramEntryMapper: PictogramEntryMapper
 ) : PictogramRepository {
+    override fun observePictograms(): Flow<List<Pictogram>> =
+        pictogramDao.observeAll().map { pictograms -> pictograms.map(pictogramMapper::mapToDomain) }
+
+    override fun observePictogramEntries(): Flow<List<PictogramEntry>> =
+        pictogramEntryDao.observeAll().map { entries -> entries.map(pictogramEntryMapper::mapToDomain) }
+
 
     override suspend fun getPictograms(): List<Pictogram> = withContext(Dispatchers.IO) {
         pictogramDao.getAll().map(pictogramMapper::mapToDomain)

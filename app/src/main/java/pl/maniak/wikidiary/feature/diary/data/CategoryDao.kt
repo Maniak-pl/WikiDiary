@@ -1,5 +1,6 @@
 package pl.maniak.wikidiary.feature.diary.data
 
+import kotlinx.coroutines.flow.Flow
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
@@ -12,6 +13,9 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories ORDER BY name")
     fun getAllCategories(): List<CategoryEntity>
+
+    @Query("SELECT * FROM categories ORDER BY name")
+    fun observeAll(): Flow<List<CategoryEntity>>
 
     @Query("DELETE FROM categories WHERE id = :id")
     fun deleteById(id: Long)

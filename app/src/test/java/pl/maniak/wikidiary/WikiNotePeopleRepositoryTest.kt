@@ -1,101 +1,72 @@
 package pl.maniak.wikidiary
 
+import java.util.Date
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import pl.maniak.wikidiary.feature.people.domain.Person
-import pl.maniak.wikidiary.feature.people.domain.PersonGender
-import pl.maniak.wikidiary.feature.diary.data.NotePersonDao
-import pl.maniak.wikidiary.feature.diary.data.NotePersonEntity
-import pl.maniak.wikidiary.feature.people.data.PersonEntity
-import pl.maniak.wikidiary.feature.diary.data.WikiNoteDao
-import pl.maniak.wikidiary.feature.diary.data.WikiNoteEntity
-import pl.maniak.wikidiary.feature.people.data.PersonMapper
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import pl.maniak.wikidiary.feature.diary.data.WikiNoteMapperImpl
+import pl.maniak.wikidiary.feature.diary.data.WikiNoteRepositoryImpl
 import pl.maniak.wikidiary.feature.diary.domain.WikiNote
 import pl.maniak.wikidiary.feature.diary.domain.WikiNoteRepository
-import pl.maniak.wikidiary.feature.diary.data.WikiNoteRepositoryImpl
-import java.util.Date
+import pl.maniak.wikidiary.feature.people.data.PersonMapper
+import pl.maniak.wikidiary.feature.people.data.PersonRepositoryImpl
+import pl.maniak.wikidiary.feature.people.domain.Person
+import pl.maniak.wikidiary.feature.people.domain.PersonGender
+import pl.maniak.wikidiary.feature.people.domain.PersonRepository
+import pl.maniak.wikidiary.testing.inMemoryDatabase
+import pl.maniak.wikidiary.testing.nextValueAfter
 
+@RunWith(RobolectricTestRunner::class)
 class WikiNotePeopleRepositoryTest {
+
+    private val database = inMemoryDatabase()
+    private val people: PersonRepository = PersonRepositoryImpl(
+        mapper = PersonMapper(),
+        dao = database.personDao()
+    )
+    private val repository: WikiNoteRepository = WikiNoteRepositoryImpl(
+        database = database,
+        wikiNoteDao = database.wikiNoteDao(),
+        mapper = WikiNoteMapperImpl(),
+        notePersonDao = database.notePersonDao(),
+        personMapper = PersonMapper()
+    )
+    private val note = WikiNote(
+        tag = "Today",
+        content = "Spotkanie z @Dorota Płachno",
+        date = Date(1_728_480_000_000)
+    )
+
+    @After
+    fun tearDown() = database.close()
 
     @Test
     fun savedNoteKeepsPeopleAfterPersonLeavesActiveDirectory() = runBlocking {
-        val people = mutableMapOf(
-            7L to PersonEntity(
-                id = 7,
-                name = "Dorota Płachno",
-                gender = PersonGender.FEMALE.storageValue
-            )
-        )
-        val noteDao = InMemoryWikiNoteDao()
-        val notePersonDao = InMemoryNotePersonDao(people)
-        val repository: WikiNoteRepository = WikiNoteRepositoryImpl(
-            wikiNoteDao = noteDao,
-            mapper = WikiNoteMapperImpl(),
-            notePersonDao = notePersonDao,
-            personMapper = PersonMapper()
-        )
-        val note = WikiNote(
-            tag = "Today",
-            content = "Spotkanie z @Dorota Płachno",
-            date = Date(1_728_480_000_000)
-        )
+        val dorota = savedPerson("Dorota Płachno", PersonGender.FEMALE)
 
-        repository.saveNoteWithPeople(note, listOf(7L))
-        people[7L] = people.getValue(7L).copy(isActive = false)
+        repository.saveNoteWithPeople(note, listOf(dorota.id))
+        people.deletePerson(dorota.id)
 
-        assertEquals(
-            listOf(Person(7, "Dorota Płachno", PersonGender.FEMALE)),
-            repository.getNotes().single().people
-        )
-    }
-}
-
-private class InMemoryWikiNoteDao : WikiNoteDao {
-    private val values = linkedMapOf<Long, WikiNoteEntity>()
-    private var nextId = 1L
-
-    override fun getAll(): List<WikiNoteEntity> = values.values.toList()
-
-    override fun getAllByTag(tag: String): List<WikiNoteEntity> {
-        return values.values.filter { it.tag == tag }
+        assertEquals(listOf(dorota), repository.getNotes().single().people)
     }
 
-    override fun insert(wikiNote: WikiNoteEntity): Long {
-        val id = if (wikiNote.id == 0L) nextId++ else wikiNote.id
-        values[id] = wikiNote.copy(id = id)
-        return id
-    }
+    @Test
+    fun observedNotesReflectSavedNoteWithPeople() = runBlocking {
+        val dorota = savedPerson("Dorota Płachno", PersonGender.FEMALE)
 
-    override fun deleteById(id: Long) {
-        values.remove(id)
-    }
-
-    override fun deleteAll() {
-        values.clear()
-    }
-}
-
-private class InMemoryNotePersonDao(
-    private val people: Map<Long, PersonEntity>
-) : NotePersonDao {
-    private val values = mutableMapOf<Long, List<NotePersonEntity>>()
-
-    override fun getPeopleForNote(noteId: Long): List<PersonEntity> {
-        return values[noteId]
-            .orEmpty()
-            .sortedBy(NotePersonEntity::position)
-            .mapNotNull { people[it.personId] }
-    }
-
-    override fun insertAll(entries: List<NotePersonEntity>) {
-        if (entries.isNotEmpty()) {
-            values[entries.first().noteId] = entries
+        val notes = repository.observeNotes().nextValueAfter {
+            repository.saveNoteWithPeople(note, listOf(dorota.id))
         }
+
+        assertEquals("Spotkanie z @Dorota Płachno", notes.single().content)
+        assertEquals(listOf(dorota), notes.single().people)
     }
 
-    override fun deleteByNoteId(noteId: Long) {
-        values.remove(noteId)
+    private suspend fun savedPerson(name: String, gender: PersonGender): Person {
+        people.savePerson(Person(name = name, gender = gender))
+        return people.getPeople().single { it.name == name }
     }
 }

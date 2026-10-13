@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.filmweb.data
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.Flow
 import pl.maniak.wikidiary.feature.filmweb.domain.FilmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,6 +20,9 @@ class FilmRepositoryImpl(
     private val filmNoteDao: FilmNoteDao,
     private val wikiNoteMapper: WikiNoteMapper
 ) : FilmRepository {
+    override fun observeFilmNotes(): Flow<List<FilmNoteEntry>> =
+        filmNoteDao.observeAll().map { records -> records.map(::toFilmNoteEntry) }
+
 
     override suspend fun saveFilmNote(note: WikiNote, metadata: FilmMetadata) {
         withContext(Dispatchers.IO) {
@@ -43,17 +48,17 @@ class FilmRepositoryImpl(
     }
 
     override suspend fun getFilmNotes(): List<FilmNoteEntry> = withContext(Dispatchers.IO) {
-        filmNoteDao.getAll().map { record ->
-            FilmNoteEntry(
-                noteId = record.noteId,
-                metadata = FilmMetadata(
-                    canonicalUrl = record.canonicalUrl,
-                    title = record.title,
-                    year = record.year,
-                    mediaType = FilmMediaType.valueOf(record.mediaType),
-                    posterUrl = record.posterUrl
-                )
-            )
-        }
+        filmNoteDao.getAll().map(::toFilmNoteEntry)
     }
+
+    private fun toFilmNoteEntry(record: FilmNoteRecord) = FilmNoteEntry(
+        noteId = record.noteId,
+        metadata = FilmMetadata(
+            canonicalUrl = record.canonicalUrl,
+            title = record.title,
+            year = record.year,
+            mediaType = FilmMediaType.valueOf(record.mediaType),
+            posterUrl = record.posterUrl
+        )
+    )
 }

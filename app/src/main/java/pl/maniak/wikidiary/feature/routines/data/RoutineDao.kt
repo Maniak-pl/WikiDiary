@@ -1,5 +1,6 @@
 package pl.maniak.wikidiary.feature.routines.data
 
+import kotlinx.coroutines.flow.Flow
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -13,6 +14,9 @@ interface RoutineDao {
 
     @Query("SELECT * FROM routines ORDER BY name")
     fun getAllRoutines(): List<RoutineEntity>
+
+    @Query("SELECT * FROM routines ORDER BY name")
+    fun observeAll(): Flow<List<RoutineEntity>>
 
     @Query("DELETE FROM routines WHERE id = :id")
     fun deleteById(id: Long)

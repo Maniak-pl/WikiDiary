@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary.feature.people.data
 
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.Flow
 import pl.maniak.wikidiary.feature.people.domain.PersonRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,6 +11,9 @@ class PersonRepositoryImpl(
     private val mapper: PersonMapper,
     private val dao: PersonDao
 ) : PersonRepository {
+    override fun observePeople(): Flow<List<Person>> =
+        dao.observeAll().map { people -> people.map(mapper::mapToDomain) }
+
     override suspend fun getPeople(): List<Person> = withContext(Dispatchers.IO) {
         dao.getAll().map(mapper::mapToDomain)
     }

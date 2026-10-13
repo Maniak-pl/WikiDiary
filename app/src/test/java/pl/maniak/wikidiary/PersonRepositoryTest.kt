@@ -1,27 +1,34 @@
 package pl.maniak.wikidiary
 
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import pl.maniak.wikidiary.feature.people.data.PersonMapper
+import pl.maniak.wikidiary.feature.people.data.PersonRepositoryImpl
 import pl.maniak.wikidiary.feature.people.domain.Person
 import pl.maniak.wikidiary.feature.people.domain.PersonGender
-import pl.maniak.wikidiary.feature.people.data.PersonDao
-import pl.maniak.wikidiary.feature.people.data.PersonEntity
-import pl.maniak.wikidiary.feature.people.data.PersonMapper
 import pl.maniak.wikidiary.feature.people.domain.PersonRepository
-import pl.maniak.wikidiary.feature.people.data.PersonRepositoryImpl
+import pl.maniak.wikidiary.testing.inMemoryDatabase
+import pl.maniak.wikidiary.testing.nextValueAfter
 
+@RunWith(RobolectricTestRunner::class)
 class PersonRepositoryTest {
+
+    private val database = inMemoryDatabase()
+    private val repository: PersonRepository = PersonRepositoryImpl(
+        mapper = PersonMapper(),
+        dao = database.personDao()
+    )
+
+    @After
+    fun tearDown() = database.close()
 
     @Test
     fun peopleCanBeCreatedAndRemovedFromActiveDirectory() = runBlocking {
-        val dao = InMemoryPersonDao()
-        val repository: PersonRepository = PersonRepositoryImpl(
-            mapper = PersonMapper(),
-            dao = dao
-        )
-
         repository.savePerson(Person(name = "Dorota Płachno", gender = PersonGender.FEMALE))
         repository.savePerson(Person(name = "Damian Hanusiak", gender = PersonGender.MALE))
 
@@ -34,32 +41,17 @@ class PersonRepositoryTest {
             repository.getPeople().first { it.name == "Dorota Płachno" }.gender
         )
 
-        repository.deletePerson(dao.activeValues.first { it.name == "Dorota Płachno" }.id)
+        repository.deletePerson(repository.getPeople().first { it.name == "Dorota Płachno" }.id)
 
         assertTrue(repository.getPeople().none { it.name == "Dorota Płachno" })
     }
-}
 
-private class InMemoryPersonDao : PersonDao {
-    val activeValues = mutableListOf<PersonEntity>()
-    private val archivedValues = mutableListOf<PersonEntity>()
-    private var nextId = 1L
+    @Test
+    fun observedPeopleReflectSavedPerson() = runBlocking {
+        val people = repository.observePeople().nextValueAfter {
+            repository.savePerson(Person(name = "Jakub Hałun", gender = PersonGender.MALE))
+        }
 
-    override fun getAll(): List<PersonEntity> = activeValues.sortedBy { it.name }
-
-    override fun getById(id: Long): PersonEntity? {
-        return (activeValues + archivedValues).firstOrNull { it.id == id }
-    }
-
-    override fun insert(person: PersonEntity): Long {
-        val stored = person.copy(id = if (person.id == 0L) nextId++ else person.id)
-        activeValues += stored
-        return stored.id
-    }
-
-    override fun archiveById(id: Long) {
-        val person = activeValues.first { it.id == id }
-        activeValues.remove(person)
-        archivedValues += person.copy(isActive = false)
+        assertEquals(listOf("Jakub Hałun"), people.map(Person::name))
     }
 }
