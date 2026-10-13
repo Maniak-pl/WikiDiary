@@ -59,8 +59,8 @@ fun MainScreen(
     people: List<Person> = emptyList(),
     routines: List<Routine> = emptyList(),
     todos: List<Todo> = emptyList(),
-    filmNotes: List<FilmNoteEntry> = emptyList(),
     pictogramEntries: List<PictogramEntry> = emptyList(),
+    wikiDocument: String = "",
     wikiPageUrl: String = "",
     onClick: (ActionClick) -> Unit = {},
 ) {
@@ -126,9 +126,7 @@ fun MainScreen(
 
                 is PrepareNote -> {
                     PreparingNoteScreen(
-                        notesList = list,
-                        filmNotes = filmNotes,
-                        pictogramEntries = pictogramEntries,
+                        content = wikiDocument,
                         wikiPageUrl = wikiPageUrl,
                         onCopyClick = {
                             clipboardManager.setPrimaryClip(ClipData.newPlainText("WikiNote", it))

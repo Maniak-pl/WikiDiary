@@ -188,6 +188,13 @@ własny moduł Koin:
 Nowa funkcja powinna powstać jako osobny pakiet `feature/<nazwa>` z własnym
 modułem Koin dołączonym w `di/AppModule.kt`.
 
+Eksport do Wiki składa `WikiExporter` z wpisów dostarczanych przez funkcje.
+Aby nowa funkcja pojawiła się w notatce Wiki, wystarczy w jej module Koin
+zarejestrować implementację `WikiExportContributor` (`bind
+WikiExportContributor::class`). Contributor zwraca `Flow` z liniami grup
+(`GroupLine`) lub załącznikami dnia (`DayAttachment`), a `order` ustala
+kolejność renderowania.
+
 ## Budowanie lokalne (opcjonalnie)
 
 Gotowy APK nie wymaga kompilowania. Jeśli potrzebny jest nowy build, wymagane

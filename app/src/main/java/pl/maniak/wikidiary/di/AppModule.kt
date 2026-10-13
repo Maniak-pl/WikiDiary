@@ -4,6 +4,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import pl.maniak.wikidiary.core.di.coreModule
 import pl.maniak.wikidiary.feature.diary.diaryModule
+import pl.maniak.wikidiary.feature.export.exportModule
 import pl.maniak.wikidiary.feature.filmweb.filmwebModule
 import pl.maniak.wikidiary.feature.people.peopleModule
 import pl.maniak.wikidiary.feature.pictograms.pictogramsModule
@@ -20,10 +21,11 @@ val appModule = module {
         todoModule,
         routinesModule,
         pictogramsModule,
-        filmwebModule
+        filmwebModule,
+        exportModule
     )
 
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 
     factory { WikiWidgetProvider() }
 }

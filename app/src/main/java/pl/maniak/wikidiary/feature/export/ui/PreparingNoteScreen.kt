@@ -32,28 +32,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.R
-import pl.maniak.wikidiary.feature.filmweb.domain.FilmNoteEntry
-import pl.maniak.wikidiary.feature.pictograms.domain.PictogramEntry
-import pl.maniak.wikidiary.feature.diary.domain.WikiNote
-import pl.maniak.wikidiary.feature.export.domain.WikiHelper
 import java.net.URI
 import java.net.URISyntaxException
-import java.util.Date
 
 @Composable
 fun PreparingNoteScreen(
-    notesList: List<WikiNote> = emptyList(),
-    filmNotes: List<FilmNoteEntry> = emptyList(),
-    pictogramEntries: List<PictogramEntry> = emptyList(),
+    content: String = "",
     wikiPageUrl: String = "",
     onCopyClick: (content: String) -> Unit = {},
     onSaveWikiPageUrl: (url: String) -> Unit = {},
     onOpenWikiClick: (url: String, content: String) -> Unit = { _, _ -> }
 ) {
     val state = rememberScrollState()
-    val content = remember(notesList, filmNotes, pictogramEntries) {
-        WikiHelper.preparingEntryOnWiki(notesList, filmNotes, pictogramEntries)
-    }
     var showWikiUrlDialog by remember { mutableStateOf(false) }
     var wikiUrlInput by remember(wikiPageUrl) { mutableStateOf(wikiPageUrl) }
     var wikiUrlError by remember { mutableStateOf<String?>(null) }
@@ -197,10 +187,6 @@ private fun isValidWikiUrl(value: String): Boolean {
 @Composable
 fun PreparingNoteScreenPreview() {
     PreparingNoteScreen(
-        notesList = listOf(
-            WikiNote(1, "ToDo", "Taking out the trash on Saturday", null, Date(), false),
-            WikiNote(2, "Today", "I got up at 5:00", "Work", Date(), false),
-            WikiNote(3, "Regeneration", "I went to the gym", "Health:Fitness", Date(), false),
-        )
+        content = "===== 09.10.2024, Wednesday =====\n\n  * **Today**\n    * I got up at 5:00\n"
     )
 }

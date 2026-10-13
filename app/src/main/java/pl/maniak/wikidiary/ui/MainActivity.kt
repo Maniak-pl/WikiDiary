@@ -126,7 +126,7 @@ class MainActivity : ComponentActivity() {
                             people = viewModel.people.value,
                             routines = viewModel.routines.value,
                             todos = viewModel.todos.value,
-                            filmNotes = viewModel.filmNotes.value,
+                            wikiDocument = viewModel.wikiDocument.collectAsState().value,
                             pictogramEntries = viewModel.pictogramEntries.value,
                             wikiPageUrl = viewModel.wikiPageUrl.value,
                             onClick = viewModel::onActionClick

@@ -1,6 +1,9 @@
 package pl.maniak.wikidiary.feature.diary
 
 import org.koin.dsl.module
+import pl.maniak.wikidiary.feature.diary.domain.NotesExportContributor
+import pl.maniak.wikidiary.feature.export.domain.WikiExportContributor
+import org.koin.dsl.bind
 import pl.maniak.wikidiary.core.database.WikiNoteDatabase
 import pl.maniak.wikidiary.feature.diary.data.CategoryMapper
 import pl.maniak.wikidiary.feature.diary.data.CategoryRepositoryImpl
@@ -25,4 +28,5 @@ val diaryModule = module {
     single<WikiNoteRepository> { WikiNoteRepositoryImpl(get(), get(), get(), get(), get()) }
     single<TagRepository> { TagRepositoryImpl(get(), get()) }
     single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
+    single { NotesExportContributor(get<WikiNoteRepository>().observeNotes()) } bind WikiExportContributor::class
 }

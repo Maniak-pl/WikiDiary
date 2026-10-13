@@ -9,7 +9,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import pl.maniak.wikidiary.feature.export.domain.WikiExporter
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Date
@@ -75,7 +78,11 @@ class MainViewModel(
     private val filmwebSearchRepository: FilmwebSearchRepository,
     private val pictogramRepository: PictogramRepository,
     private val personRepository: PersonRepository,
+    wikiExporter: WikiExporter,
 ) : ViewModel() {
+
+    val wikiDocument: StateFlow<String> = wikiExporter.document()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 
     private val _notes = mutableStateOf<List<WikiNote>>(emptyList())
     val notes: State<List<WikiNote>> = _notes
