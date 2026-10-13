@@ -19,16 +19,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.FloatingActionButtonDefaults.elevation
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -92,6 +93,7 @@ fun PreparingNoteScreen(
     var wikiUrlError by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         floatingActionButton =
         {
             Column(
@@ -118,8 +120,7 @@ fun PreparingNoteScreen(
                         } else {
                             onOpenWikiClick(wikiPageUrl, content)
                         }
-                    },
-                    elevation = elevation(5.dp),
+                    }
                 ) {
                     if (wikiPageUrl.isBlank()) {
                         Icon(
@@ -131,8 +132,7 @@ fun PreparingNoteScreen(
                     }
                 }
                 FloatingActionButton(
-                    onClick = { onCopyClick(content) },
-                    elevation = elevation(5.dp),
+                    onClick = { onCopyClick(content) }
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_copy),
@@ -179,7 +179,7 @@ fun PreparingNoteScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = wikiUrlError.orEmpty(),
-                            color = androidx.compose.material.MaterialTheme.colors.error
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                 }

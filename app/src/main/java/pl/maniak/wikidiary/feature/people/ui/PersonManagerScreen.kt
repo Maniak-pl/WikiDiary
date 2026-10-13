@@ -3,26 +3,24 @@ package pl.maniak.wikidiary.feature.people.ui
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
@@ -43,6 +41,7 @@ fun PersonManagerRoute(viewModel: PeopleViewModel = koinViewModel()) {
     PersonManagerScreen(people = state.people, error = state.error, onIntent = viewModel::onIntent)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonManagerScreen(
     people: List<Person>,
@@ -55,23 +54,12 @@ fun PersonManagerScreen(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .size(width = 40.dp, height = 4.dp)
-                .background(
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.38f),
-                    shape = RoundedCornerShape(50)
-                )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = "Osoby",
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -85,28 +73,14 @@ fun PersonManagerScreen(
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Ikona osoby", style = MaterialTheme.typography.subtitle2)
+        Text(text = "Ikona osoby", style = MaterialTheme.typography.titleSmall)
         Spacer(modifier = Modifier.height(6.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PersonGender.entries.forEach { option ->
-                Button(
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            PersonGender.entries.forEachIndexed { index, option ->
+                SegmentedButton(
+                    selected = gender == option,
                     onClick = { gender = option },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = if (gender == option) {
-                            MaterialTheme.colors.primary
-                        } else {
-                            MaterialTheme.colors.surface
-                        },
-                        contentColor = if (gender == option) {
-                            MaterialTheme.colors.onPrimary
-                        } else {
-                            MaterialTheme.colors.onSurface
-                        }
-                    ),
-                    modifier = Modifier.weight(1f)
+                    shape = SegmentedButtonDefaults.itemShape(index, PersonGender.entries.size)
                 ) {
                     Text(option.icon)
                 }
@@ -129,18 +103,18 @@ fun PersonManagerScreen(
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = error,
-                color = MaterialTheme.colors.error,
-                style = MaterialTheme.typography.body2
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Zapisane osoby", style = MaterialTheme.typography.subtitle1)
+        Text(text = "Zapisane osoby", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(6.dp))
         if (people.isEmpty()) {
             Text(
                 text = "Brak osób. Dodaj osobę, aby używać wzmianek @.",
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.bodyMedium
             )
         } else {
             people.forEach { person ->

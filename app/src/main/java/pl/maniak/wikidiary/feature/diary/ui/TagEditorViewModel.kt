@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import java.util.Date
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pl.maniak.wikidiary.feature.diary.domain.Category
@@ -14,7 +14,10 @@ import pl.maniak.wikidiary.feature.diary.domain.CategoryRepository
 import pl.maniak.wikidiary.feature.diary.domain.Tag
 import pl.maniak.wikidiary.feature.diary.domain.TagRepository
 
-data class TagEditorUiState(val categories: List<Category> = emptyList())
+data class TagEditorUiState(
+    val categories: List<Category> = emptyList(),
+    val tags: List<Tag> = emptyList(),
+)
 
 sealed interface TagEditorIntent {
     data class SaveTag(
@@ -34,9 +37,11 @@ class TagEditorViewModel(
     private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
 
-    val uiState: StateFlow<TagEditorUiState> = categoryRepository.observeCategories()
-        .map(::TagEditorUiState)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TagEditorUiState())
+    val uiState: StateFlow<TagEditorUiState> = combine(
+        categoryRepository.observeCategories(),
+        tagRepository.observeTags(),
+        ::TagEditorUiState
+    ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TagEditorUiState())
 
     fun onIntent(intent: TagEditorIntent) {
         viewModelScope.launch {

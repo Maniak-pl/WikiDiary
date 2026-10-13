@@ -1,17 +1,74 @@
 package pl.maniak.wikidiary.core.ui.theme
 
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-val ColorPrimary = Color(0xFF000000)
-val ColorPrimaryVariant = Color(0xFF000000)
-val ColorAccent = Color(0xFFE41E0A)
+/** Material 3 roles derived from the brand red #E41E0A. */
+internal val LightColors = lightColorScheme(
+    primary = Color(0xFFC00100),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFFFDAD4),
+    onPrimaryContainer = Color(0xFF410000),
+    inversePrimary = Color(0xFFFFB4A8),
+    secondary = Color(0xFF775651),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFFFFDAD4),
+    onSecondaryContainer = Color(0xFF2C1512),
+    tertiary = Color(0xFF705C2E),
+    onTertiary = Color(0xFFFFFFFF),
+    tertiaryContainer = Color(0xFFFBDFA6),
+    onTertiaryContainer = Color(0xFF251A00),
+    background = Color(0xFFFFF8F6),
+    onBackground = Color(0xFF231918),
+    surface = Color(0xFFFFF8F6),
+    onSurface = Color(0xFF231918),
+    surfaceVariant = Color(0xFFF5DDDA),
+    onSurfaceVariant = Color(0xFF534341),
+    surfaceTint = Color(0xFFC00100),
+    inverseSurface = Color(0xFF392E2C),
+    inverseOnSurface = Color(0xFFFFEDEA),
+    outline = Color(0xFF857371),
+    outlineVariant = Color(0xFFD8C2BE),
+    surfaceBright = Color(0xFFFFF8F6),
+    surfaceDim = Color(0xFFE8D6D3),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFFFF0EE),
+    surfaceContainer = Color(0xFFFCEAE7),
+    surfaceContainerHigh = Color(0xFFF6E4E1),
+    surfaceContainerHighest = Color(0xFFF1DEDB),
+)
 
-val DarkColorPrimary = Color(0xFFFFB4AB)
-val DarkColorPrimaryVariant = Color(0xFFFF8A80)
-val DarkColorAccent = Color(0xFFFFB4AB)
-
-val DarkColorBackground = Color(0xFF121212)
-val DarkColorSurface = Color(0xFF1E1E1E)
-val DarkColorOnBackground = Color(0xFFE6E1E5)
-val DarkColorOnSurface = Color(0xFFE6E1E5)
-val DarkColorOnPrimary = Color(0xFF410002)
+internal val DarkColors = darkColorScheme(
+    primary = Color(0xFFFFB4A8),
+    onPrimary = Color(0xFF690100),
+    primaryContainer = Color(0xFF930100),
+    onPrimaryContainer = Color(0xFFFFDAD4),
+    inversePrimary = Color(0xFFC00100),
+    secondary = Color(0xFFE7BDB6),
+    onSecondary = Color(0xFF442925),
+    secondaryContainer = Color(0xFF5D3F3B),
+    onSecondaryContainer = Color(0xFFFFDAD4),
+    tertiary = Color(0xFFDEC48C),
+    onTertiary = Color(0xFF3E2E04),
+    tertiaryContainer = Color(0xFF564419),
+    onTertiaryContainer = Color(0xFFFBDFA6),
+    background = Color(0xFF1A1110),
+    onBackground = Color(0xFFF1DEDC),
+    surface = Color(0xFF1A1110),
+    onSurface = Color(0xFFF1DEDC),
+    surfaceVariant = Color(0xFF534341),
+    onSurfaceVariant = Color(0xFFD8C2BE),
+    surfaceTint = Color(0xFFFFB4A8),
+    inverseSurface = Color(0xFFF1DEDC),
+    inverseOnSurface = Color(0xFF392E2C),
+    outline = Color(0xFFA08C89),
+    outlineVariant = Color(0xFF534341),
+    surfaceBright = Color(0xFF423735),
+    surfaceDim = Color(0xFF1A1110),
+    surfaceContainerLowest = Color(0xFF140C0B),
+    surfaceContainerLow = Color(0xFF231918),
+    surfaceContainer = Color(0xFF271D1C),
+    surfaceContainerHigh = Color(0xFF322826),
+    surfaceContainerHighest = Color(0xFF3D3231),
+)

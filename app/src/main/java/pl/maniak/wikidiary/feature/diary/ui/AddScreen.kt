@@ -10,22 +10,20 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Surface
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -65,7 +63,7 @@ fun AddScreen(
     onIntent: (DiaryIntent) -> Unit,
     onNavigate: (DiaryNavigation) -> Unit,
 ) {
-    var text by remember { mutableStateOf(TextFieldValue("")) }
+    var text by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
     val mentionQuery = currentMentionQuery(text)
     val personSuggestions = if (mentionQuery != null) {
         people
@@ -107,17 +105,15 @@ fun AddScreen(
             onNavigate = onNavigate
         )
 
-        Divider(
-            thickness = 2.dp,
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.24f)
-        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         if (personSuggestions.isNotEmpty()) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 180.dp),
-                elevation = 4.dp
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shadowElevation = 4.dp
             ) {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     personSuggestions.forEach { person ->
@@ -136,9 +132,7 @@ fun AddScreen(
         }
 
         TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(55.dp),
+            modifier = Modifier.fillMaxWidth(),
             value = text,
             onValueChange = { text = it },
             label = { Text(text = "Enter your note") },
@@ -171,10 +165,7 @@ private fun TagsLayout(
                 text = tag.name,
                 onClick = { onTagClick(tag) },
                 onLongClick = { onEditTagClick(tag) },
-                colors = TagDefaults.tagColors(
-                    backgroundColor = tag.color,
-                    contentColor = contentColorFor(tag.color)
-                ),
+                colors = TagDefaults.filledTagColors(tag.color),
             )
         }
 

@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
@@ -41,7 +41,7 @@ fun DropdownMenuCategoriesView(
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.38f),
+                    color = MaterialTheme.colorScheme.outline,
                     shape = RoundedCornerShape(4.dp)
                 )
                 .padding(16.dp)
@@ -63,20 +63,22 @@ fun DropdownMenuCategoriesView(
             onDismissRequest = { expanded = false }
         ) {
             categories.forEach { category ->
-                DropdownMenuItem(onClick = {
-                    onCategorySelected(category)
-                    expanded = false
-                }) {
-                    Text(text = category.name)
-                }
+                DropdownMenuItem(
+                    text = { Text(text = category.name) },
+                    onClick = {
+                        onCategorySelected(category)
+                        expanded = false
+                    }
+                )
             }
 
-            DropdownMenuItem(onClick = {
-                onCategorySelected(null)
-                expanded = false
-            }) {
-                Text(text = "Clear selection")
-            }
+            DropdownMenuItem(
+                text = { Text(text = "Clear selection") },
+                onClick = {
+                    onCategorySelected(null)
+                    expanded = false
+                }
+            )
         }
     }
 }

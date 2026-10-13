@@ -19,15 +19,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -135,8 +138,7 @@ fun FilmwebSearchScreen(
         item {
             Text(
                 text = "🎬 Filmweb",
-                fontSize = 24.sp,
-                modifier = Modifier.padding(top = 16.dp)
+                style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -210,7 +212,7 @@ fun FilmwebSearchScreen(
             item {
                 Text(
                     text = "Wyniki wyszukiwania (${searchState.results.size})",
-                    style = MaterialTheme.typography.subtitle1,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp, bottom = 4.dp)
@@ -260,7 +262,7 @@ fun FilmwebSearchScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Tag",
-                    style = MaterialTheme.typography.subtitle1,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 4.dp)
@@ -304,12 +306,13 @@ fun FilmwebSearchScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
-                    backgroundColor = MaterialTheme.colors.onSurface.copy(alpha = 0.06f),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                    ),
                     border = BorderStroke(
                         width = 1.dp,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+                        color = MaterialTheme.colorScheme.outlineVariant
                     ),
-                    elevation = 0.dp,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
@@ -375,12 +378,9 @@ private fun FilmwebSearchResultCard(
     result: FilmSearchResult,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = 2.dp
+    ElevatedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier.padding(8.dp),
@@ -392,7 +392,7 @@ private fun FilmwebSearchResultCard(
                     modifier = Modifier
                         .size(88.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = "Brak\nokładki", fontSize = 12.sp)
@@ -410,13 +410,13 @@ private fun FilmwebSearchResultCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = result.title,
-                    style = MaterialTheme.typography.subtitle1,
+                    style = MaterialTheme.typography.titleMedium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = "${result.mediaType.displayName()} · ${result.year ?: "rok nieznany"}",
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -501,13 +501,12 @@ private fun FilmwebMetadataCard(
                 ) {
                     FilmMediaType.values().forEach { item ->
                         DropdownMenuItem(
+                            text = { Text(item.displayName()) },
                             onClick = {
                                 onMediaTypeChange(item)
                                 typeMenuExpanded = false
                             }
-                        ) {
-                            Text(item.displayName())
-                        }
+                        )
                     }
                 }
             }
@@ -521,36 +520,17 @@ private fun FilmTagChip(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.clickable(onClick = onClick),
-        backgroundColor = if (isSelected) {
-            MaterialTheme.colors.primary
-        } else {
-            MaterialTheme.colors.surface
-        },
-        contentColor = if (isSelected) {
-            MaterialTheme.colors.onPrimary
-        } else {
-            MaterialTheme.colors.onSurface
-        },
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (isSelected) {
-                MaterialTheme.colors.primary
-            } else {
-                MaterialTheme.colors.onSurface.copy(alpha = 0.24f)
-            }
-        ),
-        elevation = 0.dp,
-        shape = RoundedCornerShape(18.dp)
-    ) {
-        Text(
-            text = tag.name,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
+    FilterChip(
+        selected = isSelected,
+        onClick = onClick,
+        label = {
+            Text(
+                text = tag.name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    )
 }
 
 private fun FilmMediaType.displayName(): String {

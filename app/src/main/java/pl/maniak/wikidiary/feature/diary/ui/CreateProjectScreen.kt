@@ -18,11 +18,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,13 +47,13 @@ private object ScreenValues {
 
 @Composable
 fun CreateProjectRoute(
-    tag: Tag?,
+    tagId: Long?,
     onDone: () -> Unit,
     viewModel: TagEditorViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
     CreateProjectScreen(
-        tag = tag,
+        tag = tagId?.let { id -> state.tags.find { it.id == id } },
         categories = state.categories,
         onIntent = { intent ->
             viewModel.onIntent(intent)
@@ -90,20 +90,9 @@ fun CreateProjectScreen(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .padding(8.dp)
-                .width(40.dp)
-                .height(4.dp)
-                .background(
-                    MaterialTheme.colors.onSurface.copy(alpha = 0.38f),
-                    shape = RoundedCornerShape(50)
-                )
-        )
-
         Text(
             text = stringResource(id = R.string.label_create_project),
             fontSize = 24.sp
@@ -158,7 +147,7 @@ fun CreateProjectScreen(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Button(
+            OutlinedButton(
                 onClick = {
                     tag?.let {
                         onIntent(TagEditorIntent.DeleteTag(it.id))
@@ -209,7 +198,7 @@ fun ColorCircle(
     onClick: () -> Unit
 ) {
     val borderColor = if (isSelected) {
-        MaterialTheme.colors.onSurface
+        MaterialTheme.colorScheme.onSurface
     } else {
         Color.Transparent
     }

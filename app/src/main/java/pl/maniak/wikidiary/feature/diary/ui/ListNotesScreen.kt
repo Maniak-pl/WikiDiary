@@ -13,19 +13,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.contentColorFor
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.primarySurface
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -148,11 +150,10 @@ private fun PictogramEntriesItem(
     entries: List<PictogramEntry>,
     onIntent: (NotesListIntent) -> Unit
 ) {
-    Surface(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 5.dp),
-        elevation = 3.dp
+            .padding(horizontal = 10.dp, vertical = 5.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Row(
@@ -200,6 +201,7 @@ private fun PictogramEntriesItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectionToolbar(
     selectedCount: Int,
@@ -208,12 +210,16 @@ fun SelectionToolbar(
     onDelete: () -> Unit,
     onSelectAllToggle: () -> Unit
 ) {
-    val toolbarBackground = MaterialTheme.colors.primarySurface
-    val toolbarContent = contentColorFor(toolbarBackground)
+    val toolbarBackground = MaterialTheme.colorScheme.primaryContainer
+    val toolbarContent = MaterialTheme.colorScheme.onPrimaryContainer
 
     TopAppBar(
-        backgroundColor = toolbarBackground,
-        contentColor = toolbarContent,
+        windowInsets = WindowInsets(0),
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = toolbarBackground,
+            titleContentColor = toolbarContent,
+            actionIconContentColor = toolbarContent
+        ),
         title = { Text("Zaznaczono: $selectedCount / $totalCount") },
         actions = {
             Checkbox(
@@ -256,20 +262,26 @@ fun WikiNoteItem(
 ) {
     val scale = animateFloatAsState(if (isSelected) 0.95f else 1f).value
 
-    Surface(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp, vertical = 5.dp)
-            .scale(scale)
-            .combinedClickable(
-                onClick = { onClick(!isSelected) },
-                onLongClick = onLongClick
-            ),
-        elevation = 5.dp
+            .scale(scale),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.secondaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLow
+            }
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .combinedClickable(
+                    onClick = { onClick(!isSelected) },
+                    onLongClick = onLongClick
+                )
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -297,7 +309,7 @@ fun WikiNoteItem(
                     text = note.content,
                     modifier = Modifier.padding(4.dp),
                     fontSize = 12.sp,
-                    style = MaterialTheme.typography.body1
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
             if (isSelectionMode) {

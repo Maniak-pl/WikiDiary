@@ -2,9 +2,7 @@ package pl.maniak.wikidiary.feature.diary.ui
 
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.collectAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,13 +11,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,23 +45,12 @@ fun CreateCategoryScreen(
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
 
     Column(
-        modifier = Modifier.padding(16.dp),
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .padding(8.dp)
-                .width(40.dp)
-                .height(4.dp)
-                .background(
-                    MaterialTheme.colors.onSurface.copy(alpha = 0.38f),
-                    shape = RoundedCornerShape(50)
-                )
-        )
-
         Text(
             text = "\uD83D\uDCC1 Create Category",
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentWidth(Alignment.CenterHorizontally)
@@ -113,7 +100,7 @@ fun CreateCategoryScreen(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Button(
+            OutlinedButton(
                 onClick = {
                     selectedCategory?.let {
                         onIntent(TagEditorIntent.DeleteCategory(id = it.id))

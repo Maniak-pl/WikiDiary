@@ -40,8 +40,8 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
 - **Pictogramy** - chip `🖼️ Pictogramy` otwiera katalog ikon. Można utworzyć
   pictogram, wybierając ikonę i nazwę, przypisać go do wybranego taga oraz
   edytować lub usunąć definicję. Przycisk `+` pokazuje dodatkowy zestaw ikon.
-  Usuwanie przypisania jest dostępne bezpośrednio przy pictogramie na ekranie
-  List Notes. Eksport tworzy osobny wpis DokuWiki, np.
+  Usuwanie przypisania jest dostępne bezpośrednio przy pictogramie w zakładce
+  Notatki. Eksport tworzy osobny wpis DokuWiki, np.
   `{{ :pictograms_-_love.png?200 |}}`, pod właściwym tagiem i dniem;
   pictogramy nie są dopisywane do treści notatek.
 - **Przygotowanie wpisu Wiki** - notatki są grupowane według daty, tagów i
@@ -60,21 +60,26 @@ kroków`.
 
 ## Ekrany aplikacji
 
-Górny pasek udostępnia pięć obszarów:
+Dolny pasek nawigacji (Material 3) ma pięć zakładek z etykietami; nazwa
+bieżącej zakładki jest widoczna w górnym pasku. Każda zakładka zachowuje swój
+stan (np. niedokończony tekst notatki) po przełączeniu na inną.
 
-| Ekran | Zastosowanie |
+| Zakładka | Zastosowanie |
 | --- | --- |
-| **Add Note** | Wpisywanie treści i zapisywanie jej pod wybranym tagiem. |
-| **Routines** | Zarządzanie i wykonywanie codziennych rutyn. |
-| **ToDo** | Dodawanie, odhaczanie i usuwanie zadań do wykonania. |
-| **Prepare Note** | Podgląd oraz kopiowanie tekstu przygotowanego w formacie Wiki. |
-| **List Notes** | Przeglądanie i masowe usuwanie zapisanych notatek. |
+| **Dziennik** | Wpisywanie treści i zapisywanie jej pod wybranym tagiem; chipy otwierają panele Filmweb, Pictogramy, Osoby, tagi, kategorie i wybór daty. |
+| **Zadania** | Dodawanie, odhaczanie i usuwanie zadań ToDo. |
+| **Rutyny** | Zarządzanie i wykonywanie codziennych rutyn. |
+| **Notatki** | Przeglądanie i masowe usuwanie zapisanych notatek oraz pictogramów. |
+| **Eksport** | Podgląd oraz kopiowanie tekstu przygotowanego w formacie Wiki. |
+
+Panele (tagi, kategorie, Filmweb, Pictogramy, Osoby) otwierają się jako
+arkusze dolne; można je zamknąć gestem w dół lub przyciskiem Wstecz.
 
 ### Typowy przepływ pracy
 
-1. Na ekranie **Add Note** wpisz treść notatki.
-2. Wybierz tag, aby zapisać wpis. Chip z datą pozwala zmienić dzień, którego
-   dotyczy notatka.
+1. W zakładce **Dziennik** wpisz treść notatki.
+2. Wybierz tag, aby zapisać wpis. Chip z datą otwiera kalendarz, w którym
+   można zmienić dzień, którego dotyczy notatka.
 3. Aby dodać film lub serial, wybierz chip **🎬 Filmweb**, wyszukaj pozycję i
    kliknij wynik na natywnej liście.
 4. Zatwierdź kartę wybranej pozycji, wybierz tag, sprawdź datę i opcjonalnie
@@ -82,13 +87,13 @@ Górny pasek udostępnia pięć obszarów:
 5. Aby dodać pictogram, wybierz **🖼️ Pictogramy**, wybierz tag, utwórz lub
    wybierz pictogram i kliknij **Dodaj**. Data jest pobierana z aktualnie
    wybranego dnia.
-6. Na ekranie **ToDo** dodaj zadanie. Aplikacja zapisze jego dodanie jako
+6. W zakładce **Zadania** dodaj zadanie. Aplikacja zapisze jego dodanie jako
    notatkę pod tagiem `ToDo`.
 7. Po wykonaniu zadania odhacz je. Aplikacja zapisze zakończenie jako notatkę
    pod tagiem `Today`; ukończone zadanie pozostanie na liście.
 8. Wybierz **👥 Osoby**, dodaj imię i nazwisko oraz ikonę. W treści notatki
    wpisz `@` i pierwszą literę, a następnie wybierz osobę z podpowiedzi.
-9. Użyj **Prepare Note**, aby wygenerować tekst i skopiować go do schowka.
+9. Otwórz zakładkę **Eksport**, aby wygenerować tekst i skopiować go do schowka.
 10. Opcjonalnie wybierz `+` nad przyciskiem kopiowania i zapisz pełny adres
    strony Wiki (`http://` lub `https://`). Później przycisk web skopiuje
    eksport i otworzy zapisany adres.
@@ -160,7 +165,10 @@ produkcyjnej.
 ## Technologia i architektura
 
 - Kotlin `2.0` z kompilatorem Compose (K2)
-- Jetpack Compose (BOM) i Material
+- Jetpack Compose (BOM) i Material 3 ze stałą paletą marki (czerwony akcent),
+  w wersji jasnej i ciemnej
+- Navigation Compose z bezpiecznymi typowo trasami (`@Serializable`)
+- tryb edge-to-edge (`enableEdgeToEdge`)
 - Room jako lokalna baza danych (generowanie kodu przez KSP)
 - Koin do wstrzykiwania zależności
 - Coroutines
@@ -193,8 +201,17 @@ ekran ma własny `ViewModel` (rejestrowany przez `viewModel { }` w module
 funkcji), który wystawia `StateFlow<XxxUiState>` i przyjmuje zdarzenia przez
 `onIntent(XxxIntent)`. Funkcja `XxxRoute` pobiera `ViewModel` przez
 `koinViewModel()` i przekazuje stan do bezstanowego ekranu Compose.
-Wybrany dzień jest współdzielony przez `SelectedDateStore`, a `MainActivity`
-jedynie przełącza ekrany i arkusze (`AppSheet`).
+Wybrany dzień jest współdzielony przez `SelectedDateStore`.
+
+Powłokę aplikacji tworzy `ui/WikiApp.kt`: `Scaffold` z górnym paskiem,
+dolnym `NavigationBar`, arkuszami `ModalBottomSheet` i kalendarzem
+`DatePickerDialog`. Zakładki są opisane w `ui/navigation/TopLevelDestination.kt`
+(trasa `AppRoute`, etykieta, tytuł, ikony), a `ui/navigation/WikiNavHost.kt`
+mapuje trasy na ekrany i zachowuje stan zakładek przy przełączaniu. Arkusze są
+opisane przez `AppSheet` i przetrwają obrót ekranu. `MainActivity` jedynie
+włącza edge-to-edge i ustawia `WikiApp`. Nowa zakładka to wpis w
+`TopLevelDestination` i odpowiadający mu `composable<AppRoute.X>` w
+`WikiNavHost`.
 
 Eksport do Wiki składa `WikiExporter` z wpisów dostarczanych przez funkcje.
 Aby nowa funkcja pojawiła się w notatce Wiki, wystarczy w jej module Koin

@@ -16,15 +16,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -126,14 +126,12 @@ fun PictogramManagerScreen(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        SheetHandle(modifier = Modifier.align(Alignment.CenterHorizontally))
-
         Text(
             text = "Pictogramy",
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
@@ -141,7 +139,7 @@ fun PictogramManagerScreen(
 
         Text(
             text = "Tag dla pictogramu",
-            style = MaterialTheme.typography.subtitle2
+            style = MaterialTheme.typography.titleSmall
         )
         Spacer(modifier = Modifier.height(6.dp))
         Row(
@@ -161,7 +159,7 @@ fun PictogramManagerScreen(
         if (tags.isEmpty()) {
             Text(
                 text = "Najpierw utwórz tag, aby przypisać pictogram.",
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 
@@ -169,7 +167,7 @@ fun PictogramManagerScreen(
 
         Text(
             text = if (editingId == 0L) "Nowy pictogram" else "Edytuj pictogram",
-            style = MaterialTheme.typography.subtitle1,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(6.dp))
@@ -236,22 +234,22 @@ fun PictogramManagerScreen(
         if (error != null) {
             Text(
                 text = error,
-                color = MaterialTheme.colors.error,
-                style = MaterialTheme.typography.caption
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Lista pictogramów",
-            style = MaterialTheme.typography.subtitle1,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(6.dp))
         if (pictograms.isEmpty()) {
             Text(
                 text = "Brak pictogramów. Utwórz pierwszy powyżej.",
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.bodyMedium
             )
         } else {
             pictograms.forEach { pictogram ->
@@ -282,41 +280,16 @@ fun PictogramManagerScreen(
 }
 
 @Composable
-private fun SheetHandle(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier
-            .padding(bottom = 8.dp)
-            .size(width = 40.dp, height = 4.dp)
-            .clip(RoundedCornerShape(50)),
-        color = MaterialTheme.colors.onSurface.copy(alpha = 0.38f)
-    ) {}
-}
-
-@Composable
 private fun TagChoice(
     tag: Tag,
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.clickable(onClick = onClick),
-        backgroundColor = if (selected) {
-            MaterialTheme.colors.primary
-        } else {
-            MaterialTheme.colors.surface
-        },
-        contentColor = if (selected) {
-            MaterialTheme.colors.onPrimary
-        } else {
-            MaterialTheme.colors.onSurface
-        },
-        elevation = 0.dp
-    ) {
-        Text(
-            text = tag.name,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-        )
-    }
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(text = tag.name) }
+    )
 }
 
 @Composable
@@ -331,16 +304,16 @@ private fun IconChoice(
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick),
         color = if (selected) {
-            MaterialTheme.colors.primary.copy(alpha = 0.18f)
+            MaterialTheme.colorScheme.primaryContainer
         } else {
-            MaterialTheme.colors.surface
+            MaterialTheme.colorScheme.surfaceContainerLow
         },
         border = androidx.compose.foundation.BorderStroke(
             width = 1.dp,
             color = if (selected) {
-                MaterialTheme.colors.primary
+                MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colors.onSurface.copy(alpha = 0.24f)
+                MaterialTheme.colorScheme.outlineVariant
             }
         )
     ) {
@@ -372,7 +345,7 @@ private fun PictogramRow(
             Text(text = pictogram.name)
             Text(
                 text = WikiParser.pictogramFileName(pictogram.name),
-                style = MaterialTheme.typography.caption
+                style = MaterialTheme.typography.bodySmall
             )
         }
         Button(
