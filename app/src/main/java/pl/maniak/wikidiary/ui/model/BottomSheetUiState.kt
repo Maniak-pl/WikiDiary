@@ -1,6 +1,6 @@
 package pl.maniak.wikidiary.ui.model
 
-import pl.maniak.wikidiary.data.Tag
+import pl.maniak.wikidiary.feature.diary.domain.Tag
 
 sealed interface BottomSheetUiState {
     data class CreateProject(val tag: Tag? = null) : BottomSheetUiState

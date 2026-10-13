@@ -169,12 +169,24 @@ produkcyjnej.
 - `compileSdk` / `targetSdk`: `34`
 - `minSdk`: `24`
 
-Główne warstwy projektu:
+Kod jest podzielony na funkcje (feature slices). Każda funkcja ma własny
+pakiet z warstwami `domain` (modele, interfejsy repozytoriów, logika),
+`data` (encje Room, DAO, mapery, implementacje) i `ui` (ekrany Compose) oraz
+własny moduł Koin:
 
-- `ui` - aktywność, ViewModel, ekrany Compose i widget;
-- `domain` - modele i interfejsy repozytoriów;
-- `data` - encje Room, DAO, mapery i implementacje repozytoriów;
-- `utils` - formatowanie dat oraz generowanie składni Wiki.
+- `core` - baza Room, konfiguracja, motyw, wspólne komponenty UI, daty i
+  składnia Wiki;
+- `feature/diary` - notatki, tagi i kategorie;
+- `feature/people` - osoby i wzmianki `@`;
+- `feature/todo` - zadania ToDo;
+- `feature/routines` - rutyny dzienne;
+- `feature/pictograms` - pictogramy;
+- `feature/filmweb` - wyszukiwanie i wpisy Filmweb;
+- `feature/export` - przygotowanie notatki Wiki;
+- `ui` - aktywność, nawigacja i widget.
+
+Nowa funkcja powinna powstać jako osobny pakiet `feature/<nazwa>` z własnym
+modułem Koin dołączonym w `di/AppModule.kt`.
 
 ## Budowanie lokalne (opcjonalnie)
 

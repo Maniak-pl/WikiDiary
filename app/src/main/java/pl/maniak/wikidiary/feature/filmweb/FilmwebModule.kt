@@ -1,0 +1,15 @@
+package pl.maniak.wikidiary.feature.filmweb
+
+import org.koin.dsl.module
+import pl.maniak.wikidiary.core.database.WikiNoteDatabase
+import pl.maniak.wikidiary.feature.filmweb.data.FilmRepositoryImpl
+import pl.maniak.wikidiary.feature.filmweb.data.FilmwebSearchRepositoryImpl
+import pl.maniak.wikidiary.feature.filmweb.domain.FilmRepository
+import pl.maniak.wikidiary.feature.filmweb.domain.FilmwebSearchRepository
+
+val filmwebModule = module {
+    single { get<WikiNoteDatabase>().filmDao() }
+    single { get<WikiNoteDatabase>().filmNoteDao() }
+    single<FilmRepository> { FilmRepositoryImpl(get(), get(), get(), get(), get()) }
+    single<FilmwebSearchRepository> { FilmwebSearchRepositoryImpl() }
+}

@@ -25,13 +25,12 @@ import pl.maniak.wikidiary.ui.model.ActionClick.DataPickerChangeDate
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateCategory
 import pl.maniak.wikidiary.ui.model.BottomSheetUiState.CreateProject
-import pl.maniak.wikidiary.ui.screens.MainScreen
-import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateCategoryScreen
-import pl.maniak.wikidiary.ui.screens.bottomsheet.CreateProjectScreen
-import pl.maniak.wikidiary.ui.screens.bottomsheet.FilmwebSearchScreen
-import pl.maniak.wikidiary.ui.screens.bottomsheet.PictogramManagerScreen
-import pl.maniak.wikidiary.ui.screens.bottomsheet.PersonManagerScreen
-import pl.maniak.wikidiary.ui.theme.WikiTheme
+import pl.maniak.wikidiary.feature.diary.ui.CreateCategoryScreen
+import pl.maniak.wikidiary.feature.diary.ui.CreateProjectScreen
+import pl.maniak.wikidiary.feature.filmweb.ui.FilmwebSearchScreen
+import pl.maniak.wikidiary.feature.pictograms.ui.PictogramManagerScreen
+import pl.maniak.wikidiary.feature.people.ui.PersonManagerScreen
+import pl.maniak.wikidiary.core.ui.theme.WikiTheme
 import java.util.Calendar
 import java.util.GregorianCalendar
 

@@ -30,7 +30,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <pl.maniak.wikidiary.utils.views.FlowLayout
+    <pl.maniak.wikidiary.core.ui.component.FlowLayout
         android:id="@+id/containerTags"
         android:layout_width="0dp"
         android:layout_height="0dp"

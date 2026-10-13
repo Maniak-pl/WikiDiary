@@ -2,9 +2,9 @@ package pl.maniak.wikidiary
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import pl.maniak.wikidiary.data.Person
-import pl.maniak.wikidiary.data.PersonGender
-import pl.maniak.wikidiary.utils.helpers.PersonMentionResolver
+import pl.maniak.wikidiary.feature.people.domain.Person
+import pl.maniak.wikidiary.feature.people.domain.PersonGender
+import pl.maniak.wikidiary.feature.people.domain.PersonMentionResolver
 
 class PersonMentionResolverTest {
 

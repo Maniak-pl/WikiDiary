@@ -4,8 +4,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pl.maniak.wikidiary.domain.model.FilmMediaType
-import pl.maniak.wikidiary.utils.helpers.FilmwebPageParser
+import pl.maniak.wikidiary.feature.filmweb.domain.FilmMediaType
+import pl.maniak.wikidiary.feature.filmweb.data.FilmwebPageParser
 
 class FilmwebPageParserTest {
     @Test

@@ -2,9 +2,9 @@ package pl.maniak.wikidiary
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import pl.maniak.wikidiary.data.Todo
-import pl.maniak.wikidiary.domain.model.WikiNote
-import pl.maniak.wikidiary.utils.helpers.TodoNoteFactory
+import pl.maniak.wikidiary.feature.todo.domain.Todo
+import pl.maniak.wikidiary.feature.diary.domain.WikiNote
+import pl.maniak.wikidiary.feature.todo.domain.TodoNoteFactory
 import java.util.Date
 
 class TodoNoteFactoryTest {

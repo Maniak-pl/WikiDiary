@@ -3,18 +3,18 @@ package pl.maniak.wikidiary
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import pl.maniak.wikidiary.data.Person
-import pl.maniak.wikidiary.data.PersonGender
-import pl.maniak.wikidiary.data.database.NotePersonDao
-import pl.maniak.wikidiary.data.database.NotePersonEntity
-import pl.maniak.wikidiary.data.database.PersonEntity
-import pl.maniak.wikidiary.data.database.WikiNoteDao
-import pl.maniak.wikidiary.data.database.WikiNoteEntity
-import pl.maniak.wikidiary.data.mapper.PersonMapper
-import pl.maniak.wikidiary.data.mapper.WikiNoteMapperImpl
-import pl.maniak.wikidiary.domain.model.WikiNote
-import pl.maniak.wikidiary.domain.repository.WikiNoteRepository
-import pl.maniak.wikidiary.domain.repository.WikiNoteRepositoryImpl
+import pl.maniak.wikidiary.feature.people.domain.Person
+import pl.maniak.wikidiary.feature.people.domain.PersonGender
+import pl.maniak.wikidiary.feature.diary.data.NotePersonDao
+import pl.maniak.wikidiary.feature.diary.data.NotePersonEntity
+import pl.maniak.wikidiary.feature.people.data.PersonEntity
+import pl.maniak.wikidiary.feature.diary.data.WikiNoteDao
+import pl.maniak.wikidiary.feature.diary.data.WikiNoteEntity
+import pl.maniak.wikidiary.feature.people.data.PersonMapper
+import pl.maniak.wikidiary.feature.diary.data.WikiNoteMapperImpl
+import pl.maniak.wikidiary.feature.diary.domain.WikiNote
+import pl.maniak.wikidiary.feature.diary.domain.WikiNoteRepository
+import pl.maniak.wikidiary.feature.diary.data.WikiNoteRepositoryImpl
 import java.util.Date
 
 class WikiNotePeopleRepositoryTest {

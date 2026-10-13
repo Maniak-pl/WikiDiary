@@ -5,12 +5,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pl.maniak.wikidiary.data.Todo
-import pl.maniak.wikidiary.data.database.TodoDao
-import pl.maniak.wikidiary.data.database.TodoEntity
-import pl.maniak.wikidiary.data.mapper.TodoMapper
-import pl.maniak.wikidiary.domain.repository.TodoRepository
-import pl.maniak.wikidiary.domain.repository.TodoRepositoryImpl
+import pl.maniak.wikidiary.feature.todo.domain.Todo
+import pl.maniak.wikidiary.feature.todo.data.TodoDao
+import pl.maniak.wikidiary.feature.todo.data.TodoEntity
+import pl.maniak.wikidiary.feature.todo.data.TodoMapper
+import pl.maniak.wikidiary.feature.todo.domain.TodoRepository
+import pl.maniak.wikidiary.feature.todo.data.TodoRepositoryImpl
 
 class TodoRepositoryTest {
 

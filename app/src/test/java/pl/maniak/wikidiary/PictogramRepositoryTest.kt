@@ -5,17 +5,17 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pl.maniak.wikidiary.data.database.PictogramDao
-import pl.maniak.wikidiary.data.database.PictogramEntryDao
-import pl.maniak.wikidiary.data.database.PictogramEntryEntity
-import pl.maniak.wikidiary.data.database.PictogramEntryRecord
-import pl.maniak.wikidiary.data.database.PictogramEntity
-import pl.maniak.wikidiary.data.mapper.PictogramEntryMapper
-import pl.maniak.wikidiary.data.mapper.PictogramMapper
-import pl.maniak.wikidiary.domain.model.Pictogram
-import pl.maniak.wikidiary.domain.model.PictogramEntry
-import pl.maniak.wikidiary.domain.repository.PictogramRepository
-import pl.maniak.wikidiary.domain.repository.PictogramRepositoryImpl
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramDao
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramEntryDao
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramEntryEntity
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramEntryRecord
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramEntity
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramEntryMapper
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramMapper
+import pl.maniak.wikidiary.feature.pictograms.domain.Pictogram
+import pl.maniak.wikidiary.feature.pictograms.domain.PictogramEntry
+import pl.maniak.wikidiary.feature.pictograms.domain.PictogramRepository
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramRepositoryImpl
 
 class PictogramRepositoryTest {
 

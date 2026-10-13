@@ -1,0 +1,100 @@
+package pl.maniak.wikidiary.core.wiki
+
+import pl.maniak.wikidiary.feature.filmweb.domain.FilmMediaType
+import pl.maniak.wikidiary.feature.filmweb.domain.FilmMetadata
+import pl.maniak.wikidiary.feature.people.domain.Person
+import java.text.Normalizer
+import java.util.Locale
+
+object WikiParser {
+
+    fun addHeadline(note: String, level: Int): String {
+        val mark = when (level) {
+            1 -> "======"
+            2 -> "====="
+            3 -> "===="
+            4 -> "==="
+            else -> "=="
+        }
+        return "$mark $note $mark"
+    }
+
+    fun addListBold(note: String, level: Int): String {
+        val str = StringBuilder()
+        repeat(level) {
+            str.append("  ")
+        }
+        str.append("* **")
+        str.append(note)
+        str.append("**")
+        return str.toString()
+    }
+
+    fun addList(note: String, level: Int): String {
+        val str = StringBuilder()
+        repeat(level) {
+            str.append("  ")
+        }
+        str.append("* ")
+        str.append(note)
+        return str.toString()
+    }
+
+    fun addFilmNote(prefix: String, metadata: FilmMetadata): String {
+        val sentencePrefix = prefix.trim().ifBlank { "Obejrzałem" }
+        val mediaType = when (metadata.mediaType) {
+            FilmMediaType.FILM -> "film"
+            FilmMediaType.SERIAL -> "serial"
+        }
+        return "$sentencePrefix $mediaType " +
+            "[[${metadata.canonicalUrl}|${metadata.title} (${metadata.year})]]"
+    }
+
+    fun addImage(fileName: String): String {
+        return "{{ :movies:$fileName?200 |}}"
+    }
+
+    fun addPictogram(name: String): String {
+        return "{{ :${pictogramFileName(name)}?200 |}}"
+    }
+
+    fun addPerson(person: Person): String {
+        return "**${person.gender.icon} [[:Community:${person.name}]]**"
+    }
+
+    fun pictogramFileName(name: String): String {
+        val normalizedName = Normalizer
+            .normalize(name.trim().lowercase(Locale.ROOT), Normalizer.Form.NFD)
+            .replace("\\p{M}+".toRegex(), "")
+            .replace("[^a-z0-9]+".toRegex(), "_")
+            .trim('_')
+            .ifBlank { "pictogram" }
+        return "pictograms_-_$normalizedName.png"
+    }
+
+    fun addProject(tag: String, folder: String, year: String): String {
+        return "${addIconCategory(folder)}[[:$folder]] - [[:$folder:Projekt - $tag ${year}]]"
+    }
+
+    private fun addIconCategory(category: String): String {
+        val icons = mapOf(
+            "Books" to "\uD83D\uDCDA ",
+            "Hobby" to "\uD83D\uDD79\uFE0F ",
+            "Work" to "\uD83D\uDCBC ",
+            "Health" to "❤\uFE0F ",
+            "Finances" to "\uD83D\uDCB0 ",
+            "Community" to "\uD83D\uDC6B\uD83C\uDFFC ",
+            "WikiDiary" to "\uD83D\uDCD3 ",
+            "Education" to "\uD83C\uDF93 ",
+            "RealEstate" to "\uD83C\uDFD8\uFE0F ",
+            "Travels" to "\uD83D\uDDFA\uFE0F ",
+            "Transport" to "\uD83D\uDE97 "
+        )
+        for ((key, icon) in icons) {
+            if (category.contains(key, ignoreCase = true)) {
+                return icon
+            }
+        }
+        return ""
+    }
+}

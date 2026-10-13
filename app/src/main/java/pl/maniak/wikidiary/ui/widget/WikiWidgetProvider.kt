@@ -9,7 +9,7 @@ import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import org.koin.java.KoinJavaComponent.inject
 import pl.maniak.wikidiary.R
-import pl.maniak.wikidiary.domain.repository.Config
+import pl.maniak.wikidiary.core.config.Config
 import pl.maniak.wikidiary.ui.MainActivity
 
 class WikiWidgetProvider : AppWidgetProvider() {

@@ -1,0 +1,286 @@
+package pl.maniak.wikidiary.core.database
+
+import pl.maniak.wikidiary.feature.diary.data.CategoryDao
+import pl.maniak.wikidiary.feature.diary.data.CategoryEntity
+import pl.maniak.wikidiary.feature.diary.data.NotePersonDao
+import pl.maniak.wikidiary.feature.diary.data.NotePersonEntity
+import pl.maniak.wikidiary.feature.diary.data.TagDao
+import pl.maniak.wikidiary.feature.diary.data.TagEntity
+import pl.maniak.wikidiary.feature.diary.data.WikiNoteDao
+import pl.maniak.wikidiary.feature.diary.data.WikiNoteEntity
+import pl.maniak.wikidiary.feature.filmweb.data.FilmDao
+import pl.maniak.wikidiary.feature.filmweb.data.FilmEntity
+import pl.maniak.wikidiary.feature.filmweb.data.FilmNoteDao
+import pl.maniak.wikidiary.feature.filmweb.data.FilmNoteEntity
+import pl.maniak.wikidiary.feature.people.data.PersonDao
+import pl.maniak.wikidiary.feature.people.data.PersonEntity
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramDao
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramEntity
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramEntryDao
+import pl.maniak.wikidiary.feature.pictograms.data.PictogramEntryEntity
+import pl.maniak.wikidiary.feature.routines.data.RoutineDao
+import pl.maniak.wikidiary.feature.routines.data.RoutineEntity
+import pl.maniak.wikidiary.feature.todo.data.TodoDao
+import pl.maniak.wikidiary.feature.todo.data.TodoEntity
+import android.content.Context
+import androidx.room.Database
+import androidx.room.migration.Migration
+import androidx.room.Room.databaseBuilder
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import androidx.sqlite.db.SupportSQLiteDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+@Database(
+    entities = [
+        WikiNoteEntity::class,
+        TagEntity::class,
+        CategoryEntity::class,
+        RoutineEntity::class,
+        FilmEntity::class,
+        FilmNoteEntity::class,
+        PictogramEntity::class,
+        PictogramEntryEntity::class,
+        TodoEntity::class,
+        PersonEntity::class,
+        NotePersonEntity::class
+    ],
+    version = 5,
+    exportSchema = false
+)
+@TypeConverters(Converters::class)
+abstract class WikiNoteDatabase : RoomDatabase() {
+
+    abstract fun wikiNoteDao(): WikiNoteDao
+    abstract fun tagDao(): TagDao
+    abstract fun categoryDao(): CategoryDao
+    abstract fun routineDao(): RoutineDao
+    abstract fun filmDao(): FilmDao
+    abstract fun filmNoteDao(): FilmNoteDao
+    abstract fun pictogramDao(): PictogramDao
+    abstract fun pictogramEntryDao(): PictogramEntryDao
+    abstract fun todoDao(): TodoDao
+    abstract fun personDao(): PersonDao
+    abstract fun notePersonDao(): NotePersonDao
+
+    companion object {
+        private var INSTANCE: WikiNoteDatabase? = null
+
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `film_table` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `canonicalUrl` TEXT NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `year` INTEGER NOT NULL,
+                        `mediaType` TEXT NOT NULL,
+                        `posterUrl` TEXT
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS `index_film_table_canonicalUrl` " +
+                        "ON `film_table` (`canonicalUrl`)"
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `film_note_table` (
+                        `noteId` INTEGER NOT NULL,
+                        `filmId` INTEGER NOT NULL,
+                        PRIMARY KEY(`noteId`),
+                        FOREIGN KEY(`noteId`) REFERENCES `wiki_note_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE,
+                        FOREIGN KEY(`filmId`) REFERENCES `film_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_film_note_table_filmId` " +
+                        "ON `film_note_table` (`filmId`)"
+                )
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `pictogram_table` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `icon` TEXT NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS `index_pictogram_table_name` " +
+                        "ON `pictogram_table` (`name`)"
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `pictogram_entry_table` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `pictogramId` INTEGER NOT NULL,
+                        `tag` TEXT NOT NULL,
+                        `category` TEXT,
+                        `date` INTEGER NOT NULL,
+                        FOREIGN KEY(`pictogramId`) REFERENCES `pictogram_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_pictogram_entry_table_pictogramId` " +
+                        "ON `pictogram_entry_table` (`pictogramId`)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_pictogram_entry_table_date_tag` " +
+                        "ON `pictogram_entry_table` (`date`, `tag`)"
+                )
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `todo_table` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `isCompleted` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `person_table` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `gender` TEXT NOT NULL,
+                        `isActive` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `note_person_table` (
+                        `noteId` INTEGER NOT NULL,
+                        `personId` INTEGER NOT NULL,
+                        `position` INTEGER NOT NULL,
+                        PRIMARY KEY(`noteId`, `personId`),
+                        FOREIGN KEY(`noteId`) REFERENCES `wiki_note_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE,
+                        FOREIGN KEY(`personId`) REFERENCES `person_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE NO ACTION
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_note_person_table_noteId` " +
+                        "ON `note_person_table` (`noteId`)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_note_person_table_personId` " +
+                        "ON `note_person_table` (`personId`)"
+                )
+            }
+        }
+
+        fun getDatabase(context: Context): WikiNoteDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = databaseBuilder(
+                    context.applicationContext,
+                    WikiNoteDatabase::class.java,
+                    "wiki_database"
+                )
+                    .addMigrations(
+                        MIGRATION_1_2,
+                        MIGRATION_2_3,
+                        MIGRATION_3_4,
+                        MIGRATION_4_5
+                    )
+                    .addCallback(DatabaseCallback(context)) // Add callback
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+
+        private class DatabaseCallback(private val context: Context) : Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                CoroutineScope(Dispatchers.IO).launch {
+                    populateInitialData(context)
+                }
+            }
+        }
+
+        private fun populateInitialData(context: Context) {
+            val database = getDatabase(context)
+            val tagDao = database.tagDao()
+            val categoryDao = database.categoryDao()
+            val routineDao = database.routineDao()
+
+            val black = 0xFF000000.toInt()
+            val defaultTags = listOf(
+                TagEntity(tag = "Book", color = black),
+                TagEntity(tag = "Meeting", color = black),
+                TagEntity(tag = "ToDo", color = black),
+                TagEntity(tag = "Today", color = black),
+                TagEntity(tag = "Work", color = black),
+                TagEntity(
+                    tag = "Lubimy czytać wyzwanie",
+                    category = "Books",
+                    color = 0xFF4CAF50.toInt()
+                ),
+            )
+            defaultTags.forEach { tagDao.insert(it) }
+
+            val defaultCategories = listOf(
+                CategoryEntity(name = "Books"),
+                CategoryEntity(name = "Community"),
+                CategoryEntity(name = "Education"),
+                CategoryEntity(name = "Finances"),
+                CategoryEntity(name = "Health"),
+                CategoryEntity(name = "Hobby"),
+                CategoryEntity(name = "RealEstate"),
+                CategoryEntity(name = "Transport"),
+                CategoryEntity(name = "Travels"),
+                CategoryEntity(name = "WikiDiary"),
+                CategoryEntity(name = "Work"),
+            )
+            defaultCategories.forEach { categoryDao.insert(it) }
+
+            val defaultRoutines = listOf(
+                RoutineEntity(name = "\uD83D\uDCDE Telefon do przyjaciela"),
+                RoutineEntity(name = "❤\uFE0F Love"),
+                RoutineEntity(name = "\uD83C\uDDEC\uD83C\uDDE7 Angielski"),
+                RoutineEntity(name = "\uD83C\uDFA7 Audiobook"),
+                RoutineEntity(name = "\uD83C\uDFAC Film"),
+                RoutineEntity(name = "\uD83C\uDFCB\uFE0F Aktywność"),
+                RoutineEntity(name = "\uD83D\uDC63 10000 kroków"),
+                RoutineEntity(name = "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66 Rodzina"),
+                RoutineEntity(name = "\uD83D\uDC8A Kuracja"),
+                RoutineEntity(name = "\uD83D\uDCBB Kurs"),
+                RoutineEntity(name = "\uD83D\uDCD6 Book"),
+                RoutineEntity(name = "\uD83D\uDE34 Sen"),
+                RoutineEntity(name = "\uD83E\uDD1D Meeting"),
+                RoutineEntity(name = "\uD83E\uDD38\uFE0F Ćwiczenia"),
+                RoutineEntity(name = "\uD83E\uDDD8\uD83C\uDFFB Joga"),
+                RoutineEntity(name = "\uD83D\uDDFA\uFE0F Nowe miejsce"),
+                RoutineEntity(name = "\uD83E\uDDD8\u200D♂\uFE0F Relax"),
+            )
+            defaultRoutines.forEach { routineDao.insert(it) }
+        }
+    }
+}

@@ -4,13 +4,13 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pl.maniak.wikidiary.data.Person
-import pl.maniak.wikidiary.data.PersonGender
-import pl.maniak.wikidiary.data.database.PersonDao
-import pl.maniak.wikidiary.data.database.PersonEntity
-import pl.maniak.wikidiary.data.mapper.PersonMapper
-import pl.maniak.wikidiary.domain.repository.PersonRepository
-import pl.maniak.wikidiary.domain.repository.PersonRepositoryImpl
+import pl.maniak.wikidiary.feature.people.domain.Person
+import pl.maniak.wikidiary.feature.people.domain.PersonGender
+import pl.maniak.wikidiary.feature.people.data.PersonDao
+import pl.maniak.wikidiary.feature.people.data.PersonEntity
+import pl.maniak.wikidiary.feature.people.data.PersonMapper
+import pl.maniak.wikidiary.feature.people.domain.PersonRepository
+import pl.maniak.wikidiary.feature.people.data.PersonRepositoryImpl
 
 class PersonRepositoryTest {
 

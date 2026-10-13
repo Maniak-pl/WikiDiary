@@ -1,12 +1,12 @@
 package pl.maniak.wikidiary.ui.model
 
 import androidx.compose.ui.graphics.Color
-import pl.maniak.wikidiary.data.Routine
-import pl.maniak.wikidiary.data.Tag
-import pl.maniak.wikidiary.data.Todo
-import pl.maniak.wikidiary.data.PersonGender
-import pl.maniak.wikidiary.domain.model.WikiNote
-import pl.maniak.wikidiary.domain.model.FilmMetadata
+import pl.maniak.wikidiary.feature.routines.domain.Routine
+import pl.maniak.wikidiary.feature.diary.domain.Tag
+import pl.maniak.wikidiary.feature.todo.domain.Todo
+import pl.maniak.wikidiary.feature.people.domain.PersonGender
+import pl.maniak.wikidiary.feature.diary.domain.WikiNote
+import pl.maniak.wikidiary.feature.filmweb.domain.FilmMetadata
 import java.util.Date
 
 sealed class ActionClick {

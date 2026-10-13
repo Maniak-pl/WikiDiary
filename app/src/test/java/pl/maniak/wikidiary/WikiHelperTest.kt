@@ -4,15 +4,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pl.maniak.wikidiary.domain.model.FilmMediaType
-import pl.maniak.wikidiary.domain.model.FilmMetadata
-import pl.maniak.wikidiary.domain.model.FilmNoteEntry
-import pl.maniak.wikidiary.domain.model.PictogramEntry
-import pl.maniak.wikidiary.domain.model.WikiNote
-import pl.maniak.wikidiary.utils.helpers.WikiHelper
-import pl.maniak.wikidiary.utils.helpers.WikiParser
-import pl.maniak.wikidiary.data.Person
-import pl.maniak.wikidiary.data.PersonGender
+import pl.maniak.wikidiary.feature.filmweb.domain.FilmMediaType
+import pl.maniak.wikidiary.feature.filmweb.domain.FilmMetadata
+import pl.maniak.wikidiary.feature.filmweb.domain.FilmNoteEntry
+import pl.maniak.wikidiary.feature.pictograms.domain.PictogramEntry
+import pl.maniak.wikidiary.feature.diary.domain.WikiNote
+import pl.maniak.wikidiary.feature.export.domain.WikiHelper
+import pl.maniak.wikidiary.core.wiki.WikiParser
+import pl.maniak.wikidiary.feature.people.domain.Person
+import pl.maniak.wikidiary.feature.people.domain.PersonGender
 import java.text.SimpleDateFormat
 import java.util.Locale
 
