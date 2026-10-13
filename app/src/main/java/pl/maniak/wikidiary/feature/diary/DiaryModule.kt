@@ -33,7 +33,7 @@ val diaryModule = module {
     single<TagRepository> { TagRepositoryImpl(get(), get()) }
     single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
     single { NotesExportContributor(get<WikiNoteRepository>().observeNotes()) } bind WikiExportContributor::class
-    viewModel { DiaryViewModel(get(), get(), get(), get(), get()) }
+    viewModel { DiaryViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { TagEditorViewModel(get(), get()) }
     viewModel { NotesListViewModel(get(), get()) }
 }

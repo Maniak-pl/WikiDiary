@@ -57,12 +57,19 @@ import java.util.Date
 
 @Composable
 fun FilmwebRoute(
+    initialQuery: String = "",
     onPickDate: () -> Unit,
     onClose: () -> Unit,
     viewModel: FilmwebViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
-    LaunchedEffect(Unit) { viewModel.onIntent(FilmwebIntent.Reset) }
+    LaunchedEffect(Unit) {
+        viewModel.onIntent(FilmwebIntent.Reset)
+        if (initialQuery.isNotBlank()) {
+            viewModel.onIntent(FilmwebIntent.ChangeQuery(initialQuery))
+            viewModel.onIntent(FilmwebIntent.Search)
+        }
+    }
     LaunchedEffect(state.save) {
         if (state.save == FilmwebSaveState.Saved) {
             viewModel.onIntent(FilmwebIntent.Reset)

@@ -14,13 +14,14 @@ import androidx.compose.material.icons.outlined.Share
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
-/** Type-safe routes of the screens reachable from the bottom navigation bar. */
+/** Type-safe routes: the bottom navigation tabs plus screens opened on top of them. */
 sealed interface AppRoute {
     @Serializable data object Diary : AppRoute
     @Serializable data object Tasks : AppRoute
     @Serializable data object Routines : AppRoute
     @Serializable data object Notes : AppRoute
     @Serializable data object Export : AppRoute
+    @Serializable data object Settings : AppRoute
 }
 
 enum class TopLevelDestination(

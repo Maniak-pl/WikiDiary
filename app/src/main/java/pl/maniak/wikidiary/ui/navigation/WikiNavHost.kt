@@ -17,6 +17,7 @@ import pl.maniak.wikidiary.feature.diary.ui.DiaryRoute
 import pl.maniak.wikidiary.feature.diary.ui.NotesListRoute
 import pl.maniak.wikidiary.feature.export.ui.ExportRoute
 import pl.maniak.wikidiary.feature.routines.ui.RoutinesRoute
+import pl.maniak.wikidiary.feature.settings.ui.SettingsRoute
 import pl.maniak.wikidiary.feature.todo.ui.TodoRoute
 
 @Composable
@@ -37,6 +38,7 @@ fun WikiNavHost(
         composable<AppRoute.Routines> { RoutinesRoute() }
         composable<AppRoute.Notes> { NotesListRoute() }
         composable<AppRoute.Export> { ExportRoute() }
+        composable<AppRoute.Settings> { SettingsRoute() }
     }
 }
 
@@ -49,7 +51,8 @@ fun NavHostController.navigateTo(destination: TopLevelDestination) {
     }
 }
 
-fun NavDestination?.topLevelDestination(): TopLevelDestination =
+/** Tab of the destination, or `null` for screens shown on top of the tabs (e.g. settings). */
+fun NavDestination?.topLevelDestination(): TopLevelDestination? =
     TopLevelDestination.entries.firstOrNull { destination ->
         this?.hierarchy?.any { it.hasRoute(destination.route::class) } == true
-    } ?: TopLevelDestination.DIARY
+    }

@@ -43,8 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.maniak.wikidiary.R
-import java.net.URI
-import java.net.URISyntaxException
+import pl.maniak.wikidiary.feature.export.domain.WikiPageUrl
 
 @Composable
 fun ExportRoute(viewModel: ExportViewModel = koinViewModel()) {
@@ -188,13 +187,12 @@ fun PreparingNoteScreen(
                 TextButton(
                     onClick = {
                         val normalizedUrl = wikiUrlInput.trim()
-                        if (isValidWikiUrl(normalizedUrl)) {
+                        if (WikiPageUrl.isValid(normalizedUrl)) {
                             onSaveWikiPageUrl(normalizedUrl)
                             showWikiUrlDialog = false
                             wikiUrlError = null
                         } else {
-                            wikiUrlError =
-                                "Podaj pełny adres URL zaczynający się od http:// lub https://."
+                            wikiUrlError = WikiPageUrl.INVALID_MESSAGE
                         }
                     }
                 ) {
@@ -212,17 +210,6 @@ fun PreparingNoteScreen(
                 }
             }
         )
-    }
-}
-
-private fun isValidWikiUrl(value: String): Boolean {
-    return try {
-        val uri = URI(value)
-        (uri.scheme.equals("http", ignoreCase = true) ||
-            uri.scheme.equals("https", ignoreCase = true)) &&
-            !uri.host.isNullOrBlank()
-    } catch (_: URISyntaxException) {
-        false
     }
 }
 

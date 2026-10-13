@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pl.maniak.wikidiary.core.config.Config
 import pl.maniak.wikidiary.feature.diary.domain.WikiNoteRepository
+import pl.maniak.wikidiary.feature.todo.domain.AddTodo
 import pl.maniak.wikidiary.feature.todo.domain.Todo
 import pl.maniak.wikidiary.feature.todo.domain.TodoNoteFactory
 import pl.maniak.wikidiary.feature.todo.domain.TodoRepository
@@ -26,6 +27,7 @@ class TodoViewModel(
     private val todoRepository: TodoRepository,
     private val noteRepository: WikiNoteRepository,
     private val config: Config,
+    private val addTodo: AddTodo = AddTodo(todoRepository, noteRepository, config),
 ) : ViewModel() {
 
     val uiState: StateFlow<TodoUiState> = todoRepository.observeTodos()
@@ -34,20 +36,9 @@ class TodoViewModel(
 
     fun onIntent(intent: TodoIntent) {
         when (intent) {
-            is TodoIntent.Add -> add(intent.title)
+            is TodoIntent.Add -> viewModelScope.launch { addTodo(intent.title) }
             is TodoIntent.Delete -> viewModelScope.launch { todoRepository.deleteTodo(intent.id) }
             is TodoIntent.SetCompleted -> setCompleted(intent.id, intent.completed)
-        }
-    }
-
-    private fun add(title: String) {
-        val normalizedTitle = title.trim()
-        if (normalizedTitle.isBlank()) return
-        viewModelScope.launch {
-            val todo = Todo(title = normalizedTitle)
-            todoRepository.saveTodo(todo)
-            noteRepository.saveNote(TodoNoteFactory.createAddedNote(todo, Date()))
-            config.setLastUpdated(System.currentTimeMillis())
         }
     }
 

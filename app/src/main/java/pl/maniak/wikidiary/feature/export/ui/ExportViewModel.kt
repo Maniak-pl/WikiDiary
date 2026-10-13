@@ -2,7 +2,6 @@ package pl.maniak.wikidiary.feature.export.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -24,25 +23,19 @@ class ExportViewModel(
     private val config: Config,
 ) : ViewModel() {
 
-    private val wikiPageUrl = MutableStateFlow(config.getWikiPageUrl())
-
     val uiState: StateFlow<ExportUiState> = combine(
         wikiExporter.document(),
-        wikiPageUrl,
+        config.wikiPageUrl,
         ::ExportUiState
     ).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
-        ExportUiState(wikiPageUrl = wikiPageUrl.value)
+        ExportUiState(wikiPageUrl = config.wikiPageUrl.value)
     )
 
     fun onIntent(intent: ExportIntent) {
         when (intent) {
-            is ExportIntent.SaveWikiPageUrl -> {
-                val url = intent.url.trim()
-                config.setWikiPageUrl(url)
-                wikiPageUrl.value = url
-            }
+            is ExportIntent.SaveWikiPageUrl -> config.setWikiPageUrl(intent.url)
         }
     }
 }

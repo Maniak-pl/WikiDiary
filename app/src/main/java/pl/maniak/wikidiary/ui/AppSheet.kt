@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 sealed interface AppSheet {
     @Serializable data class TagEditor(val tagId: Long? = null) : AppSheet
     @Serializable data object Categories : AppSheet
-    @Serializable data object Filmweb : AppSheet
+    @Serializable data class Filmweb(val query: String = "") : AppSheet
     @Serializable data object Pictograms : AppSheet
     @Serializable data object People : AppSheet
     @Serializable data object None : AppSheet

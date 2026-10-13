@@ -8,6 +8,7 @@ import pl.maniak.wikidiary.feature.filmweb.filmwebModule
 import pl.maniak.wikidiary.feature.people.peopleModule
 import pl.maniak.wikidiary.feature.pictograms.pictogramsModule
 import pl.maniak.wikidiary.feature.routines.routinesModule
+import pl.maniak.wikidiary.feature.settings.settingsModule
 import pl.maniak.wikidiary.feature.todo.todoModule
 import pl.maniak.wikidiary.ui.widget.WikiWidgetProvider
 
@@ -20,7 +21,8 @@ val appModule = module {
         routinesModule,
         pictogramsModule,
         filmwebModule,
-        exportModule
+        exportModule,
+        settingsModule
     )
 
     factory { WikiWidgetProvider() }

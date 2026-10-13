@@ -10,10 +10,26 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
 
 ## Najważniejsze funkcje
 
-- **Dodawanie notatek** - wpisz treść, wybierz istniejący tag i opcjonalnie
-  ustaw datę wpisu.
-- **Tagi** - własne tagi można dodawać z ekranu dodawania notatki. Długie
-  przytrzymanie tagu otwiera jego edycję lub usunięcie.
+- **Szybki wpis (quick capture)** - jedno pole tekstowe w zakładce Dziennik
+  obsługuje wszystko. Notatkę zapisuje kliknięcie tagu lub przycisk **Wyślij**,
+  gdy w treści jest `#Tag` (np. `Spotkanie z zespołem #Work`; znacznik tagu
+  jest usuwany z treści). Wpisanie `#`, `@` lub `/` na początku pokazuje
+  podpowiedzi tagów, osób i komend. Przycisk ⊕ przy polu otwiera listę komend:
+
+  | Komenda | Działanie |
+  | --- | --- |
+  | `/todo <treść>` | dodaje zadanie ToDo (i notatkę pod tagiem `ToDo`) |
+  | `/film <tytuł>` | otwiera Filmweb i od razu wyszukuje tytuł |
+  | `/piktogram` | otwiera panel pictogramów |
+  | `/osoby` | otwiera katalog osób |
+  | `/tag <nazwa>` | tworzy nowy tag |
+  | `/projekt` | tworzy projekt (tag z kolorem i kategorią) |
+  | `/kategorie` | otwiera zarządzanie kategoriami |
+  | `/data` | zmienia dzień notatki |
+
+  Gdy brakuje tagu lub argumentu komendy, pod polem pojawia się podpowiedź.
+- **Tagi** - nowy tag tworzy komenda `/tag <nazwa>`. Długie przytrzymanie tagu
+  otwiera jego edycję lub usunięcie.
 - **Projekty i kategorie** - projekt jest tagiem z kolorem i opcjonalną
   kategorią. Kategorie można tworzyć, zmieniać i usuwać w dolnym panelu.
 - **Lista notatek** - przeglądanie wpisów oraz zaznaczanie wielu wpisów do
@@ -26,18 +42,18 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   notatkę z tagiem `ToDo`, a jego ukończenie zapisuje notatkę z tagiem `Today`.
   Ukończone zadania pozostają na liście jako odhaczone, a zadania są
   przechowywane lokalnie niezależnie od codziennego resetu rutyn.
-- **Osoby i wzmianki** - chip `👥 Osoby` otwiera katalog osób, w którym można
+- **Osoby i wzmianki** - komenda `/osoby` otwiera katalog osób, w którym można
   zapisać imię i nazwisko oraz wybrać ikonę osoby. W treści notatki wpisz `@`
   i pierwsze litery imienia, aby wybrać podpowiedź z katalogu. Po zapisaniu
   wzmianka jest zamieniana bezpośrednio w treści na pogrubiony link DokuWiki
   do przestrzeni `Community`, np.
   `**🙍🏻‍♀️ [[:Community:Dorota Płachno]]**`.
-- **Notatki Filmweb** - chip `🎬 Filmweb` otwiera natywne wyszukiwanie w
-  dolnym panelu aplikacji. Wyniki są pokazywane jako przewijana lista
+- **Notatki Filmweb** - komenda `/film <tytuł>` otwiera natywne wyszukiwanie w
+  dolnym panelu aplikacji i od razu wyszukuje podany tytuł. Wyniki są pokazywane jako przewijana lista
   maksymalnie 10 filmów i seriali z okładką, tytułem oraz rokiem. Po wybraniu
   pozycji można poprawić jej metadane, a następnie zapisać zwykłą notatkę razem
   ze strukturalnymi metadanymi Filmwebu.
-- **Pictogramy** - chip `🖼️ Pictogramy` otwiera katalog ikon. Można utworzyć
+- **Pictogramy** - komenda `/piktogram` otwiera katalog ikon. Można utworzyć
   pictogram, wybierając ikonę i nazwę, przypisać go do wybranego taga oraz
   edytować lub usunąć definicję. Przycisk `+` pokazuje dodatkowy zestaw ikon.
   Usuwanie przypisania jest dostępne bezpośrednio przy pictogramie w zakładce
@@ -51,6 +67,10 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   danego dnia. Nad przyciskiem kopiowania można zapisać adres strony Wiki;
   po jego zapisaniu przycisk web kopiuje pełny eksport do schowka i otwiera
   tę stronę w przeglądarce, aby można było wkleić treść.
+- **Ustawienia** - ikona ⚙️ w górnym pasku otwiera ekran ustawień:
+  przełącznik ciemnego motywu (domyślnie zgodny z systemem; wybór jest
+  zapamiętywany) oraz adres strony Wiki używany przy eksporcie.
+- **Tryb pionowy** - aplikacja działa wyłącznie w orientacji pionowej.
 - **Widget ekranu głównego** - pokazuje czas od ostatnio zapisanej notatki,
   wizualizuje upływ 24 godzin i otwiera aplikację po kliknięciu.
 
@@ -66,7 +86,7 @@ stan (np. niedokończony tekst notatki) po przełączeniu na inną.
 
 | Zakładka | Zastosowanie |
 | --- | --- |
-| **Dziennik** | Wpisywanie treści i zapisywanie jej pod wybranym tagiem; chipy otwierają panele Filmweb, Pictogramy, Osoby, tagi, kategorie i wybór daty. |
+| **Dziennik** | Szybki wpis: notatka pod tagiem (kliknięcie tagu lub `#Tag` + Wyślij), wzmianki `@`, komendy `/` i menu ⊕ otwierające Filmweb, Pictogramy, Osoby, tagi, kategorie i wybór daty. |
 | **Zadania** | Dodawanie, odhaczanie i usuwanie zadań ToDo. |
 | **Rutyny** | Zarządzanie i wykonywanie codziennych rutyn. |
 | **Notatki** | Przeglądanie i masowe usuwanie zapisanych notatek oraz pictogramów. |
@@ -74,29 +94,34 @@ stan (np. niedokończony tekst notatki) po przełączeniu na inną.
 
 Panele (tagi, kategorie, Filmweb, Pictogramy, Osoby) otwierają się jako
 arkusze dolne; można je zamknąć gestem w dół lub przyciskiem Wstecz.
+Ikona ⚙️ w górnym pasku otwiera ekran **Ustawienia** (bez dolnego paska,
+powrót strzałką lub przyciskiem Wstecz).
 
 ### Typowy przepływ pracy
 
 1. W zakładce **Dziennik** wpisz treść notatki.
-2. Wybierz tag, aby zapisać wpis. Chip z datą otwiera kalendarz, w którym
-   można zmienić dzień, którego dotyczy notatka.
-3. Aby dodać film lub serial, wybierz chip **🎬 Filmweb**, wyszukaj pozycję i
-   kliknij wynik na natywnej liście.
+2. Wybierz tag, aby zapisać wpis, albo dopisz `#Tag` i kliknij **Wyślij**.
+   Chip z datą (lub `/data`) otwiera kalendarz, w którym można zmienić dzień,
+   którego dotyczy notatka.
+3. Aby dodać film lub serial, wpisz `/film <tytuł>` i kliknij **Wyślij**
+   (albo wybierz Filmweb z menu ⊕), a następnie kliknij wynik na natywnej
+   liście.
 4. Zatwierdź kartę wybranej pozycji, wybierz tag, sprawdź datę i opcjonalnie
    zmień początek zdania lub metadane.
-5. Aby dodać pictogram, wybierz **🖼️ Pictogramy**, wybierz tag, utwórz lub
+5. Aby dodać pictogram, wpisz `/piktogram` (lub wybierz go z menu ⊕), wybierz tag, utwórz lub
    wybierz pictogram i kliknij **Dodaj**. Data jest pobierana z aktualnie
    wybranego dnia.
-6. W zakładce **Zadania** dodaj zadanie. Aplikacja zapisze jego dodanie jako
+6. W zakładce **Zadania** dodaj zadanie (albo wpisz w Dzienniku
+   `/todo <treść>`). Aplikacja zapisze jego dodanie jako
    notatkę pod tagiem `ToDo`.
 7. Po wykonaniu zadania odhacz je. Aplikacja zapisze zakończenie jako notatkę
    pod tagiem `Today`; ukończone zadanie pozostanie na liście.
-8. Wybierz **👥 Osoby**, dodaj imię i nazwisko oraz ikonę. W treści notatki
+8. Wpisz `/osoby`, dodaj imię i nazwisko oraz ikonę. W treści notatki
    wpisz `@` i pierwszą literę, a następnie wybierz osobę z podpowiedzi.
 9. Otwórz zakładkę **Eksport**, aby wygenerować tekst i skopiować go do schowka.
-10. Opcjonalnie wybierz `+` nad przyciskiem kopiowania i zapisz pełny adres
-   strony Wiki (`http://` lub `https://`). Później przycisk web skopiuje
-   eksport i otworzy zapisany adres.
+10. Opcjonalnie zapisz pełny adres strony Wiki (`http://` lub `https://`) w
+   **Ustawieniach** albo przyciskiem `+` nad przyciskiem kopiowania. Później
+   przycisk web skopiuje eksport i otworzy zapisany adres.
 11. Wklej przygotowany tekst do docelowej strony Wiki.
 
 ## Dane i prywatność
@@ -117,8 +142,9 @@ arkusze dolne; można je zamknąć gestem w dół lub przyciskiem Wstecz.
 - Aplikacja przechowuje referencję DokuWiki i ikonę podglądu pictogramu, ale
   nie generuje ani nie przesyła plików PNG. Plik `pictograms_-_<nazwa>.png`
   powinien istnieć w docelowej Wiki.
-- Ustawienia pomocnicze, takie jak dzień ostatniego uruchomienia i czas ostatniej
-  notatki oraz zapisany adres strony Wiki są przechowywane w `SharedPreferences`.
+- Ustawienia pomocnicze, takie jak dzień ostatniego uruchomienia, czas ostatniej
+  notatki, wybrany motyw oraz zapisany adres strony Wiki, są przechowywane w
+  `SharedPreferences`.
 - Aplikacja nie ma backendu, logowania ani synchronizacji z chmurą.
 - Usunięcie danych aplikacji lub jej odinstalowanie usuwa lokalną bazę danych.
 - Wyszukiwanie Filmweb korzysta z nieoficjalnych endpointów używanych przez
@@ -184,13 +210,16 @@ własny moduł Koin:
 
 - `core` - baza Room, konfiguracja, motyw, wspólne komponenty UI, daty i
   składnia Wiki;
-- `feature/diary` - notatki, tagi i kategorie;
+- `feature/diary` - notatki, tagi, kategorie i pole szybkiego wpisu
+  (`composer/QuickCapture` zamienia tekst na akcję: notatkę, zadanie, tag lub
+  nawigację);
 - `feature/people` - osoby i wzmianki `@`;
 - `feature/todo` - zadania ToDo;
 - `feature/routines` - rutyny dzienne;
 - `feature/pictograms` - pictogramy;
 - `feature/filmweb` - wyszukiwanie i wpisy Filmweb;
 - `feature/export` - przygotowanie notatki Wiki;
+- `feature/settings` - ekran ustawień (motyw, adres Wiki);
 - `ui` - aktywność, nawigacja i widget.
 
 Nowa funkcja powinna powstać jako osobny pakiet `feature/<nazwa>` z własnym
@@ -208,10 +237,16 @@ dolnym `NavigationBar`, arkuszami `ModalBottomSheet` i kalendarzem
 `DatePickerDialog`. Zakładki są opisane w `ui/navigation/TopLevelDestination.kt`
 (trasa `AppRoute`, etykieta, tytuł, ikony), a `ui/navigation/WikiNavHost.kt`
 mapuje trasy na ekrany i zachowuje stan zakładek przy przełączaniu. Arkusze są
-opisane przez `AppSheet` i przetrwają obrót ekranu. `MainActivity` jedynie
-włącza edge-to-edge i ustawia `WikiApp`. Nowa zakładka to wpis w
+opisane przez `AppSheet` i przetrwają zmianę konfiguracji. `MainActivity`
+ustawia motyw według `Config.darkTheme` (`null` oznacza motyw systemowy),
+dopasowuje kolory pasków systemowych i uruchamia `WikiApp`. Ekran ustawień to
+trasa `AppRoute.Settings` poza dolnym paskiem. Nowa zakładka to wpis w
 `TopLevelDestination` i odpowiadający mu `composable<AppRoute.X>` w
 `WikiNavHost`.
+
+Nową komendę pola szybkiego wpisu dodaje się jako wpis `ComposerCommand`
+(słowo kluczowe, ikona, opis, cel nawigacji) i ewentualnie wariant `Capture`
+obsłużony w `AddScreen`; podpowiedzi i menu ⊕ korzystają z tej samej listy.
 
 Eksport do Wiki składa `WikiExporter` z wpisów dostarczanych przez funkcje.
 Aby nowa funkcja pojawiła się w notatce Wiki, wystarczy w jej module Koin

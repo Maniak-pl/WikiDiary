@@ -17,6 +17,7 @@ import pl.maniak.wikidiary.feature.diary.domain.WikiNoteRepository
 import pl.maniak.wikidiary.feature.people.domain.Person
 import pl.maniak.wikidiary.feature.people.domain.PersonMentionResolver
 import pl.maniak.wikidiary.feature.people.domain.PersonRepository
+import pl.maniak.wikidiary.feature.todo.domain.AddTodo
 
 data class DiaryUiState(
     val tags: List<Tag> = emptyList(),
@@ -27,6 +28,7 @@ data class DiaryUiState(
 sealed interface DiaryIntent {
     data class AddNote(val tag: Tag, val content: String) : DiaryIntent
     data class AddTag(val name: String) : DiaryIntent
+    data class AddTodo(val title: String) : DiaryIntent
 }
 
 class DiaryViewModel(
@@ -35,6 +37,7 @@ class DiaryViewModel(
     private val personRepository: PersonRepository,
     private val config: Config,
     private val selectedDate: SelectedDateStore,
+    private val addTodo: AddTodo,
 ) : ViewModel() {
 
     val uiState: StateFlow<DiaryUiState> = combine(
@@ -52,6 +55,7 @@ class DiaryViewModel(
         when (intent) {
             is DiaryIntent.AddNote -> addNote(intent.tag, intent.content)
             is DiaryIntent.AddTag -> addTag(intent.name)
+            is DiaryIntent.AddTodo -> viewModelScope.launch { addTodo(intent.title) }
         }
     }
 

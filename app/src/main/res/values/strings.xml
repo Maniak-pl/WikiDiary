@@ -34,8 +34,6 @@
     <string name="tag_hint">tag</string>
     <string name="numberOfDay">1</string>
 
-    <string name="label_tag">🏷</string>
-    <string name="label_project">🎯</string>
     <string name="last_note_time">Complete the note. Time of last note %1$d hours ago</string>
 
 </resources>

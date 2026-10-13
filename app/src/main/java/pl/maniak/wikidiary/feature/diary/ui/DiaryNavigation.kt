@@ -7,7 +7,7 @@ sealed interface DiaryNavigation {
     data object CreateTag : DiaryNavigation
     data class EditTag(val tag: Tag) : DiaryNavigation
     data object Categories : DiaryNavigation
-    data object Filmweb : DiaryNavigation
+    data class Filmweb(val query: String = "") : DiaryNavigation
     data object Pictograms : DiaryNavigation
     data object People : DiaryNavigation
     data object PickDate : DiaryNavigation

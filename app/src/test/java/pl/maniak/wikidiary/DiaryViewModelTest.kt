@@ -14,6 +14,7 @@ import pl.maniak.wikidiary.feature.diary.ui.DiaryIntent
 import pl.maniak.wikidiary.feature.diary.ui.DiaryViewModel
 import pl.maniak.wikidiary.feature.people.domain.Person
 import pl.maniak.wikidiary.feature.people.domain.PersonGender
+import pl.maniak.wikidiary.feature.todo.domain.AddTodo
 import pl.maniak.wikidiary.testing.InMemoryConfig
 import pl.maniak.wikidiary.testing.MainDispatcherRule
 import pl.maniak.wikidiary.testing.TestRepositories
@@ -35,7 +36,8 @@ class DiaryViewModelTest {
             repositories.tags,
             repositories.people,
             InMemoryConfig(),
-            SelectedDateStore(diaryDay)
+            SelectedDateStore(diaryDay),
+            AddTodo(repositories.todos, repositories.notes, InMemoryConfig())
         )
     }
 
@@ -63,5 +65,16 @@ class DiaryViewModelTest {
             note.content
         )
         assertEquals(listOf("Martyn Pekala"), note.people.map(Person::name))
+    }
+
+    @Test
+    fun todoCommandAddsTaskAndLogsItUnderToDoTag() = runBlocking {
+        val note = repositories.notes.observeNotes().nextValueAfter {
+            viewModel.onIntent(DiaryIntent.AddTodo("Umyć garki"))
+        }.single()
+
+        assertEquals(listOf("Umyć garki"), repositories.todos.getTodos().map { it.title })
+        assertEquals("ToDo", note.tag)
+        assertEquals("Dodano zadanie: Umyć garki", note.content)
     }
 }

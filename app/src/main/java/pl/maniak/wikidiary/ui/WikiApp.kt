@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -25,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import java.util.Date
@@ -39,6 +44,7 @@ import pl.maniak.wikidiary.feature.diary.ui.DiaryNavigation
 import pl.maniak.wikidiary.feature.filmweb.ui.FilmwebRoute
 import pl.maniak.wikidiary.feature.people.ui.PersonManagerRoute
 import pl.maniak.wikidiary.feature.pictograms.ui.PictogramManagerRoute
+import pl.maniak.wikidiary.ui.navigation.AppRoute
 import pl.maniak.wikidiary.ui.navigation.TopLevelDestination
 import pl.maniak.wikidiary.ui.navigation.WikiNavHost
 import pl.maniak.wikidiary.ui.navigation.navigateTo
@@ -49,14 +55,34 @@ import pl.maniak.wikidiary.ui.navigation.topLevelDestination
 fun WikiApp(selectedDate: SelectedDateStore = koinInject()) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val current = backStackEntry?.destination.topLevelDestination()
+    val destination = backStackEntry?.destination
+    val current = destination.topLevelDestination()
+    val onSettings = destination?.hasRoute(AppRoute.Settings::class) == true
     var sheet by rememberSaveable(stateSaver = AppSheet.Saver) { mutableStateOf<AppSheet>(AppSheet.None) }
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(current.title) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(if (onSettings) "Ustawienia" else (current ?: TopLevelDestination.DIARY).title) },
+                navigationIcon = {
+                    if (onSettings) {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Wstecz")
+                        }
+                    }
+                },
+                actions = {
+                    if (!onSettings) {
+                        IconButton(onClick = { navController.navigate(AppRoute.Settings) { launchSingleTop = true } }) {
+                            Icon(Icons.Outlined.Settings, contentDescription = "Ustawienia")
+                        }
+                    }
+                }
+            )
+        },
         bottomBar = {
-            NavigationBar {
+            if (!onSettings) NavigationBar {
                 TopLevelDestination.entries.forEach { destination ->
                     val selected = destination == current
                     NavigationBarItem(
@@ -81,7 +107,7 @@ fun WikiApp(selectedDate: SelectedDateStore = koinInject()) {
                     DiaryNavigation.CreateTag -> sheet = AppSheet.TagEditor()
                     is DiaryNavigation.EditTag -> sheet = AppSheet.TagEditor(destination.tag.id)
                     DiaryNavigation.Categories -> sheet = AppSheet.Categories
-                    DiaryNavigation.Filmweb -> sheet = AppSheet.Filmweb
+                    is DiaryNavigation.Filmweb -> sheet = AppSheet.Filmweb(destination.query)
                     DiaryNavigation.Pictograms -> sheet = AppSheet.Pictograms
                     DiaryNavigation.People -> sheet = AppSheet.People
                     DiaryNavigation.PickDate -> showDatePicker = true
@@ -126,7 +152,7 @@ private fun AppSheetHost(sheet: AppSheet, onDismiss: () -> Unit, onPickDate: () 
         when (sheet) {
             is AppSheet.TagEditor -> CreateProjectRoute(tagId = sheet.tagId, onDone = close)
             AppSheet.Categories -> CreateCategoryRoute()
-            AppSheet.Filmweb -> FilmwebRoute(onPickDate = onPickDate, onClose = close)
+            is AppSheet.Filmweb -> FilmwebRoute(initialQuery = sheet.query, onPickDate = onPickDate, onClose = close)
             AppSheet.Pictograms -> PictogramManagerRoute()
             AppSheet.People -> PersonManagerRoute()
             AppSheet.None -> Unit

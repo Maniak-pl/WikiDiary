@@ -3,6 +3,20 @@ package pl.maniak.wikidiary.feature.diary.ui
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.remember
+import pl.maniak.wikidiary.feature.diary.composer.Capture
+import pl.maniak.wikidiary.feature.diary.composer.CaptureError
+import pl.maniak.wikidiary.feature.diary.composer.ComposerCommand
+import pl.maniak.wikidiary.feature.diary.composer.QuickCapture
+import pl.maniak.wikidiary.feature.diary.composer.Token
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,12 +40,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
-import pl.maniak.wikidiary.R
 import pl.maniak.wikidiary.feature.people.domain.Person
 import pl.maniak.wikidiary.feature.diary.domain.Tag
 import pl.maniak.wikidiary.core.ui.component.Tag
@@ -64,17 +76,53 @@ fun AddScreen(
     onNavigate: (DiaryNavigation) -> Unit,
 ) {
     var text by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
-    val mentionQuery = currentMentionQuery(text)
-    val personSuggestions = if (mentionQuery != null) {
-        people
-            .filter { it.name.contains(mentionQuery.trim(), ignoreCase = true) }
-            .take(5)
-    } else {
-        emptyList()
-    }
+    var error by rememberSaveable { mutableStateOf<CaptureError?>(null) }
+    val token = QuickCapture.activeToken(text.text, text.selection.start)
+    val suggestions = suggestionsFor(token, tags, people)
     val vertScrollState = rememberScrollState()
-    LaunchedEffect(text) {
+    LaunchedEffect(tags.size) {
         vertScrollState.animateScrollTo(Int.MAX_VALUE)
+    }
+
+    fun clear() {
+        text = TextFieldValue("")
+        error = null
+    }
+
+    fun submit() {
+        when (val capture = QuickCapture.parse(text.text, tags)) {
+            is Capture.SaveNote -> onIntent(DiaryIntent.AddNote(capture.tag, capture.content))
+            is Capture.AddTodo -> onIntent(DiaryIntent.AddTodo(capture.title))
+            is Capture.AddTag -> onIntent(DiaryIntent.AddTag(name = capture.name))
+            is Capture.Navigate -> onNavigate(capture.destination)
+            is Capture.Rejected -> {
+                error = capture.error
+                return
+            }
+        }
+        clear()
+    }
+
+    fun runCommand(command: ComposerCommand) {
+        val destination = command.destination
+        if (destination != null) {
+            onNavigate(destination)
+            clear()
+        } else {
+            val prefix = "/${command.keyword} "
+            text = TextFieldValue(prefix, TextRange(prefix.length))
+            error = null
+        }
+    }
+
+    fun pick(suggestion: Suggestion) {
+        val active = token ?: return
+        if (suggestion is Suggestion.Command && suggestion.command.destination != null) {
+            runCommand(suggestion.command)
+            return
+        }
+        val edit = QuickCapture.complete(text.text, text.selection.start, active, suggestion.replacement)
+        text = TextFieldValue(edit.text, TextRange(edit.cursor))
     }
 
     Column(
@@ -89,14 +137,8 @@ fun AddScreen(
             scrollState = vertScrollState,
             onTagClick = { tag ->
                 if (text.text.isNotBlank()) {
-                    onIntent(DiaryIntent.AddNote(tag, text.text))
-                    text = TextFieldValue("")
-                }
-            },
-            onAddTagClick = {
-                if (text.text.isNotBlank()) {
-                    onIntent(DiaryIntent.AddTag(name = text.text))
-                    text = TextFieldValue("")
+                    onIntent(DiaryIntent.AddNote(tag, text.text.trim()))
+                    clear()
                 }
             },
             onEditTagClick = { tag ->
@@ -107,36 +149,113 @@ fun AddScreen(
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-        if (personSuggestions.isNotEmpty()) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 180.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shadowElevation = 4.dp
-            ) {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    personSuggestions.forEach { person ->
-                        Text(
-                            text = "${person.gender.icon} ${person.name}",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp)
-                                .clickable {
-                                    text = insertPersonMention(text, person)
-                                }
-                        )
-                    }
-                }
-            }
+        if (suggestions.isNotEmpty()) {
+            SuggestionList(suggestions = suggestions, onPick = ::pick)
         }
 
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = text,
-            onValueChange = { text = it },
-            label = { Text(text = "Enter your note") },
+            onValueChange = {
+                if (it.text != text.text) error = null
+                text = it
+            },
+            placeholder = { Text(text = "Notatka… #tag @osoba /komenda") },
+            leadingIcon = { CommandMenu(onCommand = ::runCommand) },
+            trailingIcon = {
+                IconButton(onClick = ::submit, enabled = text.text.isNotBlank()) {
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Wyślij")
+                }
+            },
+            isError = error != null,
+            supportingText = error?.let { { Text(it.message) } },
         )
+    }
+}
+
+private sealed interface Suggestion {
+    val label: String
+    val replacement: String
+
+    data class Person(val person: pl.maniak.wikidiary.feature.people.domain.Person) : Suggestion {
+        override val label = "${person.gender.icon} ${person.name}"
+        override val replacement = "@${person.name}"
+    }
+
+    data class TagName(val name: String) : Suggestion {
+        override val label = "#$name"
+        override val replacement = "#$name"
+    }
+
+    data class Command(val command: ComposerCommand) : Suggestion {
+        override val label = "${command.icon} /${command.keyword} — ${command.description}"
+        override val replacement = "/${command.keyword}"
+    }
+}
+
+private const val MAX_SUGGESTIONS = 5
+
+private fun suggestionsFor(token: Token?, tags: List<Tag>, people: List<Person>): List<Suggestion> =
+    when (token?.trigger) {
+        '@' -> people
+            .filter { it.name.contains(token.query, ignoreCase = true) }
+            .take(MAX_SUGGESTIONS)
+            .map(Suggestion::Person)
+        '#' -> tags
+            .map { it.name }
+            .distinct()
+            .filter { it.contains(token.query, ignoreCase = true) }
+            .take(MAX_SUGGESTIONS)
+            .map(Suggestion::TagName)
+        '/' -> ComposerCommand.entries
+            .filter { it.keyword.startsWith(token.query, ignoreCase = true) }
+            .map(Suggestion::Command)
+        else -> emptyList()
+    }
+
+@Composable
+private fun SuggestionList(suggestions: List<Suggestion>, onPick: (Suggestion) -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 220.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = 4.dp
+    ) {
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            suggestions.forEach { suggestion ->
+                Text(
+                    text = suggestion.label,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onPick(suggestion) }
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CommandMenu(onCommand: (ComposerCommand) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Filled.AddCircle, contentDescription = "Komendy")
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            ComposerCommand.entries.forEach { command ->
+                DropdownMenuItem(
+                    text = { Text(command.description) },
+                    leadingIcon = { Text(command.icon) },
+                    trailingIcon = { Text("/${command.keyword}", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    onClick = {
+                        expanded = false
+                        onCommand(command)
+                    }
+                )
+            }
+        }
     }
 }
 
@@ -149,7 +268,6 @@ private fun TagsLayout(
     selectedDate: Date,
     scrollState: ScrollState,
     onTagClick: (Tag) -> Unit,
-    onAddTagClick: () -> Unit = {},
     onEditTagClick: (Tag) -> Unit = {},
     onNavigate: (DiaryNavigation) -> Unit
 ) {
@@ -170,70 +288,11 @@ private fun TagsLayout(
         }
 
         Tag(
-            text = stringResource(R.string.label_tag),
-            onClick = { onAddTagClick() },
-        )
-
-        Tag(
-            text = stringResource(id = R.string.label_project),
-            onClick = { onNavigate(DiaryNavigation.CreateTag) },
-        )
-
-        Tag(
-            text = "\uD83C\uDFAC Filmweb",
-            onClick = { onNavigate(DiaryNavigation.Filmweb) },
-        )
-
-        Tag(
-            text = "\uD83D\uDDBC\uFE0F Pictogramy",
-            onClick = { onNavigate(DiaryNavigation.Pictograms) },
-        )
-
-        Tag(
-            text = "\uD83D\uDC65 Osoby",
-            onClick = { onNavigate(DiaryNavigation.People) },
-        )
-
-        Tag(
-            text = "\uD83D\uDCC2",
-            onClick = { onNavigate(DiaryNavigation.Categories) },
-        )
-
-        Tag(
             text = "\uD83D\uDDD3\uFE0F - ${selectedDate.toDayString()}",
             onClick = { onNavigate(DiaryNavigation.PickDate) },
         )
     }
 
-}
-
-private fun currentMentionQuery(value: TextFieldValue): String? {
-    val cursor = value.selection.start.coerceIn(0, value.text.length)
-    val beforeCursor = value.text.substring(0, cursor)
-    val atIndex = beforeCursor.lastIndexOf('@')
-    if (atIndex < 0 || beforeCursor.substring(atIndex + 1).contains('\n')) {
-        return null
-    }
-    if (atIndex > 0 && beforeCursor[atIndex - 1].isLetterOrDigit()) {
-        return null
-    }
-    val query = beforeCursor.substring(atIndex + 1)
-    return if (query.endsWith(" ") || query.endsWith("\t")) null else query
-}
-
-private fun insertPersonMention(value: TextFieldValue, person: Person): TextFieldValue {
-    val cursor = value.selection.start.coerceIn(0, value.text.length)
-    val beforeCursor = value.text.substring(0, cursor)
-    val atIndex = beforeCursor.lastIndexOf('@')
-    if (atIndex < 0) {
-        return value
-    }
-    val mention = "@${person.name} "
-    val newText = value.text.removeRange(atIndex, cursor).let {
-        it.substring(0, atIndex) + mention + it.substring(atIndex)
-    }
-    val newCursor = atIndex + mention.length
-    return TextFieldValue(newText, TextRange(newCursor))
 }
 
 @Preview(showBackground = true)

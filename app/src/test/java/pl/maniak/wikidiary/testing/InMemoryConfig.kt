@@ -1,10 +1,11 @@
 package pl.maniak.wikidiary.testing
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import pl.maniak.wikidiary.core.config.Config
 
 class InMemoryConfig(
     private val firstLaunchToday: Boolean = false,
-    private var wikiPageUrl: String = "",
+    wikiPageUrl: String = "",
 ) : Config {
     private var lastUpdated = 0L
 
@@ -13,8 +14,14 @@ class InMemoryConfig(
     override fun setLastUpdated(time: Long) {
         lastUpdated = time
     }
-    override fun getWikiPageUrl() = wikiPageUrl
+
+    override val wikiPageUrl = MutableStateFlow(wikiPageUrl)
     override fun setWikiPageUrl(url: String) {
-        wikiPageUrl = url
+        wikiPageUrl.value = url.trim()
+    }
+
+    override val darkTheme = MutableStateFlow<Boolean?>(null)
+    override fun setDarkTheme(enabled: Boolean) {
+        darkTheme.value = enabled
     }
 }
