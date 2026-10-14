@@ -1,5 +1,6 @@
 package pl.maniak.wikidiary.feature.diary.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -11,5 +12,7 @@ data class WikiNoteEntity(
     val content: String,
     val folder: String? = null,
     val date: Long,
-    val isSend: Boolean
+    val isSend: Boolean,
+    @ColumnInfo(defaultValue = "0")
+    val needsCompletion: Boolean = false
 )

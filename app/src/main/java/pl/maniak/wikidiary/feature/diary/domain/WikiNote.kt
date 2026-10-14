@@ -11,6 +11,7 @@ data class WikiNote(
     val category: String? = null,
     val date: Date,
     val isSend: Boolean = false,
+    val needsCompletion: Boolean = false,
     val people: List<Person> = emptyList()
 ) {
     fun formatDateString(): String {

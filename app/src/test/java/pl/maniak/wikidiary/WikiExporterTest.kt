@@ -62,6 +62,20 @@ class WikiExporterTest {
     }
 
     @Test
+    fun export_appendsFixmeMarkerToNotesNeedingCompletion() {
+        val date = dateFormat.parse("2024-10-09 18:00")!!
+        val result = export(
+            notes = listOf(
+                WikiNote(id = 1, tag = "Today", content = "Wizyta u lekarza", date = date, needsCompletion = true),
+                WikiNote(id = 2, tag = "Today", content = "Spacer", date = date)
+            )
+        )
+
+        assertTrue(result.contains("    * Wizyta u lekarza FIXME\n"))
+        assertTrue(result.contains("    * Spacer\n"))
+    }
+
+    @Test
     fun export_avoidsImageNameCollisionForDifferentUrls() {
         val firstUrl = "https://www.filmweb.pl/film/example-2020"
         val secondUrl = "https://www.filmweb.pl/film/example-remake-2020"

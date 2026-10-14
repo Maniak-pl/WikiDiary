@@ -40,6 +40,9 @@ object WikiParser {
         return str.toString()
     }
 
+    fun markForCompletion(content: String, needsCompletion: Boolean): String =
+        if (needsCompletion) "$content FIXME" else content
+
     fun addFilmNote(prefix: String, metadata: FilmMetadata): String {
         val sentencePrefix = prefix.trim().ifBlank { "Obejrzałem" }
         val mediaType = when (metadata.mediaType) {

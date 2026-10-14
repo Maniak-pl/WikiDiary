@@ -19,6 +19,7 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   | Komenda | Działanie |
   | --- | --- |
   | `/todo <treść>` | dodaje zadanie ToDo (i notatkę pod tagiem `ToDo`) |
+  | `/fixme <treść> #Tag` | zapisuje notatkę oznaczoną do uzupełnienia (FIXME) |
   | `/film <tytuł>` | otwiera Filmweb i od razu wyszukuje tytuł |
   | `/piktogram` | otwiera panel pictogramów |
   | `/osoby` | otwiera katalog osób |
@@ -34,6 +35,14 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   kategorią. Kategorie można tworzyć, zmieniać i usuwać w dolnym panelu.
 - **Lista notatek** - przeglądanie wpisów oraz zaznaczanie wielu wpisów do
   jednoczesnego usunięcia.
+- **Do uzupełnienia (FIXME)** - komenda `/fixme <treść> #Tag` (albo
+  `/fixme <treść>` i kliknięcie tagu) zapisuje notatkę ze znacznikiem FIXME.
+  Słowo `/fixme` może stać w dowolnym miejscu notatki (np. `Wizyta /fixme #Work`)
+  i zawsze jest usuwane z treści.
+  Na liście notatek takie wpisy mają czerwoną odznakę, a filtr
+  „🚧 Do uzupełnienia (N)” pokazuje tylko je. W trybie zaznaczania przycisk ⚠
+  oznacza lub odznacza wybrane notatki. Eksport dopisuje na końcu wpisu
+  `FIXME`, który DokuWiki wyświetla jako znacznik.
 - **Rutyny dzienne** - własna lista codziennych czynności z możliwością
   odhaczania i usuwania. Stan wykonania jest resetowany przy pierwszym
   uruchomieniu aplikacji w nowym dniu. Odhaczenie rutyny zapisuje również

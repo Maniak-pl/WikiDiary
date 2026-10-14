@@ -9,6 +9,7 @@ interface WikiNoteRepository {
     suspend fun getWikiNotesWithTag(tag: String): List<WikiNote>
     suspend fun saveNote(note: WikiNote)
     suspend fun saveNoteWithPeople(note: WikiNote, personIds: List<Long>): Long
+    suspend fun setNeedsCompletion(ids: List<Long>, needsCompletion: Boolean)
     suspend fun deleteNoteById(id: Long)
     suspend fun deleteAllNotes()
 }

@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,35 +66,55 @@ fun ListNotesScreen(
 ) {
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedNotes by remember { mutableStateOf(setOf<Long>()) }
-    val pictogramsByGroup = pictogramEntries.groupBy { it.groupKey() }
-    val lastNoteByGroup = notesList
+    var isCompletionFilterOn by rememberSaveable { mutableStateOf(false) }
+    val notesToCompleteCount = notesList.count(WikiNote::needsCompletion)
+    val showOnlyNotesToComplete = isCompletionFilterOn && notesToCompleteCount > 0
+    val visibleNotes = if (showOnlyNotesToComplete) notesList.filter(WikiNote::needsCompletion) else notesList
+    val pictogramsByGroup =
+        if (showOnlyNotesToComplete) emptyMap() else pictogramEntries.groupBy { it.groupKey() }
+    val lastNoteByGroup = visibleNotes
         .groupBy { it.groupKey() }
         .mapValues { (_, notes) -> notes.last().id }
+
+    fun exitSelectionMode() {
+        isSelectionMode = false
+        selectedNotes = emptySet()
+    }
 
     Column {
         if (isSelectionMode) {
             SelectionToolbar(
                 selectedCount = selectedNotes.size,
-                totalCount = notesList.size,
-                onCancel = {
-                    isSelectionMode = false
-                    selectedNotes = emptySet()
-                },
+                totalCount = visibleNotes.size,
+                onCancel = ::exitSelectionMode,
                 onDelete = {
                     onIntent(NotesListIntent.DeleteNotes(selectedNotes.toList()))
-                    isSelectionMode = false
-                    selectedNotes = emptySet()
+                    exitSelectionMode()
+                },
+                onToggleNeedsCompletion = {
+                    val markAll = !visibleNotes
+                        .filter { it.id in selectedNotes }
+                        .all(WikiNote::needsCompletion)
+                    onIntent(NotesListIntent.SetNeedsCompletion(selectedNotes.toList(), markAll))
+                    exitSelectionMode()
                 },
                 onSelectAllToggle = {
                     selectedNotes =
-                        if (selectedNotes.size == notesList.size) emptySet() else notesList.map { it.id }
+                        if (selectedNotes.size == visibleNotes.size) emptySet() else visibleNotes.map { it.id }
                             .toSet()
                 }
+            )
+        } else if (notesToCompleteCount > 0) {
+            FilterChip(
+                modifier = Modifier.padding(horizontal = 10.dp),
+                selected = showOnlyNotesToComplete,
+                onClick = { isCompletionFilterOn = !isCompletionFilterOn },
+                label = { Text("\uD83D\uDEA7 Do uzupełnienia ($notesToCompleteCount)") }
             )
         }
 
         LazyColumn {
-            notesList.forEach { note ->
+            visibleNotes.forEach { note ->
                 item(key = "note_${note.id}") {
                     WikiNoteItem(
                         note = note,
@@ -208,6 +231,7 @@ fun SelectionToolbar(
     totalCount: Int,
     onCancel: () -> Unit,
     onDelete: () -> Unit,
+    onToggleNeedsCompletion: () -> Unit,
     onSelectAllToggle: () -> Unit
 ) {
     val toolbarBackground = MaterialTheme.colorScheme.primaryContainer
@@ -231,6 +255,14 @@ fun SelectionToolbar(
                     checkmarkColor = toolbarBackground
                 )
             )
+
+            IconButton(onClick = onToggleNeedsCompletion) {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = "Oznacz lub odznacz do uzupełnienia",
+                    tint = toolbarContent
+                )
+            }
 
             IconButton(onClick = onDelete) {
                 Icon(
@@ -292,11 +324,22 @@ fun WikiNoteItem(
                         .padding(4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = note.tag,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = note.tag,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                        if (note.needsCompletion) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "FIXME",
+                                color = MaterialTheme.colorScheme.error,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
 
                     Text(
                         text = note.formatDateString(),
@@ -329,7 +372,7 @@ fun ListNotesScreenPreview() {
     ListNotesScreen(
         listOf(
             WikiNote(1, "ToDo", "Taking out the trash on Saturday", "", Date(), false),
-            WikiNote(2, "Today", "I got up at 5:00", "", Date(), false)
+            WikiNote(2, "Today", "I got up at 5:00", "", Date(), false, needsCompletion = true)
         )
     )
 }

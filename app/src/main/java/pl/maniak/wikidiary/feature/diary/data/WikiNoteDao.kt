@@ -32,6 +32,9 @@ interface WikiNoteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(wikiNote: WikiNoteEntity): Long
 
+    @Query("UPDATE wiki_note_table SET needsCompletion = :needsCompletion WHERE id IN (:ids)")
+    fun updateNeedsCompletion(ids: List<Long>, needsCompletion: Boolean)
+
     @Query("DELETE FROM wiki_note_table WHERE id = :id")
     fun deleteById(id: Long)
 

@@ -5,7 +5,7 @@ import pl.maniak.wikidiary.feature.diary.ui.DiaryNavigation
 
 /** What the composer should do with the typed text. */
 sealed interface Capture {
-    data class SaveNote(val tag: Tag, val content: String) : Capture
+    data class SaveNote(val tag: Tag, val content: String, val needsCompletion: Boolean = false) : Capture
     data class AddTodo(val title: String) : Capture
     data class AddTag(val name: String) : Capture
     data class Navigate(val destination: DiaryNavigation) : Capture
@@ -28,6 +28,7 @@ enum class ComposerCommand(
     private val aliases: List<String> = emptyList(),
 ) {
     TODO("todo", "\u2705", "Dodaj zadanie ToDo", takesArgument = true),
+    FIXME("fixme", "\uD83D\uDEA7", "Notatka do uzupełnienia później (FIXME)", takesArgument = true),
     FILM("film", "\uD83C\uDFAC", "Wyszukaj film lub serial w Filmweb", takesArgument = true),
     PICTOGRAM("piktogram", "\uD83D\uDDBC\uFE0F", "Dodaj pictogram", takesArgument = false, listOf("pictogram")),
     PEOPLE("osoby", "\uD83D\uDC65", "Zarządzaj osobami", takesArgument = false, listOf("osoba")),
@@ -47,7 +48,7 @@ enum class ComposerCommand(
             PROJECT -> DiaryNavigation.CreateTag
             CATEGORIES -> DiaryNavigation.Categories
             DATE -> DiaryNavigation.PickDate
-            TODO, FILM, TAG -> null
+            TODO, FIXME, FILM, TAG -> null
         }
 }
 
@@ -58,17 +59,30 @@ data class TextEdit(val text: String, val cursor: Int)
 
 /**
  * Turns composer text into an action: `/command argument`, or a note whose `#Tag` (any known tag,
- * multi-word names included) picks the tag and is removed from the content.
+ * multi-word names included) picks the tag and is removed from the content. The completion command
+ * word ([FIXME_MARKER]) anywhere in a note is removed from the content and marks the note as needing
+ * completion.
  */
 object QuickCapture {
     private const val TRIGGERS = "@#/"
+    private val FIXME_MARKER = Regex("[ \\t]*(?<=^|\\s)/fixme(?=$|[^\\p{L}\\p{N}_])", RegexOption.IGNORE_CASE)
 
     fun parse(text: String, tags: List<Tag>): Capture {
         val trimmed = text.trim()
         return when {
             trimmed.isEmpty() -> Capture.Rejected(CaptureError.EMPTY)
-            trimmed.startsWith('/') -> parseCommand(trimmed.drop(1))
-            else -> parseNote(trimmed, tags)
+            trimmed.startsWith('/') -> parseCommand(trimmed.drop(1), tags)
+            else -> parseNoteWithMarker(trimmed, tags)
+        }
+    }
+
+    /** Saves [text] under the clicked [tag], honouring the completion command word like [parse] does. */
+    fun parseForTag(text: String, tag: Tag): Capture {
+        val trimmed = text.trim()
+        return if (trimmed.isEmpty()) {
+            Capture.Rejected(CaptureError.EMPTY)
+        } else {
+            withFixmeMarker(trimmed) { Capture.SaveNote(tag, it) }
         }
     }
 
@@ -94,18 +108,39 @@ object QuickCapture {
         )
     }
 
-    private fun parseCommand(body: String): Capture {
-        val keyword = body.takeWhile { !it.isWhitespace() }
-        val argument = body.drop(keyword.length).trim()
+    private fun parseCommand(body: String, tags: List<Tag>): Capture {
+        val (keyword, argument) = splitCommand(body)
         val command = ComposerCommand.entries.firstOrNull { it.matches(keyword) }
             ?: return Capture.Rejected(CaptureError.UNKNOWN_COMMAND)
         command.destination?.let { return Capture.Navigate(it) }
         return when (command) {
             ComposerCommand.FILM -> Capture.Navigate(DiaryNavigation.Filmweb(argument))
             ComposerCommand.TODO -> requireArgument(argument, Capture::AddTodo)
+            ComposerCommand.FIXME -> requireArgument(argument) { markForCompletion(parseNoteWithMarker(it, tags)) }
             else -> requireArgument(argument, Capture::AddTag)
         }
     }
+
+    private fun splitCommand(body: String): Pair<String, String> {
+        val keyword = body.takeWhile { !it.isWhitespace() }
+        return keyword to body.drop(keyword.length).trim()
+    }
+
+    private fun parseNoteWithMarker(text: String, tags: List<Tag>): Capture =
+        withFixmeMarker(text) { parseNote(it, tags) }
+
+    private fun withFixmeMarker(text: String, capture: (String) -> Capture): Capture {
+        if (!FIXME_MARKER.containsMatchIn(text)) return capture(text)
+        val content = text.replace(FIXME_MARKER, "").trim()
+        return if (content.isEmpty()) {
+            Capture.Rejected(CaptureError.MISSING_ARGUMENT)
+        } else {
+            markForCompletion(capture(content))
+        }
+    }
+
+    private fun markForCompletion(capture: Capture) =
+        if (capture is Capture.SaveNote) capture.copy(needsCompletion = true) else capture
 
     private fun requireArgument(argument: String, capture: (String) -> Capture) =
         if (argument.isEmpty()) Capture.Rejected(CaptureError.MISSING_ARGUMENT) else capture(argument)

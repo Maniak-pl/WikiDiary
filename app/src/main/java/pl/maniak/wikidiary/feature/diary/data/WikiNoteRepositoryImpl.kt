@@ -59,6 +59,11 @@ class WikiNoteRepositoryImpl(
             }
         }
 
+    override suspend fun setNeedsCompletion(ids: List<Long>, needsCompletion: Boolean) =
+        withContext(Dispatchers.IO) {
+            wikiNoteDao.updateNeedsCompletion(ids, needsCompletion)
+        }
+
     override suspend fun deleteNoteById(id: Long) = withContext(Dispatchers.IO) {
         wikiNoteDao.deleteById(id)
     }

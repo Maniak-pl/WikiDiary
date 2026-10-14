@@ -63,6 +63,47 @@ class QuickCaptureTest {
     }
 
     @Test
+    fun fixmeCommandSavesNoteMarkedForCompletion() {
+        assertEquals(
+            Capture.SaveNote(work, "Wizyta u lekarza", needsCompletion = true),
+            parse("/fixme Wizyta u lekarza #Work")
+        )
+        assertEquals(Capture.Rejected(CaptureError.MISSING_TAG), parse("/fixme Wizyta u lekarza"))
+        assertEquals(Capture.Rejected(CaptureError.MISSING_ARGUMENT), parse("/FIXME "))
+    }
+
+    @Test
+    fun clickedTagSavesNoteAndHonoursFixmeCommand() {
+        assertEquals(Capture.SaveNote(book, "Rozdział 3"), QuickCapture.parseForTag(" Rozdział 3 ", book))
+        assertEquals(
+            Capture.SaveNote(book, "Rozdział 3", needsCompletion = true),
+            QuickCapture.parseForTag("/fixme Rozdział 3", book)
+        )
+        assertEquals(
+            Capture.SaveNote(book, "Rozdział 3", needsCompletion = true),
+            QuickCapture.parseForTag("Rozdział 3 /fixme", book)
+        )
+        assertEquals(Capture.SaveNote(book, "/fixmeX"), QuickCapture.parseForTag("/fixmeX", book))
+        assertEquals(Capture.Rejected(CaptureError.MISSING_ARGUMENT), QuickCapture.parseForTag("/fixme", book))
+    }
+
+    @Test
+    fun fixmeWordAnywhereInNoteIsRemovedAndMarksNote() {
+        val expected = Capture.SaveNote(work, "Wizyta u lekarza", needsCompletion = true)
+        assertEquals(expected, parse("Wizyta u lekarza /fixme #Work"))
+        assertEquals(expected, parse("Wizyta /FIXME u lekarza #Work"))
+        assertEquals(expected, parse("#Work Wizyta u lekarza /fixme"))
+        assertEquals(expected, parse("/fixme Wizyta u lekarza /fixme #Work"))
+        assertEquals(
+            Capture.SaveNote(work, "Wizyta, u lekarza", needsCompletion = true),
+            parse("Wizyta /fixme, u lekarza #Work")
+        )
+        assertEquals(Capture.SaveNote(work, "ścieżka a/fixme i /fixmeX"), parse("ścieżka a/fixme i /fixmeX #Work"))
+        assertEquals(Capture.Rejected(CaptureError.EMPTY), parse("/fixme #Work"))
+        assertEquals(Capture.Rejected(CaptureError.EMPTY), parse("#Work /fixme"))
+    }
+
+    @Test
     fun filmCommandOpensFilmwebWithQuery() {
         assertEquals(Capture.Navigate(DiaryNavigation.Filmweb("Diuna")), parse("/film Diuna"))
         assertEquals(Capture.Navigate(DiaryNavigation.Filmweb("")), parse("/FILM"))

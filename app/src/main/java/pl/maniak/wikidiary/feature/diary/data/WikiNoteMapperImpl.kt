@@ -10,7 +10,8 @@ class WikiNoteMapperImpl : WikiNoteMapper {
         content = entity.content,
         category = entity.folder,
         date = Date(entity.date),
-        isSend = entity.isSend
+        isSend = entity.isSend,
+        needsCompletion = entity.needsCompletion
     )
 
     override fun mapToEntity(domain: WikiNote): WikiNoteEntity = WikiNoteEntity(
@@ -19,6 +20,7 @@ class WikiNoteMapperImpl : WikiNoteMapper {
         content = domain.content,
         folder = domain.category,
         date = domain.date.time,
-        isSend = domain.isSend
+        isSend = domain.isSend,
+        needsCompletion = domain.needsCompletion
     )
 }

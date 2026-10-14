@@ -26,7 +26,7 @@ data class DiaryUiState(
 )
 
 sealed interface DiaryIntent {
-    data class AddNote(val tag: Tag, val content: String) : DiaryIntent
+    data class AddNote(val tag: Tag, val content: String, val needsCompletion: Boolean = false) : DiaryIntent
     data class AddTag(val name: String) : DiaryIntent
     data class AddTodo(val title: String) : DiaryIntent
 }
@@ -53,13 +53,13 @@ class DiaryViewModel(
 
     fun onIntent(intent: DiaryIntent) {
         when (intent) {
-            is DiaryIntent.AddNote -> addNote(intent.tag, intent.content)
+            is DiaryIntent.AddNote -> addNote(intent.tag, intent.content, intent.needsCompletion)
             is DiaryIntent.AddTag -> addTag(intent.name)
             is DiaryIntent.AddTodo -> viewModelScope.launch { addTodo(intent.title) }
         }
     }
 
-    private fun addNote(tag: Tag, content: String) {
+    private fun addNote(tag: Tag, content: String, needsCompletion: Boolean) {
         viewModelScope.launch {
             val people = PersonMentionResolver.resolve(content, personRepository.getPeople())
             noteRepository.saveNoteWithPeople(
@@ -68,6 +68,7 @@ class DiaryViewModel(
                     content = PersonMentionResolver.replaceWithWikiLinks(content, people),
                     category = tag.category,
                     date = selectedDate.date.value,
+                    needsCompletion = needsCompletion,
                     people = people
                 ),
                 personIds = people.map(Person::id)

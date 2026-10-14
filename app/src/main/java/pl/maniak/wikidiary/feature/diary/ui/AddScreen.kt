@@ -89,9 +89,9 @@ fun AddScreen(
         error = null
     }
 
-    fun submit() {
-        when (val capture = QuickCapture.parse(text.text, tags)) {
-            is Capture.SaveNote -> onIntent(DiaryIntent.AddNote(capture.tag, capture.content))
+    fun submit(capture: Capture) {
+        when (capture) {
+            is Capture.SaveNote -> onIntent(DiaryIntent.AddNote(capture.tag, capture.content, capture.needsCompletion))
             is Capture.AddTodo -> onIntent(DiaryIntent.AddTodo(capture.title))
             is Capture.AddTag -> onIntent(DiaryIntent.AddTag(name = capture.name))
             is Capture.Navigate -> onNavigate(capture.destination)
@@ -137,8 +137,7 @@ fun AddScreen(
             scrollState = vertScrollState,
             onTagClick = { tag ->
                 if (text.text.isNotBlank()) {
-                    onIntent(DiaryIntent.AddNote(tag, text.text.trim()))
-                    clear()
+                    submit(QuickCapture.parseForTag(text.text, tag))
                 }
             },
             onEditTagClick = { tag ->
@@ -163,7 +162,10 @@ fun AddScreen(
             placeholder = { Text(text = "Notatka… #tag @osoba /komenda") },
             leadingIcon = { CommandMenu(onCommand = ::runCommand) },
             trailingIcon = {
-                IconButton(onClick = ::submit, enabled = text.text.isNotBlank()) {
+                IconButton(
+                    onClick = { submit(QuickCapture.parse(text.text, tags)) },
+                    enabled = text.text.isNotBlank()
+                ) {
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Wyślij")
                 }
             },

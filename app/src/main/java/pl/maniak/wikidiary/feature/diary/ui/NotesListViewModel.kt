@@ -19,6 +19,7 @@ data class NotesListUiState(
 
 sealed interface NotesListIntent {
     data class DeleteNotes(val ids: List<Long>) : NotesListIntent
+    data class SetNeedsCompletion(val ids: List<Long>, val needsCompletion: Boolean) : NotesListIntent
     data class DeletePictogramEntry(val id: Long) : NotesListIntent
 }
 
@@ -37,6 +38,8 @@ class NotesListViewModel(
         viewModelScope.launch {
             when (intent) {
                 is NotesListIntent.DeleteNotes -> intent.ids.forEach { noteRepository.deleteNoteById(it) }
+                is NotesListIntent.SetNeedsCompletion ->
+                    noteRepository.setNeedsCompletion(intent.ids, intent.needsCompletion)
                 is NotesListIntent.DeletePictogramEntry -> pictogramRepository.deletePictogramEntry(intent.id)
             }
         }

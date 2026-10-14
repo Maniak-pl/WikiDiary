@@ -68,6 +68,17 @@ class DiaryViewModelTest {
     }
 
     @Test
+    fun noteMarkedForCompletionIsSavedWithTheMarker() = runBlocking {
+        val note = repositories.notes.observeNotes().nextValueAfter {
+            viewModel.onIntent(
+                DiaryIntent.AddNote(tag = Tag(id = 0, name = "Today"), content = "Wizyta", needsCompletion = true)
+            )
+        }.single()
+
+        assertEquals(true, note.needsCompletion)
+    }
+
+    @Test
     fun todoCommandAddsTaskAndLogsItUnderToDoTag() = runBlocking {
         val note = repositories.notes.observeNotes().nextValueAfter {
             viewModel.onIntent(DiaryIntent.AddTodo("Umyć garki"))

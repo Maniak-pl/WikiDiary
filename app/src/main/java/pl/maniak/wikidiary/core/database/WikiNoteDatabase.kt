@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
         PersonEntity::class,
         NotePersonEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -196,6 +196,15 @@ abstract class WikiNoteDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE `wiki_note_table` " +
+                        "ADD COLUMN `needsCompletion` INTEGER NOT NULL DEFAULT 0"
+                )
+            }
+        }
+
         fun getDatabase(context: Context): WikiNoteDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = databaseBuilder(
@@ -207,7 +216,8 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                         MIGRATION_1_2,
                         MIGRATION_2_3,
                         MIGRATION_3_4,
-                        MIGRATION_4_5
+                        MIGRATION_4_5,
+                        MIGRATION_5_6
                     )
                     .addCallback(DatabaseCallback(context)) // Add callback
                     .build()

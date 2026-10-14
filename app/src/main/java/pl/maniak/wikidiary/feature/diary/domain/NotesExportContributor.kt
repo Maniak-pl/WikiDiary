@@ -20,7 +20,10 @@ class NotesExportContributor(
                 date = note.date,
                 group = WikiExportGroup.label(note.tag, note.category, note.date),
                 line = WikiParser.addList(
-                    PersonMentionResolver.replaceWithWikiLinks(note.content, note.people),
+                    WikiParser.markForCompletion(
+                        PersonMentionResolver.replaceWithWikiLinks(note.content, note.people),
+                        note.needsCompletion
+                    ),
                     2
                 )
             )
