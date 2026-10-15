@@ -3,6 +3,7 @@ package pl.maniak.wikidiary.core.wiki
 import pl.maniak.wikidiary.feature.filmweb.domain.FilmMediaType
 import pl.maniak.wikidiary.feature.filmweb.domain.FilmMetadata
 import pl.maniak.wikidiary.feature.people.domain.Person
+import pl.maniak.wikidiary.feature.books.domain.BookMetadata
 import java.text.Normalizer
 import java.util.Locale
 
@@ -51,6 +52,12 @@ object WikiParser {
         }
         return "$sentencePrefix $mediaType " +
             "[[${metadata.canonicalUrl}|${metadata.title} (${metadata.year})]]"
+    }
+
+    fun addBookNote(prefix: String, metadata: BookMetadata): String {
+        val year = metadata.year?.let { " ($it)" }.orEmpty()
+        return "${prefix.trim().ifBlank { "Przeczytałem" }} książkę " +
+            "[[${metadata.canonicalUrl}|${metadata.title}$year]] – ${metadata.author}"
     }
 
     fun addImage(fileName: String): String {

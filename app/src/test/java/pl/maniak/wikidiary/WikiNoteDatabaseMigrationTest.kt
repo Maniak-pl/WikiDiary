@@ -27,7 +27,11 @@ class WikiNoteDatabaseMigrationTest {
         createVersion5DatabaseWithNote(content = "Stara notatka")
 
         val database = Room.databaseBuilder(context, WikiNoteDatabase::class.java, name)
-            .addMigrations(WikiNoteDatabase.MIGRATION_5_6, WikiNoteDatabase.MIGRATION_6_7)
+            .addMigrations(
+                WikiNoteDatabase.MIGRATION_5_6,
+                WikiNoteDatabase.MIGRATION_6_7,
+                WikiNoteDatabase.MIGRATION_7_8
+            )
             .allowMainThreadQueries()
             .build()
         val note = database.wikiNoteDao().getAll().single()
@@ -42,6 +46,7 @@ class WikiNoteDatabaseMigrationTest {
         Room.databaseBuilder(context, WikiNoteDatabase::class.java, name)
             .allowMainThreadQueries().build().apply { openHelper.writableDatabase }.close()
         SQLiteDatabase.openDatabase(context.getDatabasePath(name).path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+            db.execSQL("DROP TABLE `book_note_table`")
             db.execSQL("DROP TABLE `expense_table`")
             db.execSQL(
                 "INSERT INTO wiki_note_table (tag, content, date, isSend, needsCompletion) " +
@@ -50,7 +55,7 @@ class WikiNoteDatabaseMigrationTest {
             db.version = 6
         }
         val database = Room.databaseBuilder(context, WikiNoteDatabase::class.java, name)
-            .addMigrations(WikiNoteDatabase.MIGRATION_6_7)
+            .addMigrations(WikiNoteDatabase.MIGRATION_6_7, WikiNoteDatabase.MIGRATION_7_8)
             .allowMainThreadQueries().build()
         try {
             val note = database.wikiNoteDao().getAll().single()
@@ -58,6 +63,42 @@ class WikiNoteDatabaseMigrationTest {
             assertEquals(true, note.needsCompletion)
             database.expenseDao().insert(
                 pl.maniak.wikidiary.feature.expenses.data.ExpenseEntity(note.id, 12000, "Zakup", "ACCOUNT")
+            )
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun migration7To8PreservesExpensesAndNotesAndCreatesBooks() {
+        Room.databaseBuilder(context, WikiNoteDatabase::class.java, name)
+            .allowMainThreadQueries().build().apply { openHelper.writableDatabase }.close()
+        SQLiteDatabase.openDatabase(context.getDatabasePath(name).path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+            db.execSQL("DROP TABLE `book_note_table`")
+            db.execSQL(
+                "INSERT INTO wiki_note_table (id, tag, content, date, isSend, needsCompletion) " +
+                    "VALUES (1, 'Finances', 'Zakup', 0, 0, 1)"
+            )
+            db.execSQL(
+                "INSERT INTO expense_table (noteId, amountInGrosze, description, paymentMethod) " +
+                    "VALUES (1, 12000, 'Zakup', 'CASH')"
+            )
+            db.version = 7
+        }
+        val database = Room.databaseBuilder(context, WikiNoteDatabase::class.java, name)
+            .addMigrations(WikiNoteDatabase.MIGRATION_7_8).allowMainThreadQueries().build()
+        try {
+            assertEquals("Zakup", database.wikiNoteDao().getAll().single().content)
+            assertEquals(true, database.wikiNoteDao().getAll().single().needsCompletion)
+            database.openHelper.readableDatabase.query("SELECT amountInGrosze, paymentMethod FROM expense_table").use {
+                it.moveToFirst()
+                assertEquals(12000L, it.getLong(0))
+                assertEquals("CASH", it.getString(1))
+            }
+            database.bookNoteDao().insert(
+                pl.maniak.wikidiary.feature.books.data.BookNoteEntity(
+                    1, "https://lubimyczytac.pl/ksiazka/123/test", "Test", "Autor", null, null
+                )
             )
         } finally {
             database.close()
@@ -74,6 +115,7 @@ class WikiNoteDatabaseMigrationTest {
 
         SQLiteDatabase.openDatabase(context.getDatabasePath(name).path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
             db.execSQL("PRAGMA foreign_keys = OFF")
+            db.execSQL("DROP TABLE `book_note_table`")
             db.execSQL("DROP TABLE `expense_table`")
             db.execSQL("DROP TABLE `wiki_note_table`")
             db.execSQL(

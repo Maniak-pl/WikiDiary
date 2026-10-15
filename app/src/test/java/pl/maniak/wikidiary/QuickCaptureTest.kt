@@ -123,6 +123,13 @@ class QuickCaptureTest {
     }
 
     @Test
+    fun bookCommandOpensLubimyczytacWithOptionalQueryAndPolishAlias() {
+        assertEquals(Capture.Navigate(DiaryNavigation.Books()), parse("/ksiazka"))
+        assertEquals(Capture.Navigate(DiaryNavigation.Books("Diuna")), parse("/KSIAZKA Diuna"))
+        assertEquals(Capture.Navigate(DiaryNavigation.Books("Frank Herbert")), parse("/książka Frank Herbert"))
+    }
+
+    @Test
     fun tagCommandCreatesTag() {
         assertEquals(Capture.AddTag("Książki"), parse("/tag Książki"))
         assertEquals(Capture.Rejected(CaptureError.MISSING_ARGUMENT), parse("/tag "))

@@ -4,6 +4,7 @@ import org.koin.dsl.module
 import pl.maniak.wikidiary.core.di.coreModule
 import pl.maniak.wikidiary.feature.diary.diaryModule
 import pl.maniak.wikidiary.feature.export.exportModule
+import pl.maniak.wikidiary.feature.books.booksModule
 import pl.maniak.wikidiary.feature.expenses.expensesModule
 import pl.maniak.wikidiary.feature.filmweb.filmwebModule
 import pl.maniak.wikidiary.feature.people.peopleModule
@@ -23,6 +24,7 @@ val appModule = module {
         routinesModule,
         pictogramsModule,
         filmwebModule,
+        booksModule,
         exportModule,
         settingsModule
     )

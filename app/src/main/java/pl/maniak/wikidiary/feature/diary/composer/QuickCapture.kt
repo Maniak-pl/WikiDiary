@@ -31,6 +31,7 @@ enum class ComposerCommand(
     EXPENSE("wydatek", "\uD83D\uDCB3", "Dodaj wydatek", takesArgument = false),
     FIXME("fixme", "\uD83D\uDEA7", "Notatka do uzupełnienia później (FIXME)", takesArgument = true),
     FILM("film", "\uD83C\uDFAC", "Wyszukaj film lub serial w Filmweb", takesArgument = true),
+    BOOK("ksiazka", "\uD83D\uDCDA", "Dodaj przeczytaną książkę z Lubimyczytać.pl", takesArgument = true, listOf("książka")),
     PICTOGRAM("piktogram", "\uD83D\uDDBC\uFE0F", "Dodaj pictogram", takesArgument = false, listOf("pictogram")),
     PEOPLE("osoby", "\uD83D\uDC65", "Zarządzaj osobami", takesArgument = false, listOf("osoba")),
     TAG("tag", "\uD83C\uDFF7\uFE0F", "Utwórz tag", takesArgument = true),
@@ -50,7 +51,7 @@ enum class ComposerCommand(
             CATEGORIES -> DiaryNavigation.Categories
             DATE -> DiaryNavigation.PickDate
             EXPENSE -> DiaryNavigation.Expense()
-            TODO, FIXME, FILM, TAG -> null
+            TODO, FIXME, FILM, BOOK, TAG -> null
         }
 }
 
@@ -124,6 +125,7 @@ object QuickCapture {
         command.destination?.let { return Capture.Navigate(it) }
         return when (command) {
             ComposerCommand.FILM -> Capture.Navigate(DiaryNavigation.Filmweb(argument))
+            ComposerCommand.BOOK -> Capture.Navigate(DiaryNavigation.Books(argument))
             ComposerCommand.TODO -> requireArgument(argument, Capture::AddTodo)
             ComposerCommand.FIXME -> requireArgument(argument) { markForCompletion(parseNoteWithMarker(it, tags)) }
             else -> requireArgument(argument, Capture::AddTag)

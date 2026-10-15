@@ -34,6 +34,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import pl.maniak.wikidiary.feature.expenses.data.ExpenseDao
 import pl.maniak.wikidiary.feature.expenses.data.ExpenseEntity
+import pl.maniak.wikidiary.feature.books.data.BookNoteDao
+import pl.maniak.wikidiary.feature.books.data.BookNoteEntity
 
 @Database(
     entities = [
@@ -48,9 +50,10 @@ import pl.maniak.wikidiary.feature.expenses.data.ExpenseEntity
         TodoEntity::class,
         PersonEntity::class,
         NotePersonEntity::class,
-        ExpenseEntity::class
+        ExpenseEntity::class,
+        BookNoteEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -68,6 +71,7 @@ abstract class WikiNoteDatabase : RoomDatabase() {
     abstract fun personDao(): PersonDao
     abstract fun notePersonDao(): NotePersonDao
     abstract fun expenseDao(): ExpenseDao
+    abstract fun bookNoteDao(): BookNoteDao
 
     companion object {
         private var INSTANCE: WikiNoteDatabase? = null
@@ -227,6 +231,26 @@ abstract class WikiNoteDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `book_note_table` (
+                        `noteId` INTEGER NOT NULL,
+                        `canonicalUrl` TEXT NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `author` TEXT NOT NULL,
+                        `year` INTEGER,
+                        `coverUrl` TEXT,
+                        PRIMARY KEY(`noteId`),
+                        FOREIGN KEY(`noteId`) REFERENCES `wiki_note_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): WikiNoteDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = databaseBuilder(
@@ -240,7 +264,8 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                         MIGRATION_3_4,
                         MIGRATION_4_5,
                         MIGRATION_5_6,
-                        MIGRATION_6_7
+                        MIGRATION_6_7,
+                        MIGRATION_7_8
                     )
                     .addCallback(DatabaseCallback(context)) // Add callback
                     .build()

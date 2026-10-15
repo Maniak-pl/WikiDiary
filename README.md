@@ -6,7 +6,7 @@ wpisów w formacie Wiki.
 
 Aplikacja nie wymaga konta ani własnego backendu. Notatki, tagi, kategorie i
 rutyny są przechowywane lokalnie na urządzeniu. Połączenie z internetem jest
-potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
+potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie lub Lubimyczytać.pl.
 
 ## Najważniejsze funkcje
 
@@ -22,6 +22,7 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   | `/wydatek` | otwiera formularz wydatku; opcjonalnie `/wydatek 120 OLX – Kurtka #Tag` |
   | `/fixme <treść> #Tag` | zapisuje notatkę oznaczoną do uzupełnienia (FIXME) |
   | `/film <tytuł>` | otwiera Filmweb i od razu wyszukuje tytuł |
+  | `/ksiazka <tytuł lub autor>` | wyszukuje książki w Lubimyczytać.pl; można też użyć `/książka` |
   | `/piktogram` | otwiera panel pictogramów |
   | `/osoby` | otwiera katalog osób |
   | `/tag <nazwa>` | tworzy nowy tag |
@@ -73,6 +74,21 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   maksymalnie 10 filmów i seriali z okładką, tytułem oraz rokiem. Po wybraniu
   pozycji można poprawić jej metadane, a następnie zapisać zwykłą notatkę razem
   ze strukturalnymi metadanymi Filmwebu.
+- **Przeczytane książki** - `/ksiazka Diuna` otwiera natywny panel wyszukiwania
+  w Lubimyczytać.pl. Komenda bez argumentu otwiera pustą wyszukiwarkę.
+  Lista pokazuje maksymalnie 10 książek z autorami i okładkami. Po wybraniu
+  książki aplikacja pobiera jej dane; tytuł, autora, rok wydania (opcjonalny)
+  i początek zdania można poprawić przed zapisem. Wybierz tag (domyślnie
+  istniejący `Book`) i datę. Zapis tworzy notatkę, np.
+  `Przeczytałem książkę [[https://lubimyczytac.pl/ksiazka/4942534/diuna|Diuna (2024)]] – Frank Herbert`.
+  Metadane są zapisywane lokalnie razem z notatką i usuwane po jej usunięciu.
+  Eksport dodaje jeden znacznik okładki na książkę i dzień, np.
+  `{{ :books:Diuna_4942534.jpg?200 |}}`; numer w nazwie odróżnia książki o tym
+  samym tytule. Tak jak przy filmach, okładkę trzeba samodzielnie wgrać do Wiki
+  pod wskazaną nazwą. Gdy serwis nie udostępnia okładki, znacznik jest pomijany.
+  Wyszukiwanie nie wymaga konta w serwisie. Pobierane są dane bibliograficzne,
+  nie opisy ani recenzje. Zmiana strony lub blokada dostępu jest pokazywana
+  jako błąd, a nie pusta lista wyników.
 - **Pictogramy** - komenda `/piktogram` otwiera katalog ikon. Można utworzyć
   pictogram, wybierając ikonę i nazwę, przypisać go do wybranego taga oraz
   edytować lub usunąć definicję. Przycisk `+` pokazuje dodatkowy zestaw ikon.

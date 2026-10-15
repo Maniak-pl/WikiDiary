@@ -20,8 +20,10 @@ androidxTestCore = "1.6.1"
 coroutines = "1.9.0"
 androidxJunit = "1.2.1"
 espresso = "3.6.1"
+jsoup = "1.18.3"
 
 [libraries]
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
