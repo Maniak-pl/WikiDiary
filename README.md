@@ -178,6 +178,15 @@ W repozytorium znajduje się aktualny build debug:
 | Źródło APK | `develop` + natywna lista wyników Filmweb |
 | SHA-256 APK | `6186cb5b02437129c6888ec6e61d84b904249c251f8a553a13138cb11f91f026` |
 
+### APK z GitHub Actions
+
+Workflow [`Build APK`](.github/workflows/build-apk.yml) przy każdym pushu i
+pull requeście uruchamia testy jednostkowe i buduje debug APK z aktualnego
+kodu. Można go też uruchomić ręcznie: zakładka **Actions** → **Build APK** →
+**Run workflow**. Gotowy plik jest w sekcji **Artifacts** danego uruchomienia
+(przechowywany 30 dni). APK jest podpisany kluczem z `app/debug.keystore`, więc
+instaluje się jako aktualizacja wersji z tego repozytorium.
+
 ### Instalacja przez ADB
 
 Pobierz plik APK, opcjonalnie zweryfikuj sumę, a następnie zainstaluj go na
