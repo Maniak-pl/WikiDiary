@@ -63,6 +63,19 @@ class QuickCaptureTest {
     }
 
     @Test
+    fun expenseCommandOpensFormWithOptionalShortcutAndClickedTag() {
+        assertEquals(Capture.Navigate(DiaryNavigation.Expense()), parse("/wydatek"))
+        assertEquals(
+            Capture.Navigate(DiaryNavigation.Expense("120 OLX – Kurtka #Work")),
+            parse("/WYDATEK 120 OLX – Kurtka #Work")
+        )
+        assertEquals(
+            Capture.Navigate(DiaryNavigation.Expense("12 Kawa", book.id)),
+            QuickCapture.parseForTag("/wydatek 12 Kawa", book)
+        )
+    }
+
+    @Test
     fun fixmeCommandSavesNoteMarkedForCompletion() {
         assertEquals(
             Capture.SaveNote(work, "Wizyta u lekarza", needsCompletion = true),

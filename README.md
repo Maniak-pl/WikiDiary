@@ -19,6 +19,7 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   | Komenda | Działanie |
   | --- | --- |
   | `/todo <treść>` | dodaje zadanie ToDo (i notatkę pod tagiem `ToDo`) |
+  | `/wydatek` | otwiera formularz wydatku; opcjonalnie `/wydatek 120 OLX – Kurtka #Tag` |
   | `/fixme <treść> #Tag` | zapisuje notatkę oznaczoną do uzupełnienia (FIXME) |
   | `/film <tytuł>` | otwiera Filmweb i od razu wyszukuje tytuł |
   | `/piktogram` | otwiera panel pictogramów |
@@ -51,6 +52,16 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie.
   notatkę z tagiem `ToDo`, a jego ukończenie zapisuje notatkę z tagiem `Today`.
   Ukończone zadania pozostają na liście jako odhaczone, a zadania są
   przechowywane lokalnie niezależnie od codziennego resetu rutyn.
+- **Wydatki** - wybierz „Dodaj wydatek” z menu komend albo wpisz `/wydatek`
+  i naciśnij **Wyślij**. Formularz zawiera kwotę w zł, opis, tag (domyślnie
+  `Finances`), datę i sposób płatności: **💳 Konto** (domyślnie przy każdym
+  otwarciu) lub **💵 Gotówka**. Skrót `/wydatek 120,50 OLX – Kurtka #Tag`
+  wypełnia formularz przed zatwierdzeniem; kliknięcie tagu po wpisaniu
+  `/wydatek 120,50 OLX – Kurtka` wybiera go w formularzu. Kwota musi być
+  dodatnia i mieć maksymalnie dwie cyfry po przecinku (można też użyć kropki).
+  Lista notatek i eksport zawierają np. `💳 OLX – Kurtka – 120,50 zł`.
+  Dane wydatku, w tym kwota w groszach i sposób płatności, są zapisywane
+  lokalnie razem z notatką. Usunięcie notatki usuwa również powiązany wydatek.
 - **Osoby i wzmianki** - komenda `/osoby` otwiera katalog osób, w którym można
   zapisać imię i nazwisko oraz wybrać ikonę osoby. W treści notatki wpisz `@`
   i pierwsze litery imienia, aby wybrać podpowiedź z katalogu. Po zapisaniu

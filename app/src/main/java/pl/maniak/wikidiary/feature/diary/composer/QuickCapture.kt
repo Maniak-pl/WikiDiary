@@ -28,6 +28,7 @@ enum class ComposerCommand(
     private val aliases: List<String> = emptyList(),
 ) {
     TODO("todo", "\u2705", "Dodaj zadanie ToDo", takesArgument = true),
+    EXPENSE("wydatek", "\uD83D\uDCB3", "Dodaj wydatek", takesArgument = false),
     FIXME("fixme", "\uD83D\uDEA7", "Notatka do uzupełnienia później (FIXME)", takesArgument = true),
     FILM("film", "\uD83C\uDFAC", "Wyszukaj film lub serial w Filmweb", takesArgument = true),
     PICTOGRAM("piktogram", "\uD83D\uDDBC\uFE0F", "Dodaj pictogram", takesArgument = false, listOf("pictogram")),
@@ -48,6 +49,7 @@ enum class ComposerCommand(
             PROJECT -> DiaryNavigation.CreateTag
             CATEGORIES -> DiaryNavigation.Categories
             DATE -> DiaryNavigation.PickDate
+            EXPENSE -> DiaryNavigation.Expense()
             TODO, FIXME, FILM, TAG -> null
         }
 }
@@ -79,6 +81,12 @@ object QuickCapture {
     /** Saves [text] under the clicked [tag], honouring the completion command word like [parse] does. */
     fun parseForTag(text: String, tag: Tag): Capture {
         val trimmed = text.trim()
+        if (trimmed.startsWith('/')) {
+            val (keyword, argument) = splitCommand(trimmed.drop(1))
+            if (ComposerCommand.EXPENSE.matches(keyword)) {
+                return Capture.Navigate(DiaryNavigation.Expense(argument, tag.id))
+            }
+        }
         return if (trimmed.isEmpty()) {
             Capture.Rejected(CaptureError.EMPTY)
         } else {
@@ -112,6 +120,7 @@ object QuickCapture {
         val (keyword, argument) = splitCommand(body)
         val command = ComposerCommand.entries.firstOrNull { it.matches(keyword) }
             ?: return Capture.Rejected(CaptureError.UNKNOWN_COMMAND)
+        if (command == ComposerCommand.EXPENSE) return Capture.Navigate(DiaryNavigation.Expense(argument))
         command.destination?.let { return Capture.Navigate(it) }
         return when (command) {
             ComposerCommand.FILM -> Capture.Navigate(DiaryNavigation.Filmweb(argument))
@@ -145,7 +154,7 @@ object QuickCapture {
     private fun requireArgument(argument: String, capture: (String) -> Capture) =
         if (argument.isEmpty()) Capture.Rejected(CaptureError.MISSING_ARGUMENT) else capture(argument)
 
-    private fun parseNote(text: String, tags: List<Tag>): Capture {
+    internal fun parseNote(text: String, tags: List<Tag>): Capture {
         text.forEachIndexed { index, char ->
             if (char != '#' || (index > 0 && !text[index - 1].isWhitespace())) return@forEachIndexed
             val rest = text.substring(index + 1)

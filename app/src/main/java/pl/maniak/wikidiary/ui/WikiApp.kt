@@ -42,6 +42,7 @@ import pl.maniak.wikidiary.feature.diary.ui.CreateCategoryRoute
 import pl.maniak.wikidiary.feature.diary.ui.CreateProjectRoute
 import pl.maniak.wikidiary.feature.diary.ui.DiaryNavigation
 import pl.maniak.wikidiary.feature.filmweb.ui.FilmwebRoute
+import pl.maniak.wikidiary.feature.expenses.ui.ExpenseRoute
 import pl.maniak.wikidiary.feature.people.ui.PersonManagerRoute
 import pl.maniak.wikidiary.feature.pictograms.ui.PictogramManagerRoute
 import pl.maniak.wikidiary.ui.navigation.AppRoute
@@ -108,6 +109,7 @@ fun WikiApp(selectedDate: SelectedDateStore = koinInject()) {
                     is DiaryNavigation.EditTag -> sheet = AppSheet.TagEditor(destination.tag.id)
                     DiaryNavigation.Categories -> sheet = AppSheet.Categories
                     is DiaryNavigation.Filmweb -> sheet = AppSheet.Filmweb(destination.query)
+                    is DiaryNavigation.Expense -> sheet = AppSheet.Expense(destination.input, destination.tagId)
                     DiaryNavigation.Pictograms -> sheet = AppSheet.Pictograms
                     DiaryNavigation.People -> sheet = AppSheet.People
                     DiaryNavigation.PickDate -> showDatePicker = true
@@ -153,6 +155,12 @@ private fun AppSheetHost(sheet: AppSheet, onDismiss: () -> Unit, onPickDate: () 
             is AppSheet.TagEditor -> CreateProjectRoute(tagId = sheet.tagId, onDone = close)
             AppSheet.Categories -> CreateCategoryRoute()
             is AppSheet.Filmweb -> FilmwebRoute(initialQuery = sheet.query, onPickDate = onPickDate, onClose = close)
+            is AppSheet.Expense -> ExpenseRoute(
+                initialInput = sheet.input,
+                initialTagId = sheet.tagId,
+                onPickDate = onPickDate,
+                onClose = close
+            )
             AppSheet.Pictograms -> PictogramManagerRoute()
             AppSheet.People -> PersonManagerRoute()
             AppSheet.None -> Unit

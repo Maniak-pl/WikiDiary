@@ -32,6 +32,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import pl.maniak.wikidiary.feature.expenses.data.ExpenseDao
+import pl.maniak.wikidiary.feature.expenses.data.ExpenseEntity
 
 @Database(
     entities = [
@@ -45,9 +47,10 @@ import kotlinx.coroutines.launch
         PictogramEntryEntity::class,
         TodoEntity::class,
         PersonEntity::class,
-        NotePersonEntity::class
+        NotePersonEntity::class,
+        ExpenseEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -64,6 +67,7 @@ abstract class WikiNoteDatabase : RoomDatabase() {
     abstract fun todoDao(): TodoDao
     abstract fun personDao(): PersonDao
     abstract fun notePersonDao(): NotePersonDao
+    abstract fun expenseDao(): ExpenseDao
 
     companion object {
         private var INSTANCE: WikiNoteDatabase? = null
@@ -205,6 +209,24 @@ abstract class WikiNoteDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `expense_table` (
+                        `noteId` INTEGER NOT NULL,
+                        `amountInGrosze` INTEGER NOT NULL,
+                        `description` TEXT NOT NULL,
+                        `paymentMethod` TEXT NOT NULL,
+                        PRIMARY KEY(`noteId`),
+                        FOREIGN KEY(`noteId`) REFERENCES `wiki_note_table`(`id`)
+                            ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): WikiNoteDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = databaseBuilder(
@@ -217,7 +239,8 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                         MIGRATION_2_3,
                         MIGRATION_3_4,
                         MIGRATION_4_5,
-                        MIGRATION_5_6
+                        MIGRATION_5_6,
+                        MIGRATION_6_7
                     )
                     .addCallback(DatabaseCallback(context)) // Add callback
                     .build()
