@@ -19,6 +19,8 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie lub Lubimyczytać.
   | Komenda | Działanie |
   | --- | --- |
   | `/todo <treść>` | dodaje zadanie ToDo (i notatkę pod tagiem `ToDo`) |
+  | `/mysl <treść>` | zapisuje notatkę w grupie `Przemyślenia`, bez wybierania tagu |
+  | `/wdzieczny <treść>` | zapisuje notatkę w grupie `Kronika wdzięczności`, bez wybierania tagu |
   | `/wydatek` | otwiera formularz wydatku; opcjonalnie `/wydatek 120 OLX – Kurtka #Tag` |
   | `/fixme <treść> #Tag` | zapisuje notatkę oznaczoną do uzupełnienia (FIXME) |
   | `/film <tytuł>` | otwiera Filmweb i od razu wyszukuje tytuł |
@@ -37,6 +39,15 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie lub Lubimyczytać.
   kategorią. Kategorie można tworzyć, zmieniać i usuwać w dolnym panelu.
 - **Lista notatek** - przeglądanie wpisów oraz zaznaczanie wielu wpisów do
   jednoczesnego usunięcia.
+- **Przemyślenia i kronika wdzięczności** - wpisz np. `/mysl Warto zwolnić`
+  lub `/wdzieczny Za wspólny spacer` i naciśnij **Wyślij**. Komendy są też
+  dostępne w menu ⊕ i podpowiedziach `/`. Działają również pisownie `/myśl`
+  i `/wdzięczny`. Tagi `Przemyślenia` i `Kronika wdzięczności` tworzą się
+  przy pierwszym użyciu i nie są powielane przy kolejnych wpisach.
+  Komenda wybiera swoją grupę także przy zapisie przez kliknięcie innego tagu.
+  Treść zachowuje hashtagi jako tekst; nie trzeba dodawać `#Tag`.
+  Wpisy korzystają z wybranej daty, obsługują wzmianki `@osoba` i znacznik
+  `/fixme`, a w eksporcie trafiają do odpowiedniej grupy bez tekstu komendy.
 - **Do uzupełnienia (FIXME)** - komenda `/fixme <treść> #Tag` (albo
   `/fixme <treść>` i kliknięcie tagu) zapisuje notatkę ze znacznikiem FIXME.
   Słowo `/fixme` może stać w dowolnym miejscu notatki (np. `Wizyta /fixme #Work`)

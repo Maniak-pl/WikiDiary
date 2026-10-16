@@ -26,8 +26,13 @@ enum class ComposerCommand(
     val description: String,
     val takesArgument: Boolean,
     private val aliases: List<String> = emptyList(),
+    val noteTag: String? = null,
 ) {
     TODO("todo", "\u2705", "Dodaj zadanie ToDo", takesArgument = true),
+    THOUGHT("mysl", "\uD83D\uDCAD", "Zapisz przemyślenie", takesArgument = true,
+        aliases = listOf("myśl"), noteTag = "Przemyślenia"),
+    GRATITUDE("wdzieczny", "\uD83D\uDE4F", "Zapisz wpis do kroniki wdzięczności", takesArgument = true,
+        aliases = listOf("wdzięczny"), noteTag = "Kronika wdzięczności"),
     EXPENSE("wydatek", "\uD83D\uDCB3", "Dodaj wydatek", takesArgument = false),
     FIXME("fixme", "\uD83D\uDEA7", "Notatka do uzupełnienia później (FIXME)", takesArgument = true),
     FILM("film", "\uD83C\uDFAC", "Wyszukaj film lub serial w Filmweb", takesArgument = true),
@@ -51,7 +56,7 @@ enum class ComposerCommand(
             CATEGORIES -> DiaryNavigation.Categories
             DATE -> DiaryNavigation.PickDate
             EXPENSE -> DiaryNavigation.Expense()
-            TODO, FIXME, FILM, BOOK, TAG -> null
+            TODO, THOUGHT, GRATITUDE, FIXME, FILM, BOOK, TAG -> null
         }
 }
 
@@ -86,6 +91,9 @@ object QuickCapture {
             val (keyword, argument) = splitCommand(trimmed.drop(1))
             if (ComposerCommand.EXPENSE.matches(keyword)) {
                 return Capture.Navigate(DiaryNavigation.Expense(argument, tag.id))
+            }
+            if (ComposerCommand.entries.any { it.noteTag != null && it.matches(keyword) }) {
+                return parseCommand(trimmed.drop(1), emptyList())
             }
         }
         return if (trimmed.isEmpty()) {
@@ -123,6 +131,12 @@ object QuickCapture {
             ?: return Capture.Rejected(CaptureError.UNKNOWN_COMMAND)
         if (command == ComposerCommand.EXPENSE) return Capture.Navigate(DiaryNavigation.Expense(argument))
         command.destination?.let { return Capture.Navigate(it) }
+        command.noteTag?.let { name ->
+            return requireArgument(argument) { content ->
+                val tag = tags.firstOrNull { it.name == name } ?: Tag(id = 0, name = name)
+                withFixmeMarker(content) { Capture.SaveNote(tag, it) }
+            }
+        }
         return when (command) {
             ComposerCommand.FILM -> Capture.Navigate(DiaryNavigation.Filmweb(argument))
             ComposerCommand.BOOK -> Capture.Navigate(DiaryNavigation.Books(argument))

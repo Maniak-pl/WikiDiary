@@ -63,6 +63,59 @@ class QuickCaptureTest {
     }
 
     @Test
+    fun reflectionCommandsSaveWithoutTagAndRemoveOnlyCommand() {
+        mapOf(
+            "/mysl Warto zwolnić" to "Przemyślenia",
+            "/MYŚL Warto zwolnić" to "Przemyślenia",
+            "/wdzieczny Warto zwolnić" to "Kronika wdzięczności",
+            "/WDZIĘCZNY Warto zwolnić" to "Kronika wdzięczności"
+        ).forEach { (input, name) ->
+            val capture = QuickCapture.parse(input, emptyList())
+            check(capture is Capture.SaveNote)
+            assertEquals(name, capture.tag.name)
+            assertEquals(0L, capture.tag.id)
+            assertEquals("Warto zwolnić", capture.content)
+            assertEquals(false, capture.needsCompletion)
+        }
+    }
+
+    @Test
+    fun reflectionCommandsRejectMissingContentIncludingClickedTagPath() {
+        listOf("/mysl", "/myśl \n ", "/wdzieczny", "/wdzięczny \t").forEach { input ->
+            assertEquals(Capture.Rejected(CaptureError.MISSING_ARGUMENT), parse(input))
+            assertEquals(Capture.Rejected(CaptureError.MISSING_ARGUMENT), QuickCapture.parseForTag(input, work))
+        }
+    }
+
+    @Test
+    fun reflectionCommandsReuseExistingTagsAndPreserveContentAndCompletionMarker() {
+        val thoughts = Tag(10, "Przemyślenia")
+        val gratitude = Tag(11, "Kronika wdzięczności")
+        val existingTags = tags + thoughts + gratitude
+        assertEquals(
+            Capture.SaveNote(thoughts, "Warto zwolnić #Work", needsCompletion = true),
+            QuickCapture.parse("/mysl Warto zwolnić #Work /fixme", existingTags)
+        )
+        assertEquals(
+            Capture.SaveNote(gratitude, "Za spacer z @Jan"),
+            QuickCapture.parse("/wdzieczny Za spacer z @Jan", existingTags)
+        )
+    }
+
+    @Test
+    fun clickingOtherTagDoesNotSaveReflectionCommandAsLiteralNote() {
+        listOf("/mysl Treść" to "Przemyślenia", "/wdzieczny Treść" to "Kronika wdzięczności").forEach {
+            (input, group) ->
+            val capture = QuickCapture.parseForTag(input, work)
+            check(capture is Capture.SaveNote)
+            assertEquals(group, capture.tag.name)
+            assertEquals("Treść", capture.content)
+        }
+        assertEquals(Capture.SaveNote(work, "/myslX Treść"), QuickCapture.parseForTag("/myslX Treść", work))
+        assertEquals(Capture.Rejected(CaptureError.UNKNOWN_COMMAND), parse("/myslX Treść"))
+    }
+
+    @Test
     fun expenseCommandOpensFormWithOptionalShortcutAndClickedTag() {
         assertEquals(Capture.Navigate(DiaryNavigation.Expense()), parse("/wydatek"))
         assertEquals(

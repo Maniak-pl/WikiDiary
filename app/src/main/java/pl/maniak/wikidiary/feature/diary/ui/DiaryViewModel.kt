@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import pl.maniak.wikidiary.core.config.Config
 import pl.maniak.wikidiary.core.date.SelectedDateStore
 import pl.maniak.wikidiary.feature.diary.domain.Tag
@@ -39,6 +41,7 @@ class DiaryViewModel(
     private val selectedDate: SelectedDateStore,
     private val addTodo: AddTodo,
 ) : ViewModel() {
+    private val noteSaveMutex = Mutex()
 
     val uiState: StateFlow<DiaryUiState> = combine(
         tagRepository.observeTags(),
@@ -60,21 +63,29 @@ class DiaryViewModel(
     }
 
     private fun addNote(tag: Tag, content: String, needsCompletion: Boolean) {
+        val date = selectedDate.date.value
         viewModelScope.launch {
-            val people = PersonMentionResolver.resolve(content, personRepository.getPeople())
-            noteRepository.saveNoteWithPeople(
-                note = WikiNote(
-                    tag = tag.name,
-                    content = PersonMentionResolver.replaceWithWikiLinks(content, people),
-                    category = tag.category,
-                    date = selectedDate.date.value,
-                    needsCompletion = needsCompletion,
-                    people = people
-                ),
-                personIds = people.map(Person::id)
-            )
-            config.setLastUpdated(System.currentTimeMillis())
-            tagRepository.saveTag(tag.copy(date = Date()))
+            noteSaveMutex.withLock {
+                val resolvedTag = if (tag.id == 0L) {
+                    tagRepository.getTags().firstOrNull { it.name == tag.name } ?: tag
+                } else {
+                    tag
+                }
+                val people = PersonMentionResolver.resolve(content, personRepository.getPeople())
+                noteRepository.saveNoteWithPeople(
+                    note = WikiNote(
+                        tag = resolvedTag.name,
+                        content = PersonMentionResolver.replaceWithWikiLinks(content, people),
+                        category = resolvedTag.category,
+                        date = date,
+                        needsCompletion = needsCompletion,
+                        people = people
+                    ),
+                    personIds = people.map(Person::id)
+                )
+                config.setLastUpdated(System.currentTimeMillis())
+                tagRepository.saveTag(resolvedTag.copy(date = Date()))
+            }
         }
     }
 
