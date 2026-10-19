@@ -12,6 +12,17 @@ interface ExpenseDao {
 
     @Query(
         """
+        SELECT wiki_note_table.date
+        FROM expense_table
+        INNER JOIN wiki_note_table ON wiki_note_table.id = expense_table.noteId
+        ORDER BY wiki_note_table.date DESC
+        LIMIT 1
+        """
+    )
+    fun getLatestExpenseDate(): Long?
+
+    @Query(
+        """
         SELECT expense_table.*, wiki_note_table.date
         FROM expense_table
         INNER JOIN wiki_note_table ON wiki_note_table.id = expense_table.noteId

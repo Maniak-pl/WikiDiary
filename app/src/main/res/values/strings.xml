@@ -35,5 +35,12 @@
     <string name="numberOfDay">1</string>
 
     <string name="last_note_time">Complete the note. Time of last note %1$d hours ago</string>
+    <string name="widget_note_gauge_description">Liczba notatek, maksymalnie 500</string>
+    <string name="widget_fuel_gauge_description">Godziny do pustego wskaźnika, pełny cykl 24 godziny</string>
+    <string name="widget_activity_progress_description">Postęp od ostatniej notatki w cyklu 24 godzin</string>
+    <string name="widget_expense">Wydatek</string>
+    <string name="widget_routine">Rutyna</string>
+    <string name="widget_inactivity">12 h bez akcji</string>
+    <string name="widget_gratitude">Wdzięczność</string>
 
 </resources>

@@ -11,6 +11,19 @@ interface WikiNoteDao {
     @Query("SELECT * FROM wiki_note_table")
     fun getAll(): List<WikiNoteEntity>
 
+    @Query("SELECT COUNT(*) FROM wiki_note_table")
+    fun getNoteCount(): Int
+
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM wiki_note_table
+            WHERE tag = :tag AND date >= :startDate AND date < :endDate
+        )
+        """
+    )
+    fun hasNoteWithTagBetween(tag: String, startDate: Long, endDate: Long): Boolean
+
     @Query(
         """
         SELECT wiki_note_table.*,
