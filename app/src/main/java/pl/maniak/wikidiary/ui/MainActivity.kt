@@ -1,5 +1,8 @@
 package pl.maniak.wikidiary.ui
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
@@ -13,6 +16,7 @@ import androidx.compose.runtime.getValue
 import org.koin.android.ext.android.inject
 import pl.maniak.wikidiary.core.config.Config
 import pl.maniak.wikidiary.core.ui.theme.WikiTheme
+import pl.maniak.wikidiary.ui.widget.WikiWidgetProvider
 
 // Default scrims of enableEdgeToEdge, reused when the theme is chosen in settings.
 private val LIGHT_SCRIM = Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
@@ -39,5 +43,24 @@ class MainActivity : ComponentActivity() {
                 WikiApp()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshWidget()
+    }
+
+    private fun refreshWidget() {
+        val widgetManager = AppWidgetManager.getInstance(this)
+        val widgetIds = widgetManager.getAppWidgetIds(
+            ComponentName(this, WikiWidgetProvider::class.java)
+        )
+        if (widgetIds.isEmpty()) return
+
+        sendBroadcast(
+            Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                .setComponent(ComponentName(this, WikiWidgetProvider::class.java))
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds)
+        )
     }
 }

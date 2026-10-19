@@ -3,9 +3,9 @@
     android:id="@+id/widgetLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
     android:background="#66000000"
+    android:gravity="center"
+    android:orientation="vertical"
     android:padding="8dp">
 
     <LinearLayout
@@ -32,9 +32,15 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="horizontal">
+
                 <TextView
                     android:id="@+id/gratitudeIndicatorIcon"
                     android:layout_width="wrap_content"
@@ -50,6 +56,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="horizontal">
+
                 <TextView
                     android:id="@+id/activityIndicatorIcon"
                     android:layout_width="wrap_content"
@@ -65,12 +72,13 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="horizontal">
+
                 <TextView
                     android:id="@+id/routineIndicatorIcon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/widget_routine"
-                    android:text="🔄"
+                    android:text="🎯"
                     android:textSize="18sp" />
             </LinearLayout>
 
@@ -80,6 +88,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="horizontal">
+
                 <TextView
                     android:id="@+id/expenseIndicatorIcon"
                     android:layout_width="wrap_content"
@@ -88,6 +97,12 @@
                     android:text="💰"
                     android:textSize="18sp" />
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
         </LinearLayout>
 
         <ImageView
@@ -104,7 +119,7 @@
         android:layout_width="match_parent"
         android:layout_height="10dp"
         android:contentDescription="@string/widget_activity_progress_description"
-        android:scaleType="fitXY"
-        android:paddingTop="2dp" />
+        android:paddingTop="2dp"
+        android:scaleType="fitXY" />
 
 </LinearLayout>

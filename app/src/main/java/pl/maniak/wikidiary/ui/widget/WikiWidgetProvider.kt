@@ -81,7 +81,7 @@ class WikiWidgetProvider : AppWidgetProvider() {
         )
         setIndicator(views, R.id.gratitudeIndicatorIcon, "❤️", state.needsGratitude)
         setIndicator(views, R.id.activityIndicatorIcon, "🕒", state.needsInactivityWarning)
-        setIndicator(views, R.id.routineIndicatorIcon, "🔄", state.needsRoutine)
+        setIndicator(views, R.id.routineIndicatorIcon, "\uD83C\uDFAF", state.needsRoutine)
         setIndicator(views, R.id.expenseIndicatorIcon, "💰", state.needsExpense)
 
         val intent = Intent(context, MainActivity::class.java).apply {
