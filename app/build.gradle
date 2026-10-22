@@ -6,6 +6,11 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+def appVersionMajor = project.property('APP_VERSION_MAJOR').toInteger()
+def appVersionMinor = project.property('APP_VERSION_MINOR').toInteger()
+def appVersionPatch = project.property('APP_VERSION_PATCH').toInteger()
+def appVersionCode = project.property('APP_VERSION_CODE').toInteger()
+
 android {
     namespace 'pl.maniak.wikidiary'
     compileSdk 34
@@ -14,8 +19,8 @@ android {
         applicationId "pl.maniak.wikidiary"
         minSdk 24
         targetSdk 34
-        versionCode 2
-        versionName "1.1"
+        versionCode appVersionCode
+        versionName "${appVersionMajor}.${appVersionMinor}.${appVersionPatch}"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

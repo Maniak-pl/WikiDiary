@@ -12,10 +12,28 @@ interface RoutineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(routine: RoutineEntity)
 
-    @Query("SELECT * FROM routines ORDER BY name")
+    @Query(
+        """
+        SELECT * FROM routines
+        ORDER BY (
+            SELECT COUNT(*) FROM wiki_note_table
+            WHERE tag = 'Routine'
+                AND content = 'Wykonano rutynę "' || routines.name || '"'
+        ) DESC, name COLLATE NOCASE
+        """
+    )
     fun getAllRoutines(): List<RoutineEntity>
 
-    @Query("SELECT * FROM routines ORDER BY name")
+    @Query(
+        """
+        SELECT * FROM routines
+        ORDER BY (
+            SELECT COUNT(*) FROM wiki_note_table
+            WHERE tag = 'Routine'
+                AND content = 'Wykonano rutynę "' || routines.name || '"'
+        ) DESC, name COLLATE NOCASE
+        """
+    )
     fun observeAll(): Flow<List<RoutineEntity>>
 
     @Query("DELETE FROM routines WHERE id = :id")

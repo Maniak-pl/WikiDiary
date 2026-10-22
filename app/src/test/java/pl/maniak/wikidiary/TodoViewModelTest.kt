@@ -3,6 +3,7 @@ package pl.maniak.wikidiary
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,5 +51,18 @@ class TodoViewModelTest {
         }
 
         assertEquals(listOf("Today" to "Zakończono zadanie: Buy milk"), notes.map { it.tag to it.content })
+        assertTrue(repositories.todos.getTodos().isEmpty())
+    }
+
+    @Test
+    fun editingTaskUpdatesItsTitle() = runBlocking {
+        repositories.todos.saveTodo(Todo(title = "Buy milk"))
+        val todo = repositories.todos.getTodos().single()
+
+        val todos = repositories.todos.observeTodos().nextValueAfter {
+            viewModel.onIntent(TodoIntent.Update(todo.copy(title = "Buy oat milk")))
+        }
+
+        assertEquals(listOf("Buy oat milk"), todos.map(Todo::title))
     }
 }

@@ -2,9 +2,11 @@ package pl.maniak.wikidiary
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import pl.maniak.wikidiary.feature.diary.composer.Capture
 import pl.maniak.wikidiary.feature.diary.composer.CaptureError
+import pl.maniak.wikidiary.feature.diary.composer.ComposerCommand
 import pl.maniak.wikidiary.feature.diary.composer.QuickCapture
 import pl.maniak.wikidiary.feature.diary.composer.TextEdit
 import pl.maniak.wikidiary.feature.diary.composer.Token
@@ -60,6 +62,11 @@ class QuickCaptureTest {
     fun todoCommandAddsTask() {
         assertEquals(Capture.AddTodo("Umyć garki"), parse("/todo  Umyć garki "))
         assertEquals(Capture.Rejected(CaptureError.MISSING_ARGUMENT), parse("/todo"))
+    }
+
+    @Test
+    fun composerCommandDescriptionsAreShort() {
+        assertTrue(ComposerCommand.entries.all { it.description.trim().split(Regex("\\s+")).size <= 2 })
     }
 
     @Test

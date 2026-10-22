@@ -19,6 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +45,8 @@ fun TodoScreen(
     onIntent: (TodoIntent) -> Unit
 ) {
     var newTodoTitle by remember { mutableStateOf("") }
+    var todoBeingEdited by remember { mutableStateOf<Todo?>(null) }
+    var editedTitle by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -79,6 +84,10 @@ fun TodoScreen(
             items(todos, key = { it.id }) { todo ->
                 TodoItem(
                     todo = todo,
+                    onEdit = {
+                        todoBeingEdited = todo
+                        editedTitle = todo.title
+                    },
                     onRemove = { onIntent(TodoIntent.Delete(todo.id)) },
                     onToggle = { isChecked ->
                         onIntent(TodoIntent.SetCompleted(todo.id, isChecked))
@@ -87,11 +96,43 @@ fun TodoScreen(
             }
         }
     }
+
+    todoBeingEdited?.let { todo ->
+        AlertDialog(
+            onDismissRequest = { todoBeingEdited = null },
+            title = { Text("Edit task") },
+            text = {
+                OutlinedTextField(
+                    value = editedTitle,
+                    onValueChange = { editedTitle = it },
+                    label = { Text("Task") },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = editedTitle.isNotBlank(),
+                    onClick = {
+                        onIntent(TodoIntent.Update(todo.copy(title = editedTitle.trim())))
+                        todoBeingEdited = null
+                    },
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { todoBeingEdited = null }) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
 }
 
 @Composable
 private fun TodoItem(
     todo: Todo,
+    onEdit: () -> Unit,
     onRemove: () -> Unit,
     onToggle: (Boolean) -> Unit
 ) {
@@ -111,6 +152,9 @@ private fun TodoItem(
                 .weight(1f)
                 .padding(start = 4.dp)
         )
+        IconButton(onClick = onEdit) {
+            Icon(Icons.Default.Edit, contentDescription = "Edit task")
+        }
         IconButton(onClick = onRemove) {
             Icon(Icons.Default.Delete, contentDescription = "Remove the task")
         }

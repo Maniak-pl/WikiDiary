@@ -28,21 +28,21 @@ enum class ComposerCommand(
     private val aliases: List<String> = emptyList(),
     val noteTag: String? = null,
 ) {
-    TODO("todo", "\u2705", "Dodaj zadanie ToDo", takesArgument = true),
-    THOUGHT("mysl", "\uD83D\uDCAD", "Zapisz przemyślenie", takesArgument = true,
+    TODO("todo", "\u2705", "Dodaj zadanie", takesArgument = true),
+    THOUGHT("mysl", "\uD83D\uDCAD", "Przemyślenie", takesArgument = true,
         aliases = listOf("myśl"), noteTag = "Przemyślenia"),
-    GRATITUDE("wdzieczny", "\uD83D\uDE4F", "Zapisz wpis do kroniki wdzięczności", takesArgument = true,
+    GRATITUDE("wdzieczny", "\uD83D\uDE4F", "Wdzięczność", takesArgument = true,
         aliases = listOf("wdzięczny"), noteTag = "Kronika wdzięczności"),
-    EXPENSE("wydatek", "\uD83D\uDCB3", "Dodaj wydatek", takesArgument = false),
-    FIXME("fixme", "\uD83D\uDEA7", "Notatka do uzupełnienia później (FIXME)", takesArgument = true),
-    FILM("film", "\uD83C\uDFAC", "Wyszukaj film lub serial w Filmweb", takesArgument = true),
-    BOOK("ksiazka", "\uD83D\uDCDA", "Dodaj przeczytaną książkę z Lubimyczytać.pl", takesArgument = true, listOf("książka")),
-    PICTOGRAM("piktogram", "\uD83D\uDDBC\uFE0F", "Dodaj pictogram", takesArgument = false, listOf("pictogram")),
-    PEOPLE("osoby", "\uD83D\uDC65", "Zarządzaj osobami", takesArgument = false, listOf("osoba")),
-    TAG("tag", "\uD83C\uDFF7\uFE0F", "Utwórz tag", takesArgument = true),
-    PROJECT("projekt", "\uD83C\uDFAF", "Utwórz projekt (tag z kolorem i kategorią)", takesArgument = false),
-    CATEGORIES("kategorie", "\uD83D\uDCC2", "Zarządzaj kategoriami", takesArgument = false),
-    DATE("data", "\uD83D\uDDD3\uFE0F", "Zmień dzień notatki", takesArgument = false);
+    EXPENSE("wydatek", "\uD83D\uDCB3", "Wydatek", takesArgument = false),
+    FIXME("fixme", "\uD83D\uDEA7", "Do uzupełnienia", takesArgument = true),
+    FILM("film", "\uD83C\uDFAC", "Dodaj film", takesArgument = true),
+    BOOK("ksiazka", "\uD83D\uDCDA", "Dodaj książkę", takesArgument = true, listOf("książka")),
+    PICTOGRAM("piktogram", "\uD83D\uDDBC\uFE0F", "Piktogram", takesArgument = false, listOf("pictogram")),
+    PEOPLE("osoby", "\uD83D\uDC65", "Osoby", takesArgument = false, listOf("osoba")),
+    TAG("tag", "\uD83C\uDFF7\uFE0F", "Dodaj tag", takesArgument = true),
+    PROJECT("projekt", "\uD83C\uDFAF", "Projekt", takesArgument = false),
+    CATEGORIES("kategorie", "\uD83D\uDCC2", "Kategorie", takesArgument = false),
+    DATE("data", "\uD83D\uDDD3\uFE0F", "Zmień datę", takesArgument = false);
 
     fun matches(keyword: String) =
         this.keyword.equals(keyword, ignoreCase = true) || aliases.any { it.equals(keyword, ignoreCase = true) }

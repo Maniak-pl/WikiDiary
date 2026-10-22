@@ -9,6 +9,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import pl.maniak.wikidiary.core.date.SelectedDateStore
+import pl.maniak.wikidiary.feature.diary.domain.WikiNote
 import pl.maniak.wikidiary.feature.routines.domain.Routine
 import pl.maniak.wikidiary.feature.routines.ui.RoutinesIntent
 import pl.maniak.wikidiary.feature.routines.ui.RoutinesViewModel
@@ -51,6 +52,33 @@ class RoutinesViewModelTest {
         assertEquals(
             listOf(Triple("Routine", "Wykonano rutynę \"Stretching\"", diaryDay)),
             notes.map { Triple(it.tag, it.content, it.date) }
+        )
+    }
+
+    @Test
+    fun routinesAreOrderedByHistoricalCompletionFrequency() = runBlocking {
+        repositories.routines.saveRoutine(Routine(name = "Often"))
+        repositories.routines.saveRoutine(Routine(name = "Rarely"))
+        repeat(3) {
+            repositories.notes.saveNote(
+                WikiNote(
+                    tag = "Routine",
+                    content = "Wykonano rutynę \"Often\"",
+                    date = diaryDay,
+                )
+            )
+        }
+        repositories.notes.saveNote(
+            WikiNote(
+                tag = "Routine",
+                content = "Wykonano rutynę \"Rarely\"",
+                date = diaryDay,
+            )
+        )
+
+        assertEquals(
+            listOf("Often", "Rarely"),
+            repositories.routines.getRoutines().map(Routine::name)
         )
     }
 }
