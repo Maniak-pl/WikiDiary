@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import pl.maniak.wikidiary.core.wiki.WikiParser
+import pl.maniak.wikidiary.feature.pictograms.domain.documentPictogram
 
 @Dao
 interface PictogramDao {
@@ -26,4 +28,12 @@ interface PictogramDao {
 
     @Query("DELETE FROM pictogram_table WHERE id = :id")
     fun deleteById(id: Long)
+
+    fun ensureDocumentPictogram(category: String) {
+        val pictogram = documentPictogram(category)
+        val fileName = WikiParser.pictogramFileName(pictogram.name)
+        if (getAll().none { WikiParser.pictogramFileName(it.name) == fileName }) {
+            insert(PictogramEntity(name = pictogram.name, icon = pictogram.icon))
+        }
+    }
 }

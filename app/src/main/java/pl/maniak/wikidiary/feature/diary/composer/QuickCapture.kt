@@ -34,6 +34,7 @@ enum class ComposerCommand(
     GRATITUDE("wdzieczny", "\uD83D\uDE4F", "Wdzięczność", takesArgument = true,
         aliases = listOf("wdzięczny"), noteTag = "Kronika wdzięczności"),
     EXPENSE("wydatek", "\uD83D\uDCB3", "Wydatek", takesArgument = false),
+    DOCUMENT("dokument", "\uD83D\uDCCB", "Dokument", takesArgument = false),
     FIXME("fixme", "\uD83D\uDEA7", "Do uzupełnienia", takesArgument = true),
     FILM("film", "\uD83C\uDFAC", "Dodaj film", takesArgument = true),
     BOOK("ksiazka", "\uD83D\uDCDA", "Dodaj książkę", takesArgument = true, listOf("książka")),
@@ -56,6 +57,7 @@ enum class ComposerCommand(
             CATEGORIES -> DiaryNavigation.Categories
             DATE -> DiaryNavigation.PickDate
             EXPENSE -> DiaryNavigation.Expense()
+            DOCUMENT -> DiaryNavigation.Document
             TODO, THOUGHT, GRATITUDE, FIXME, FILM, BOOK, TAG -> null
         }
 }

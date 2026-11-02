@@ -197,6 +197,7 @@ class QuickCaptureTest {
 
     @Test
     fun panelCommandsNavigate() {
+        assertEquals(Capture.Navigate(DiaryNavigation.Document), parse("/dokument"))
         assertEquals(Capture.Navigate(DiaryNavigation.Pictograms), parse("/piktogram"))
         assertEquals(Capture.Navigate(DiaryNavigation.People), parse("/osoby"))
         assertEquals(Capture.Navigate(DiaryNavigation.Categories), parse("/kategorie"))

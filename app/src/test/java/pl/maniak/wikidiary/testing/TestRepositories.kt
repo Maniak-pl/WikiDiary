@@ -2,6 +2,9 @@ package pl.maniak.wikidiary.testing
 
 import pl.maniak.wikidiary.core.database.WikiNoteDatabase
 import pl.maniak.wikidiary.feature.diary.data.TagMapperImpl
+import pl.maniak.wikidiary.feature.diary.data.CategoryMapper
+import pl.maniak.wikidiary.feature.diary.data.CategoryRepositoryImpl
+import pl.maniak.wikidiary.feature.diary.domain.CategoryRepository
 import pl.maniak.wikidiary.feature.diary.data.TagRepositoryImpl
 import pl.maniak.wikidiary.feature.diary.data.WikiNoteMapperImpl
 import pl.maniak.wikidiary.feature.diary.data.WikiNoteRepositoryImpl
@@ -28,6 +31,7 @@ class TestRepositories(database: WikiNoteDatabase) {
     )
     val people: PersonRepository = PersonRepositoryImpl(PersonMapper(), database.personDao())
     val tags: TagRepository = TagRepositoryImpl(TagMapperImpl(), database.tagDao())
+    val categories: CategoryRepository = CategoryRepositoryImpl(CategoryMapper(), database.categoryDao())
     val todos: TodoRepository = TodoRepositoryImpl(TodoMapper(), database.todoDao())
     val routines: RoutineRepository = RoutineRepositoryImpl(RoutineMapper(), database.routineDao())
 }

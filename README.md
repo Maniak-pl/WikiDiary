@@ -6,7 +6,59 @@ wpisów w formacie Wiki.
 
 Aplikacja nie wymaga konta ani własnego backendu. Notatki, tagi, kategorie i
 rutyny są przechowywane lokalnie na urządzeniu. Połączenie z internetem jest
-potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie lub Lubimyczytać.pl.
+potrzebne opcjonalnie, podczas wyszukiwania w Filmwebie, Lubimyczytać.pl lub
+przesyłania dokumentów na Google Drive.
+
+## Dokumenty na Google Drive
+
+Komenda `/dokument` otwiera formularz z plikiem, datą, podmiotem, opisem, tagiem
+i katalogiem dokumentu w aplikacji. Nazwa pliku ma postać `2026.09.02 - OnGeo - Raport.pdf`.
+Notatka zawiera sekcję `📋 Dokumentacja`, link opisany jako `OnGeo - Raport.pdf`
+oraz znacznik grafiki z Wiki. Obrazy nie są przesyłane na Wiki przez aplikację.
+
+Wybierz plik z urządzenia. Zostanie przesłany do głównego katalogu Mojego dysku,
+bez wybierania ani przypisywania folderów Google Drive.
+Aplikacja prosi wyłącznie o `drive.file`, nie o dostęp do całego dysku.
+Nie zmienia uprawnień udostępniania pliku.
+
+Katalog dokumentu wybiera się z kategorii dostępnych w aplikacji.
+Określa tylko rodzaj dokumentu i grafikę, nie tworzy projektu ani nie zmienia
+grupowania wpisu. Notatka trafia do wybranego taga, z jego dotychczasową kategorią.
+Wybranie tagu z kategorią podpowiada katalog dokumentu; można go zmienić.
+Nazwa grafiki korzysta z tych samych zasad co katalog pictogramów:
+RealEstate daje `pictograms_-_doc_realestate.png`,
+WikiDiary daje `pictograms_-_doc_wikidiary.png`. Grafika jest tylko znacznikiem
+w notatce, odpowiedni plik PNG musi już istnieć w Wiki.
+Po zapisaniu dokumentu brakujący pictogram pojawia się w katalogu zasobów,
+bez dodatkowego wpisu pictogramu w notatkach. Istniejące zasoby nie są nadpisywane.
+Pierwsza instalacja zawiera pictogramy dokumentów dla wszystkich domyślnych kategorii.
+Wymagane pola są oznaczone `*`: plik, podmiot, opis, katalog dokumentu i tag.
+Formularz pokazuje błędy przy polach oraz podgląd nazwy pliku przed wysłaniem.
+
+Notatka jest zapisywana dopiero po udanym uploadzie. Stan niedokończonej operacji
+jest zachowany lokalnie wraz z identyfikatorem pliku, bez tokenu Google.
+Po błędzie wybierz „Ponów zapis”. Aplikacja sprawdza, czy plik już istnieje,
+zanim przesyła go ponownie. „Anuluj niedokończony zapis” nie usuwa pliku z Drive.
+Przy utracie uprawnień lub zmianie konta może być potrzebna ponowna autoryzacja.
+
+### Konfiguracja Google Cloud
+
+Włącz Google Drive API w projekcie. Google Picker API nie jest potrzebne.
+W Google Auth Platform skonfiguruj ekran zgody i zakres
+`https://www.googleapis.com/auth/drive.file`. W trybie Testing dodaj używane
+konto jako użytkownika testowego.
+
+Utwórz klienta OAuth typu Android dla `pl.maniak.wikidiary` i odcisku SHA-1
+certyfikatu podpisującego APK. Sprawdzisz go poleceniem:
+
+```bash
+bash gradlew :app:signingReport
+```
+
+Nie wpisuj sekretu klienta ani tokenu dostępu do aplikacji. AuthorizationClient
+rozpoznaje klienta Android po nazwie pakietu i certyfikacie. Jeśli zmienisz klucz
+podpisywania, zarejestruj nowy klient Android w tym samym projekcie Google Cloud.
+Autoryzacja wymaga urządzenia z usługami Google Play.
 
 ## Najważniejsze funkcje
 
@@ -22,6 +74,7 @@ potrzebne tylko opcjonalnie, podczas wyszukiwania w Filmwebie lub Lubimyczytać.
   | `/mysl <treść>` | zapisuje notatkę w grupie `Przemyślenia`, bez wybierania tagu |
   | `/wdzieczny <treść>` | zapisuje notatkę w grupie `Kronika wdzięczności`, bez wybierania tagu |
   | `/wydatek` | otwiera formularz wydatku; opcjonalnie `/wydatek 120 OLX – Kurtka #Tag` |
+  | `/dokument` | przesyła plik na Google Drive i zapisuje link z piktogramem |
   | `/fixme <treść> #Tag` | zapisuje notatkę oznaczoną do uzupełnienia (FIXME) |
   | `/film <tytuł>` | otwiera Filmweb i od razu wyszukuje tytuł |
   | `/ksiazka <tytuł lub autor>` | wyszukuje książki w Lubimyczytać.pl; można też użyć `/książka` |

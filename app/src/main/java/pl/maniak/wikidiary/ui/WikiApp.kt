@@ -43,6 +43,7 @@ import pl.maniak.wikidiary.feature.diary.ui.CreateProjectRoute
 import pl.maniak.wikidiary.feature.diary.ui.DiaryNavigation
 import pl.maniak.wikidiary.feature.filmweb.ui.FilmwebRoute
 import pl.maniak.wikidiary.feature.books.ui.BooksRoute
+import pl.maniak.wikidiary.feature.documents.DocumentRoute
 import pl.maniak.wikidiary.feature.expenses.ui.ExpenseRoute
 import pl.maniak.wikidiary.feature.people.ui.PersonManagerRoute
 import pl.maniak.wikidiary.feature.pictograms.ui.PictogramManagerRoute
@@ -115,6 +116,7 @@ fun WikiApp(selectedDate: SelectedDateStore = koinInject()) {
                     DiaryNavigation.Pictograms -> sheet = AppSheet.Pictograms
                     DiaryNavigation.People -> sheet = AppSheet.People
                     DiaryNavigation.PickDate -> showDatePicker = true
+                    DiaryNavigation.Document -> sheet = AppSheet.Document
                 }
             },
             modifier = Modifier
@@ -168,6 +170,7 @@ private fun AppSheetHost(sheet: AppSheet, onDismiss: () -> Unit, onPickDate: () 
             )
             AppSheet.Pictograms -> PictogramManagerRoute()
             AppSheet.People -> PersonManagerRoute()
+            AppSheet.Document -> DocumentRoute(onPickDate = onPickDate, onClose = close)
             AppSheet.None -> Unit
         }
     }

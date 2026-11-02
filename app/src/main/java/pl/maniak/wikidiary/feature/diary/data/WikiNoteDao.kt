@@ -8,6 +8,8 @@ import androidx.room.Query
 
 @Dao
 interface WikiNoteDao {
+    @Query("SELECT EXISTS(SELECT 1 FROM wiki_note_table WHERE tag = :tag AND date = :date AND content = :content)")
+    fun hasDocumentNote(tag: String, date: Long, content: String): Boolean
     @Query("SELECT * FROM wiki_note_table")
     fun getAll(): List<WikiNoteEntity>
 

@@ -16,6 +16,9 @@ import pl.maniak.wikidiary.feature.pictograms.domain.Pictogram
 import pl.maniak.wikidiary.feature.pictograms.domain.PictogramEntry
 import pl.maniak.wikidiary.feature.pictograms.domain.PictogramRepository
 import pl.maniak.wikidiary.feature.pictograms.data.PictogramRepositoryImpl
+import pl.maniak.wikidiary.core.database.WikiNoteDatabase
+import pl.maniak.wikidiary.core.wiki.WikiParser
+import pl.maniak.wikidiary.feature.pictograms.domain.documentImageFile
 
 @RunWith(RobolectricTestRunner::class)
 class PictogramRepositoryTest {
@@ -30,6 +33,19 @@ class PictogramRepositoryTest {
 
     @After
     fun tearDown() = database.close()
+
+    @Test
+    fun initialCategoriesHaveReusableDocumentPictograms() = runBlocking {
+        WikiNoteDatabase.populateInitialData(database)
+        val categories = database.categoryDao().getAllCategories()
+        val pictograms = repository.getPictograms()
+        assertEquals(categories.size, pictograms.size)
+        assertEquals(
+            categories.map { documentImageFile(it.name) }.toSet(),
+            pictograms.map { WikiParser.pictogramFileName(it.name) }.toSet()
+        )
+        assertTrue(repository.getPictogramEntries().isEmpty())
+    }
 
     @Test
     fun pictogramsCanBeCreatedUpdatedAttachedAndDeleted() = runBlocking {

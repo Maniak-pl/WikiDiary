@@ -278,13 +278,12 @@ abstract class WikiNoteDatabase : RoomDatabase() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
                 CoroutineScope(Dispatchers.IO).launch {
-                    populateInitialData(context)
+                    populateInitialData(getDatabase(context))
                 }
             }
         }
 
-        private fun populateInitialData(context: Context) {
-            val database = getDatabase(context)
+        internal fun populateInitialData(database: WikiNoteDatabase) {
             val tagDao = database.tagDao()
             val categoryDao = database.categoryDao()
             val routineDao = database.routineDao()
@@ -317,7 +316,12 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                 CategoryEntity(name = "WikiDiary"),
                 CategoryEntity(name = "Work"),
             )
-            defaultCategories.forEach { categoryDao.insert(it) }
+            database.runInTransaction {
+                defaultCategories.forEach {
+                    categoryDao.insert(it)
+                    database.pictogramDao().ensureDocumentPictogram(it.name)
+                }
+            }
 
             val defaultRoutines = listOf(
                 RoutineEntity(name = "\uD83D\uDCDE Telefon do przyjaciela"),

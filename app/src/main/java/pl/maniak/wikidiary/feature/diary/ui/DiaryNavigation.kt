@@ -13,4 +13,5 @@ sealed interface DiaryNavigation {
     data object Pictograms : DiaryNavigation
     data object People : DiaryNavigation
     data object PickDate : DiaryNavigation
+    data object Document : DiaryNavigation
 }

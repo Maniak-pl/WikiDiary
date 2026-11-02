@@ -14,6 +14,7 @@ sealed interface AppSheet {
     @Serializable data class Expense(val input: String = "", val tagId: Long? = null) : AppSheet
     @Serializable data object Pictograms : AppSheet
     @Serializable data object People : AppSheet
+    @Serializable data object Document : AppSheet
     @Serializable data object None : AppSheet
 
     companion object {
