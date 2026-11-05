@@ -34,15 +34,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import pl.maniak.wikidiary.feature.export.domain.WikiPageUrl
+import pl.maniak.wikidiary.feature.backup.BackupSettings
 
 @Composable
 fun SettingsRoute(viewModel: SettingsViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsState()
-    SettingsScreen(state = state, onIntent = viewModel::onIntent)
+    SettingsScreen(state = state, onIntent = viewModel::onIntent, backupContent = { BackupSettings() })
 }
 
 @Composable
-fun SettingsScreen(state: SettingsUiState, onIntent: (SettingsIntent) -> Unit) {
+fun SettingsScreen(state: SettingsUiState, onIntent: (SettingsIntent) -> Unit, backupContent: @Composable () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -57,6 +58,8 @@ fun SettingsScreen(state: SettingsUiState, onIntent: (SettingsIntent) -> Unit) {
             savedUrl = state.wikiPageUrl,
             onSave = { onIntent(SettingsIntent.SaveWikiPageUrl(it)) }
         )
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        backupContent()
     }
 }
 

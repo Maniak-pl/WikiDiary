@@ -9,6 +9,63 @@ rutyny są przechowywane lokalnie na urządzeniu. Połączenie z internetem jest
 potrzebne opcjonalnie, podczas wyszukiwania w Filmwebie, Lubimyczytać.pl lub
 przesyłania dokumentów na Google Drive.
 
+## Kopia stałych danych na Google
+
+W Ustawieniach wybierz „Połącz konto Google”. Kopia obejmuje tagi (także projekty
+i kolory), kategorie, niewykonane ToDo, definicje rutyn, pictogramy i aktywne osoby.
+Nie obejmuje notatek, wydatków, wpisów filmów i książek, przypisań pictogramów,
+wzmianek osób ani dziennych odhaczeń rutyn. Pliki PNG pictogramów nadal znajdują
+się w Wiki, kopia zawiera tylko definicje zasobów.
+
+Dane trafiają bezpośrednio do ukrytego `appDataFolder` na wybranym koncie Google
+Drive, bez backendu i bez wybierania folderu. Potrzebny jest dodatkowy zakres
+`https://www.googleapis.com/auth/drive.appdata`; dodaj go w konfiguracji zgody
+Google Auth Platform w tym samym projekcie co klient Android. Dostęp do całego
+dysku ani sekret klienta nie są potrzebne. Tokeny nie są zapisywane lokalnie.
+
+Po podłączeniu pustego konta aplikacja zapisuje pierwszą kopię. Jeżeli na koncie
+jest już kopia, automatyczny zapis pozostaje wyłączony do decyzji użytkownika.
+Świeża instalacja nie nadpisuje więc istniejącej konfiguracji danymi domyślnymi.
+Po reinstalacji wybierz to samo konto i „Przywróć kopię”. Wymagane jest połączenie
+z internetem i zgoda Google; aplikacja nie loguje się samodzielnie po reinstalacji.
+
+Przywracanie zastępuje lokalną konfigurację, po potwierdzeniu, w jednej transakcji.
+Jest dostępne tylko bez lokalnych notatek i przypisań pictogramów oraz bez
+niedokończonego przesyłania dokumentu. Rutyny wracają jako nieodhaczone.
+Nieobsługiwana lub uszkodzona kopia jest zgłaszana jako błąd, bez kasowania danych.
+
+Zamiast przywracania można wybrać „Zapisz lokalne stałe jako nową kopię”.
+Ta operacja wymaga osobnego potwierdzenia: nowa kopia będzie zawierała dane
+z aktualnej instalacji, a starsza wersja pozostanie na Google.
+Wyłączenie kopii zachowuje powiązanie z kontem i pozwala użyć „Wznów kopię”
+bez ponownego przywracania, o ile kopia Google nie została zmieniona.
+
+Zmiany stałych danych uruchamiają zapis przez WorkManager, z wymaganiem dostępu
+do sieci. Błędy sieciowe są ponawiane; dodatkowe sprawdzenie odbywa się okresowo.
+Android może opóźniać zadania w tle. „Zapisz teraz / zatwierdź dostęp” pozwala
+wykonać zapis przed odinstalowaniem aplikacji. Sprawdź datę kopii i brak
+oczekujących zmian, bo danych zapisanych wyłącznie offline nie da się odzyskać
+po usunięciu aplikacji.
+
+Automatyczny zapis obejmuje także usunięcia. Jeśli po wysłaniu kopii usuniesz tag,
+kolejna kopia nie będzie go zawierać. „Przywróć kopię” pobiera najnowszą wersję,
+więc nie cofa takiego usunięcia. Przy testowaniu przywracania bez reinstalacji
+najpierw zapisz kopię i wyłącz automat, a dopiero potem zmień lokalne dane.
+
+Kopia jest przeznaczona dla jednego urządzenia, nie do synchronizacji kilku
+telefonów. Nowy zapis tworzy kolejną wersję pliku zamiast nadpisywać poprzednią;
+starsze wersje pozostają na Drive i zajmują miejsce. Aplikacja nie ma jeszcze
+wyboru starszej wersji przy przywracaniu. Zmiana kopii przez inną
+instalację wstrzymuje automatyczny zapis i wymaga sprawdzenia konta.
+Wyłączenie kopii na urządzeniu nie usuwa danych Google. Odinstalowanie aplikacji
+z telefonu także ich nie usuwa, ale usunięcie danych aplikacji w ustawieniach
+Drive usuwa kopie.
+
+Systemowy backup Androida i transfer danych między urządzeniami są wyłączone
+w konfiguracji aplikacji, żeby nie kopiować całej bazy z notatkami ani lokalnego
+stanu autoryzacji. Motyw, adres Wiki i pozostałe ustawienia urządzenia nie
+wchodzą do selektywnej kopii.
+
 ## Dokumenty na Google Drive
 
 Komenda `/dokument` otwiera formularz z plikiem, datą, podmiotem, opisem, tagiem

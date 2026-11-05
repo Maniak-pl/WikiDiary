@@ -6,6 +6,7 @@ import pl.maniak.wikidiary.feature.diary.diaryModule
 import pl.maniak.wikidiary.feature.export.exportModule
 import pl.maniak.wikidiary.feature.books.booksModule
 import pl.maniak.wikidiary.feature.documents.documentsModule
+import pl.maniak.wikidiary.feature.backup.backupModule
 import pl.maniak.wikidiary.feature.expenses.expensesModule
 import pl.maniak.wikidiary.feature.filmweb.filmwebModule
 import pl.maniak.wikidiary.feature.people.peopleModule
@@ -27,6 +28,7 @@ val appModule = module {
         filmwebModule,
         booksModule,
         documentsModule,
+        backupModule,
         exportModule,
         settingsModule
     )

@@ -29,9 +29,6 @@ import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import pl.maniak.wikidiary.feature.expenses.data.ExpenseDao
 import pl.maniak.wikidiary.feature.expenses.data.ExpenseEntity
 import pl.maniak.wikidiary.feature.books.data.BookNoteDao
@@ -72,6 +69,7 @@ abstract class WikiNoteDatabase : RoomDatabase() {
     abstract fun notePersonDao(): NotePersonDao
     abstract fun expenseDao(): ExpenseDao
     abstract fun bookNoteDao(): BookNoteDao
+    abstract fun backupDao(): pl.maniak.wikidiary.feature.backup.BackupDao
 
     companion object {
         private var INSTANCE: WikiNoteDatabase? = null
@@ -267,27 +265,25 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                         MIGRATION_6_7,
                         MIGRATION_7_8
                     )
-                    .addCallback(DatabaseCallback(context)) // Add callback
+                    .addCallback(DatabaseCallback())
                     .build()
                 INSTANCE = instance
                 instance
             }
         }
 
-        private class DatabaseCallback(private val context: Context) : Callback() {
+        private class DatabaseCallback : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
-                CoroutineScope(Dispatchers.IO).launch {
-                    populateInitialData(getDatabase(context))
-                }
+                populateInitialData(db)
             }
         }
 
         internal fun populateInitialData(database: WikiNoteDatabase) {
-            val tagDao = database.tagDao()
-            val categoryDao = database.categoryDao()
-            val routineDao = database.routineDao()
+            database.runInTransaction { populateInitialData(database.openHelper.writableDatabase) }
+        }
 
+        private fun populateInitialData(db: SupportSQLiteDatabase) {
             val black = 0xFF000000.toInt()
             val defaultTags = listOf(
                 TagEntity(tag = "Book", color = black),
@@ -301,8 +297,6 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                     color = 0xFF4CAF50.toInt()
                 ),
             )
-            defaultTags.forEach { tagDao.insert(it) }
-
             val defaultCategories = listOf(
                 CategoryEntity(name = "Books"),
                 CategoryEntity(name = "Community"),
@@ -316,13 +310,6 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                 CategoryEntity(name = "WikiDiary"),
                 CategoryEntity(name = "Work"),
             )
-            database.runInTransaction {
-                defaultCategories.forEach {
-                    categoryDao.insert(it)
-                    database.pictogramDao().ensureDocumentPictogram(it.name)
-                }
-            }
-
             val defaultRoutines = listOf(
                 RoutineEntity(name = "\uD83D\uDCDE Telefon do przyjaciela"),
                 RoutineEntity(name = "❤\uFE0F Love"),
@@ -342,7 +329,19 @@ abstract class WikiNoteDatabase : RoomDatabase() {
                 RoutineEntity(name = "\uD83D\uDDFA\uFE0F Nowe miejsce"),
                 RoutineEntity(name = "\uD83E\uDDD8\u200D♂\uFE0F Relax"),
             )
-            defaultRoutines.forEach { routineDao.insert(it) }
+            defaultTags.forEach {
+                db.execSQL("INSERT INTO tag_table (tag, category, date, color) VALUES (?, ?, ?, ?)",
+                    arrayOf(it.tag, it.category, it.date.time, it.color))
+            }
+            defaultCategories.forEach {
+                db.execSQL("INSERT INTO categories (name, parentId) VALUES (?, NULL)", arrayOf(it.name))
+                val pictogram = pl.maniak.wikidiary.feature.pictograms.domain.documentPictogram(it.name)
+                db.execSQL("INSERT INTO pictogram_table (name, icon) VALUES (?, ?)",
+                    arrayOf(pictogram.name, pictogram.icon))
+            }
+            defaultRoutines.forEach {
+                db.execSQL("INSERT INTO routines (name, isCompleted) VALUES (?, 0)", arrayOf(it.name))
+            }
         }
     }
 }

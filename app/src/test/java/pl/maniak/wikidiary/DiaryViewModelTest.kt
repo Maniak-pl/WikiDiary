@@ -1,5 +1,7 @@
 package pl.maniak.wikidiary
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import java.util.Date
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
@@ -13,6 +15,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import pl.maniak.wikidiary.core.date.SelectedDateStore
+import pl.maniak.wikidiary.core.database.WikiNoteDatabase
+import pl.maniak.wikidiary.feature.backup.BackupFile
+import pl.maniak.wikidiary.feature.backup.ConfigurationStore
 import pl.maniak.wikidiary.feature.diary.domain.Tag
 import pl.maniak.wikidiary.feature.diary.composer.Capture
 import pl.maniak.wikidiary.feature.diary.composer.QuickCapture
@@ -20,6 +25,8 @@ import pl.maniak.wikidiary.feature.diary.domain.NotesExportContributor
 import pl.maniak.wikidiary.feature.export.domain.WikiExporter
 import pl.maniak.wikidiary.feature.diary.ui.DiaryIntent
 import pl.maniak.wikidiary.feature.diary.ui.DiaryViewModel
+import pl.maniak.wikidiary.feature.diary.ui.TagEditorIntent
+import pl.maniak.wikidiary.feature.diary.ui.TagEditorViewModel
 import pl.maniak.wikidiary.feature.people.domain.Person
 import pl.maniak.wikidiary.feature.people.domain.PersonGender
 import pl.maniak.wikidiary.feature.todo.domain.AddTodo
@@ -51,6 +58,56 @@ class DiaryViewModelTest {
 
     @After
     fun tearDown() = database.close()
+
+    @Test
+    fun coloredProjectTagSurvivesBackupReinstallAndAppearsInDiary() = runBlocking {
+        WikiNoteDatabase.populateInitialData(database)
+        val editor = TagEditorViewModel(repositories.tags, repositories.categories)
+        val selectedColor = Color(0xFF673AB7)
+        editor.onIntent(TagEditorIntent.SaveTag(0, "Colored backup tag", "Work", selectedColor))
+        editor.onIntent(TagEditorIntent.SaveTag(0, "Colored tag without category", "", selectedColor))
+        val savedTags = withTimeout(5_000) {
+            repositories.tags.observeTags().first { tags -> tags.count { it.color == selectedColor } == 2 }
+        }.filter { it.color == selectedColor }.sortedBy { it.id }
+        val file = BackupFile(100, ConfigurationStore(database).snapshot()).encode()
+
+        val reinstalled = inMemoryDatabase()
+        try {
+            WikiNoteDatabase.populateInitialData(reinstalled)
+            ConfigurationStore(reinstalled).restore(BackupFile.decode(file).data)
+            val restoredRepositories = TestRepositories(reinstalled)
+            val restoredViewModel = DiaryViewModel(
+                restoredRepositories.notes,
+                restoredRepositories.tags,
+                restoredRepositories.people,
+                InMemoryConfig(),
+                SelectedDateStore(diaryDay),
+                AddTodo(restoredRepositories.todos, restoredRepositories.notes, InMemoryConfig())
+            )
+            val restoredTags = withTimeout(5_000) {
+                restoredViewModel.uiState.first { state ->
+                    state.tags.count { it.color == selectedColor } == 2
+                }
+            }.tags.filter { it.color == selectedColor }.sortedBy { it.id }
+            assertEquals(savedTags, restoredTags)
+            assertEquals(listOf("Work", ""), restoredTags.map { it.category })
+            assertTrue(restoredTags.all { it.color.toArgb() == selectedColor.toArgb() })
+        } finally {
+            reinstalled.close()
+        }
+    }
+
+    @Test
+    fun restoredCustomTagsBecomeVisibleInAlreadyOpenedDiary() = runBlocking {
+        repositories.tags.saveTag(Tag(0, "Restored custom tag", "Work", Date(12345)))
+        val store = ConfigurationStore(database)
+        val backup = store.snapshot()
+        repositories.tags.deleteAllTags()
+        withTimeout(5_000) { viewModel.uiState.first { it.tags.isEmpty() } }
+        val restored = viewModel.uiState.nextValueAfter { store.restore(backup) }
+        assertEquals(listOf("Restored custom tag"), restored.tags.map { it.name })
+        assertEquals("Work", restored.tags.single().category)
+    }
 
     @Test
     fun savedNoteLinksMentionedPersonOnSelectedDay() = runBlocking {
